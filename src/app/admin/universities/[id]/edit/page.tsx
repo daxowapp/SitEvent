@@ -25,5 +25,10 @@ export default async function EditUniversityPage({ params }: EditUniversityPageP
         notFound();
     }
 
-    return <UniversityForm university={university} countries={countries} />;
+    const typedUniversity = {
+        ...university,
+        programs: university.programs as unknown as string[] | null
+    };
+
+    return <UniversityForm university={typedUniversity} countries={countries} />;
 }
