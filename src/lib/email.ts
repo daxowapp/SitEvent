@@ -125,6 +125,7 @@ export async function sendConfirmationEmail(
         {
           content: qrBuffer,
           filename: "qr-code.png",
+          content_id: "qrcode", // CID for inline display
         },
       ],
     });

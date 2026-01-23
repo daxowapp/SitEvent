@@ -14,6 +14,7 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
+import jsQR from "jsqr";
 
 interface Event {
     id: string;
@@ -178,24 +179,19 @@ export default function ScannerPage() {
             canvas.height = video.videoHeight;
             ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-            // Try to detect QR code using BarcodeDetector API (if available)
-            if ("BarcodeDetector" in window) {
-                try {
-                    // @ts-expect-error BarcodeDetector not in TS types
-                    const barcodeDetector = new window.BarcodeDetector({ formats: ["qr_code"] });
-                    const barcodes = await barcodeDetector.detect(canvas);
+            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            // Use jsQR for decoding (works everywhere)
+            // @ts-ignore - jsQR is imported via require or needs types, assuming installed
+            const code = jsQR(imageData.data, imageData.width, imageData.height, {
+                inversionAttempts: "dontInvert",
+            });
 
-                    if (barcodes.length > 0) {
-                        const raw = barcodes[0].rawValue;
-                        // Extract token from URL or use raw value
-                        const token = raw.includes("/r/") ? raw.split("/r/")[1] : raw;
-                        handleScan(token);
-                        stopScanning();
-                        return;
-                    }
-                } catch (e) {
-                    // BarcodeDetector failed, continue scanning
-                }
+            if (code) {
+                const raw = code.data;
+                const token = raw.includes("/r/") ? raw.split("/r/")[1] : raw;
+                handleScan(token);
+                stopScanning();
+                return;
             }
         }
 
