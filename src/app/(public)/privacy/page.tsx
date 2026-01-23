@@ -1,6 +1,8 @@
 import { Header } from "@/components/public/header";
 import { Footer } from "@/components/public/footer";
 
+export const dynamic = "force-dynamic";
+
 export default function PrivacyPolicyPage() {
     return (
         <div className="min-h-screen bg-white">
