@@ -8,9 +8,9 @@ interface DisplayEvent {
     id: string;
     title: string;
     slug: string;
-    country: string;
-    city: string;
-    venueName: string;
+    country: string | null;
+    city: string | null;
+    venueName: string | null;
     bannerImageUrl: string | null;
     startDateTime: Date;
     status: string;
@@ -230,7 +230,7 @@ export default async function HomePage() {
                                             <div className="space-y-3">
                                                 <div className="flex items-center gap-3 text-sm text-gray-500">
                                                     <span className="flex items-center justify-center w-6 h-6 rounded-full bg-red-50 text-[hsl(var(--turkish-red))]">📍</span>
-                                                    <span>{event.city}, {event.country}</span>
+                                                    <span>{event.city || 'TBA'}, {event.country || 'TBA'}</span>
                                                 </div>
                                                 <div className="flex items-center gap-3 text-sm text-gray-500">
                                                     <span className="flex items-center justify-center w-6 h-6 rounded-full bg-red-50 text-[hsl(var(--turkish-red))]">🏛️</span>
@@ -285,7 +285,7 @@ export default async function HomePage() {
                                             <span>📅</span> {format(new Date(event.startDateTime), "PPP")}
                                         </p>
                                         <p className="text-sm text-gray-500 flex items-center gap-2">
-                                            <span>📍</span> {event.city}, {event.country}
+                                            <span>📍</span> {event.city || 'TBA'}, {event.country || 'TBA'}
                                         </p>
                                     </div>
                                 </article>
