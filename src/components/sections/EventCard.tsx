@@ -7,10 +7,10 @@ import { useTranslations } from "next-intl";
 
 interface EventCardProps {
     title: string;
-    city: string;
-    country: string;
+    city: string | null;
+    country: string | null;
     date: Date | string;
-    venueName: string;
+    venueName: string | null;
     universityCount?: number;
     bannerImageUrl?: string | null;
     slug: string;
