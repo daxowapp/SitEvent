@@ -12,6 +12,6 @@ export const config = {
         // - admin routes (keep admin in English only for simplicity)
         // - _next
         // - static files
-        '/((?!api|admin|_next|.*\\..*).*)'
+        '/((?!api|admin|login|scan-login|_next|.*\\..*).*)'
     ]
 };

@@ -76,7 +76,7 @@ const MOCK_EVENTS: DisplayEvent[] = [
 ];
 
 function isDatabaseConfigured(): boolean {
-    return !!(process.env.DATABASE_URL && !process.env.DATABASE_URL.includes('[project-ref]'));
+    return !!process.env.DATABASE_URL;
 }
 
 async function getEvents(): Promise<DisplayEvent[]> {

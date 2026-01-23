@@ -19,7 +19,7 @@ interface DisplayEvent {
 }
 
 async function getUpcomingEvents(): Promise<DisplayEvent[]> {
-    if (!process.env.DATABASE_URL || process.env.DATABASE_URL.includes('[project-ref]')) {
+    if (!process.env.DATABASE_URL) {
         return [];
     }
 
@@ -42,7 +42,7 @@ async function getUpcomingEvents(): Promise<DisplayEvent[]> {
 }
 
 async function getPastEvents(): Promise<DisplayEvent[]> {
-    if (!process.env.DATABASE_URL || process.env.DATABASE_URL.includes('[project-ref]')) {
+    if (!process.env.DATABASE_URL) {
         return [];
     }
 
