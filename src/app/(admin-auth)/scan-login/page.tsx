@@ -34,7 +34,7 @@ export default function UsherLoginPage() {
                 setPin("");
             } else {
                 toast.success("Welcome back!");
-                router.push("/admin/events"); // Redirect to events list to pick one
+                router.push("/admin/scan"); // Redirect directly to scanner
                 router.refresh();
             }
         } catch (error) {
