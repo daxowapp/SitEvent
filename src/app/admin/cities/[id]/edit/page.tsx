@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { CityForm } from "../../city-form";
-import { getCity } from "../../actions";
+import { getCity, Attraction, CafeOrFood, Transportation } from "../../actions";
 import { getCountries } from "../../../countries/actions";
 
 interface EditCityPageProps {
@@ -18,5 +18,12 @@ export default async function EditCityPage({ params }: EditCityPageProps) {
         notFound();
     }
 
-    return <CityForm city={city} countries={countries} />;
+    const typedCity = {
+        ...city,
+        attractions: city.attractions as unknown as Attraction[] | null,
+        cafesAndFood: city.cafesAndFood as unknown as CafeOrFood[] | null,
+        transportation: city.transportation as unknown as Transportation | null,
+    };
+
+    return <CityForm city={typedCity} countries={countries} />;
 }
