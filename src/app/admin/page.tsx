@@ -110,7 +110,7 @@ export default async function AdminDashboardPage() {
                                 <p className="text-sm text-slate-500 mt-1">Daily registrations over the last 30 days</p>
                             </div>
                         </div>
-                        <RegistrationChart data={trendData} />
+                        <RegistrationChart data={trendData.map(d => ({ date: d.date, value: d.count }))} />
                     </div>
                 </div>
 
