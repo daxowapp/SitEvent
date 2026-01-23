@@ -125,19 +125,6 @@ export async function sendConfirmationEmail(
         {
           filename: "qr-code.png",
           content: qrBuffer,
-          role: "related", // Inline image
-          // Resend/Nodemailer compatibility: 'cid' or 'headers' usually. 
-          // The type error suggested 'contentId', so we try that.
-          // If Resend types allow 'contentId', avoiding snake_case.
-          // Actually, standard Nodemailer uses 'cid'. Resend uses what?
-          // Let's trust the TS error hint first.
-          // Wait, 'contentId' might not be standard Resend. Resend uses `headers` for CIDs often.
-          // But I'll follow the TS suggestion 'Did you mean to write 'contentId'?' logic.
-          // Actually, better:
-          // headers: { 'Content-ID': 'qrcode' }
-          // But let's try the key TS suggested first.
-          // Wait, I will search for the type definition if I can, but I can't easily.
-          // I'll assume the compiler knows best.
           contentId: "qrcode",
         },
       ],
