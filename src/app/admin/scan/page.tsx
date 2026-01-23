@@ -214,7 +214,7 @@ export default function ScannerPage() {
     // ... (logic remains the same, only UI changes)
 
     return (
-        <div className="max-w-4xl mx-auto space-y-8 p-4">
+        <div className="min-h-[calc(100vh-4rem)] bg-slate-950 max-w-4xl mx-auto space-y-8 p-4 rounded-xl shadow-2xl my-4">
             <div className="text-center space-y-4 mb-8">
                 <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 backdrop-blur-md animate-fade-in-up">
                     <Badge variant="outline" className="border-emerald-500/30 text-emerald-400 bg-emerald-500/10">Admin Access</Badge>
@@ -285,8 +285,8 @@ export default function ScannerPage() {
 
                                 <div className="space-y-2">
                                     <div className={`text-sm px-3 py-1.5 rounded-lg inline-block font-medium ${lastResult.registration.alreadyCheckedIn
-                                            ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
-                                            : 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
+                                        ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
+                                        : 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
                                         }`}>
                                         {lastResult.registration.alreadyCheckedIn
                                             ? `⚠️ Previously at ${lastResult.registration.checkedInAt}`
