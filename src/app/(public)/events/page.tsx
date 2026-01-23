@@ -131,10 +131,10 @@ export default async function EventsPage({ searchParams }: EventsPageProps) {
     // Apply filters
     let events = allEvents;
     if (params.country) {
-        events = events.filter(e => e.country?.toLowerCase().includes(params.country!.toLowerCase()));
+        events = events.filter(e => (e.country || "").toLowerCase().includes(params.country!.toLowerCase()));
     }
     if (params.city) {
-        events = events.filter(e => e.city?.toLowerCase().includes(params.city!.toLowerCase()));
+        events = events.filter(e => (e.city || "").toLowerCase().includes(params.city!.toLowerCase()));
     }
     if (params.search) {
         events = events.filter(e =>
