@@ -53,6 +53,7 @@ export function useGeolocation() {
                         const data = await res2.json();
                         setLocation({
                             country: data.country || '',
+                            countryCode: data.country_code || '',
                             city: data.city || '',
                             loading: false,
                             error: null,

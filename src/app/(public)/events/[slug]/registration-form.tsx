@@ -54,7 +54,7 @@ export function RegistrationForm({ eventId, eventSlug }: RegistrationFormProps) 
     const [defaultCountry, setDefaultCountry] = useState<Country | undefined>(undefined);
 
     // Auto-detect user location
-    const { country, city, loading: locationLoading } = useGeolocation();
+    const { country, countryCode, city, loading: locationLoading } = useGeolocation();
 
     const {
         register,
@@ -72,55 +72,32 @@ export function RegistrationForm({ eventId, eventSlug }: RegistrationFormProps) 
 
     // Auto-fill form when location is detected
     useEffect(() => {
-        if (!locationLoading && country) {
-            // Only fill if fields are empty to avoid overwriting user input
-            const currentCountry = watch("country");
-            const currentCity = watch("city");
-
-            if (!currentCountry) {
-                // Try to match country list or use raw value if 'Other' is an option
-                // Simple strict match for now, could be improved with fuzzy search
-                setValue("country", country, { shouldValidate: true });
+        if (!locationLoading) {
+            if (countryCode) {
+                setDefaultCountry(countryCode as Country);
             }
-            if (!currentCity) {
-                setValue("city", city, { shouldValidate: true });
+
+            if (country) {
+                const currentCountry = watch("country");
+                if (!currentCountry) {
+                    setValue("country", country, { shouldValidate: true });
+                }
+            }
+
+            if (city) {
+                const currentCity = watch("city");
+                if (!currentCity) {
+                    setValue("city", city, { shouldValidate: true });
+                }
             }
         }
-    }, [country, city, locationLoading, setValue, watch]);
+    }, [country, countryCode, city, locationLoading, setValue, watch]);
 
 
-    // Auto-detect country based on IP
+    // Auto-detect country based on IP is now handled by useGeolocation hook
     useEffect(() => {
-        fetch("https://ipapi.co/json/")
-            .then((res) => res.json())
-            .then((data) => {
-                if (data && data.country_code) {
-                    setDefaultCountry(data.country_code as Country);
-
-                    // Auto-select country field
-                    if (data.country_name) {
-                        const detectedName = data.country_name;
-                        // Try exact match
-                        let matchedCountry = COUNTRIES.find(c => c.toLowerCase() === detectedName.toLowerCase());
-
-                        // Handle common mappings if exact match fails
-                        if (!matchedCountry) {
-                            if (data.country_code === "US") matchedCountry = "USA";
-                            else if (data.country_code === "GB") matchedCountry = "UK";
-                            else if (data.country_code === "AE") matchedCountry = "UAE";
-                            else if (data.country_code === "TR") matchedCountry = "Turkey";
-                            else if (data.country_code === "KR") matchedCountry = "South Korea";
-                            else if (data.country_code === "SA") matchedCountry = "Saudi Arabia";
-                        }
-
-                        if (matchedCountry) {
-                            setValue("country", matchedCountry);
-                        }
-                    }
-                }
-            })
-            .catch((err) => console.error("Failed to detect location", err));
-    }, [setValue]);
+        // Consolidating logic into the main hook effect below
+    }, []);
 
     const consentValue = watch("consent");
 
