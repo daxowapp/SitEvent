@@ -200,28 +200,28 @@ export default function ScannerPage() {
     // ... (logic remains the same, only UI changes)
 
     return (
-        <div className="min-h-[calc(100vh-4rem)] bg-slate-950 max-w-4xl mx-auto space-y-8 p-4 rounded-xl shadow-2xl my-4">
+        <div className="min-h-[calc(100vh-4rem)] bg-gray-50 max-w-4xl mx-auto space-y-8 p-4 rounded-xl shadow-sm my-4">
             <div className="text-center space-y-4 mb-8">
-                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 backdrop-blur-md animate-fade-in-up">
-                    <Badge variant="outline" className="border-emerald-500/30 text-emerald-400 bg-emerald-500/10">Admin Access</Badge>
+                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white border border-gray-200 shadow-sm animate-fade-in-up">
+                    <Badge variant="outline" className="border-red-200 text-red-700 bg-red-50">Admin Area</Badge>
                 </div>
-                <h1 className="font-display text-4xl md:text-5xl font-bold bg-gradient-to-r from-white via-white to-white/50 bg-clip-text text-transparent">
+                <h1 className="font-display text-4xl md:text-5xl font-bold text-gray-900">
                     Event Entry Scanner
                 </h1>
-                <p className="text-white/50 max-w-lg mx-auto text-lg">
+                <p className="text-gray-500 max-w-lg mx-auto text-lg">
                     Seamlessly manage event entry with high-speed QR verification.
                 </p>
             </div>
 
             {/* Event Selection */}
-            <div className="bg-white/5 border border-white/10 rounded-2xl p-2 backdrop-blur-xl">
+            <div className="bg-white border border-gray-200 rounded-2xl p-2 shadow-sm">
                 <Select value={selectedEventId} onValueChange={setSelectedEventId}>
-                    <SelectTrigger className="h-14 bg-transparent border-0 text-lg focus:ring-0">
+                    <SelectTrigger className="h-14 bg-transparent border-0 text-lg focus:ring-0 text-gray-900">
                         <SelectValue placeholder="Select Active Event..." />
                     </SelectTrigger>
-                    <SelectContent className="bg-slate-900 border-white/10 text-white">
+                    <SelectContent className="bg-white border-gray-200 text-gray-900">
                         {events.map((event) => (
-                            <SelectItem key={event.id} value={event.id} className="focus:bg-white/10 focus:text-white cursor-pointer py-3">
+                            <SelectItem key={event.id} value={event.id} className="focus:bg-red-50 focus:text-red-900 cursor-pointer py-3">
                                 {event.title}
                             </SelectItem>
                         ))}
@@ -234,28 +234,28 @@ export default function ScannerPage() {
                     <div className="space-y-6">
                         {/* Stats Cards */}
                         <div className="grid grid-cols-2 gap-4">
-                            <div className="p-6 rounded-2xl bg-gradient-to-br from-emerald-500/20 to-emerald-900/20 border border-emerald-500/30 text-center relative overflow-hidden group">
-                                <div className="absolute inset-0 bg-emerald-500/10 blur-xl group-hover:bg-emerald-500/20 transition-all opacity-0 group-hover:opacity-100" />
+                            <div className="p-6 rounded-2xl bg-gradient-to-br from-red-50 to-white border border-red-100 text-center relative overflow-hidden group shadow-sm">
+                                <div className="absolute inset-0 bg-red-500/5 blur-xl group-hover:bg-red-500/10 transition-all opacity-0 group-hover:opacity-100" />
                                 <div className="relative">
-                                    <div className="text-4xl font-display font-bold text-emerald-400">{totalCheckins}</div>
-                                    <div className="text-xs uppercase tracking-widest text-emerald-200/60 font-medium mt-1">Checked In</div>
+                                    <div className="text-4xl font-display font-bold text-red-600">{totalCheckins}</div>
+                                    <div className="text-xs uppercase tracking-widest text-red-900/40 font-medium mt-1">Checked In</div>
                                 </div>
                             </div>
-                            <div className="p-6 rounded-2xl bg-white/5 border border-white/10 text-center flex flex-col items-center justify-center">
+                            <div className="p-6 rounded-2xl bg-white border border-gray-200 text-center flex flex-col items-center justify-center shadow-sm">
                                 {lastResult?.success ? (
                                     <>
-                                        <Badge className="bg-emerald-500 text-black font-bold mb-2">Scan Successful</Badge>
-                                        <div className="text-xs text-white/50">Access Granted</div>
+                                        <Badge className="bg-green-600 hover:bg-green-700 text-white font-bold mb-2">Scan Successful</Badge>
+                                        <div className="text-xs text-gray-500">Access Granted</div>
                                     </>
                                 ) : lastResult ? (
                                     <>
                                         <Badge variant="destructive" className="font-bold mb-2">Scan Failed</Badge>
-                                        <div className="text-xs text-white/50">Access Denied</div>
+                                        <div className="text-xs text-gray-500">Access Denied</div>
                                     </>
                                 ) : (
                                     <>
-                                        <div className="w-3 h-3 rounded-full bg-emerald-500 animate-pulse mb-2 shadow-[0_0_10px_#10b981]" />
-                                        <div className="text-xs text-white/50">System Ready</div>
+                                        <div className="w-3 h-3 rounded-full bg-red-500 animate-pulse mb-2 shadow-[0_0_10px_#ef4444]" />
+                                        <div className="text-xs text-gray-500">System Ready</div>
                                     </>
                                 )}
                             </div>
@@ -263,16 +263,16 @@ export default function ScannerPage() {
 
                         {/* Last Scan Result Detailed */}
                         {lastResult?.registration && (
-                            <div className={`p-6 rounded-2xl border backdrop-blur-md animate-fade-in-up ${lastResult.success ? 'bg-emerald-950/30 border-emerald-500/30' : 'bg-red-950/30 border-red-500/30'}`}>
-                                <h3 className={`font-display text-2xl font-bold mb-1 ${lastResult.success ? 'text-emerald-400' : 'text-red-400'}`}>
+                            <div className={`p-6 rounded-2xl border shadow-sm animate-fade-in-up ${lastResult.success ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}`}>
+                                <h3 className={`font-display text-2xl font-bold mb-1 ${lastResult.success ? 'text-green-700' : 'text-red-700'}`}>
                                     {lastResult.registration.studentName}
                                 </h3>
-                                <p className="text-white/60 text-sm mb-4">{lastResult.registration.email}</p>
+                                <p className="text-gray-600 text-sm mb-4">{lastResult.registration.email}</p>
 
                                 <div className="space-y-2">
                                     <div className={`text-sm px-3 py-1.5 rounded-lg inline-block font-medium ${lastResult.registration.alreadyCheckedIn
-                                        ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
-                                        : 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
+                                        ? 'bg-amber-100 text-amber-700 border border-amber-200'
+                                        : 'bg-green-100 text-green-700 border border-green-200'
                                         }`}>
                                         {lastResult.registration.alreadyCheckedIn
                                             ? `⚠️ Previously at ${lastResult.registration.checkedInAt}`
@@ -283,8 +283,8 @@ export default function ScannerPage() {
                         )}
 
                         {/* Manual Entry */}
-                        <div className="p-6 rounded-2xl bg-white/5 border border-white/10">
-                            <h3 className="text-lg font-semibold text-white mb-4">Manual Entry</h3>
+                        <div className="p-6 rounded-2xl bg-white border border-gray-200 shadow-sm">
+                            <h3 className="text-lg font-semibold text-gray-900 mb-4">Manual Entry</h3>
                             <div className="space-y-3">
                                 <div className="flex gap-2">
                                     <Input
@@ -292,14 +292,14 @@ export default function ScannerPage() {
                                         value={manualToken}
                                         onChange={(e) => setManualToken(e.target.value)}
                                         onKeyPress={(e) => e.key === "Enter" && handleManualToken()}
-                                        className="bg-black/30 border-white/10 text-white placeholder:text-white/30 h-11"
+                                        className="bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-400 h-11 focus-visible:ring-red-500"
                                     />
-                                    <Button onClick={handleManualToken} className="bg-white text-black hover:bg-slate-200">Check In</Button>
+                                    <Button onClick={handleManualToken} className="bg-gray-900 text-white hover:bg-black">Check In</Button>
                                 </div>
                                 <div className="flex items-center gap-4 py-2">
-                                    <div className="h-px bg-white/10 flex-1" />
-                                    <span className="text-xs text-white/30 uppercase">OR SEARCH</span>
-                                    <div className="h-px bg-white/10 flex-1" />
+                                    <div className="h-px bg-gray-100 flex-1" />
+                                    <span className="text-xs text-gray-400 uppercase">OR SEARCH</span>
+                                    <div className="h-px bg-gray-100 flex-1" />
                                 </div>
                                 <div className="flex gap-2">
                                     <Input
@@ -307,9 +307,9 @@ export default function ScannerPage() {
                                         value={searchQuery}
                                         onChange={(e) => setSearchQuery(e.target.value)}
                                         onKeyPress={(e) => e.key === "Enter" && handleSearch()}
-                                        className="bg-black/30 border-white/10 text-white placeholder:text-white/30 h-11"
+                                        className="bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-400 h-11 focus-visible:ring-red-500"
                                     />
-                                    <Button onClick={handleSearch} variant="secondary" className="bg-white/10 text-white hover:bg-white/20 border border-white/10">Search</Button>
+                                    <Button onClick={handleSearch} variant="secondary" className="bg-white text-gray-700 hover:bg-gray-50 border border-gray-200">Search</Button>
                                 </div>
                             </div>
                         </div>
@@ -318,31 +318,49 @@ export default function ScannerPage() {
                     {/* Camera Scanner View */}
                     <div className="relative">
                         <div className="sticky top-6">
-                            <div className="relative aspect-[3/4] md:aspect-square bg-black rounded-3xl overflow-hidden border border-white/10 shadow-2xl">
+                            <div className="relative aspect-[3/4] md:aspect-square bg-gray-900 rounded-3xl overflow-hidden border border-gray-200 shadow-2xl">
                                 <div id="reader" className="w-full h-full bg-black" />
 
                                 {!isScanning && (
-                                    <div className="absolute inset-0 flex flex-col items-center justify-center bg-slate-900/90 backdrop-blur-sm z-10">
-                                        <div className="p-4 rounded-full bg-white/5 border border-white/10 mb-4">
-                                            <svg className="w-8 h-8 text-white/50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <div className="absolute inset-0 flex flex-col items-center justify-center bg-gray-50/90 backdrop-blur-sm z-10">
+                                        <div className="p-4 rounded-full bg-white border border-gray-200 mb-4 shadow-sm">
+                                            <svg className="w-8 h-8 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
                                             </svg>
                                         </div>
-                                        <p className="text-white font-medium mb-6">Camera is inactive</p>
-                                        <Button onClick={startScanning} size="lg" className="rounded-full px-8 bg-emerald-500 hover:bg-emerald-600 text-black font-bold">
+                                        <p className="text-gray-900 font-medium mb-6">Camera is inactive</p>
+                                        <Button onClick={startScanning} size="lg" className="rounded-full px-8 bg-red-600 hover:bg-red-700 text-white font-bold shadow-lg shadow-red-500/20">
                                             Start Camera
                                         </Button>
                                     </div>
                                 )}
 
                                 {isScanning && (
-                                    <Button
-                                        onClick={stopScanning}
-                                        className="absolute bottom-6 left-1/2 -translate-x-1/2 z-20 rounded-full px-6 bg-red-500/80 hover:bg-red-600 border border-red-400/50 backdrop-blur-md"
-                                    >
-                                        Stop Scanner
-                                    </Button>
+                                    <>
+                                        {/* Scanner Overlay UI */}
+                                        <div className="absolute inset-0 pointer-events-none">
+                                            <div className="absolute top-0 left-0 right-0 h-1/4 bg-black/50 backdrop-blur-[1px]" />
+                                            <div className="absolute bottom-0 left-0 right-0 h-1/4 bg-black/50 backdrop-blur-[1px]" />
+                                            <div className="absolute top-1/4 left-0 w-8 h-1/2 bg-black/50 backdrop-blur-[1px]" />
+                                            <div className="absolute top-1/4 right-0 w-8 h-1/2 bg-black/50 backdrop-blur-[1px]" />
+
+                                            {/* Corners - White/Red Theme */}
+                                            <div className="absolute top-1/4 left-8 w-12 h-12 border-l-4 border-t-4 border-red-500 rounded-tl-xl" />
+                                            <div className="absolute top-1/4 right-8 w-12 h-12 border-r-4 border-t-4 border-red-500 rounded-tr-xl" />
+                                            <div className="absolute bottom-1/4 left-8 w-12 h-12 border-l-4 border-b-4 border-red-500 rounded-bl-xl" />
+                                            <div className="absolute bottom-1/4 right-8 w-12 h-12 border-r-4 border-b-4 border-red-500 rounded-br-xl" />
+
+                                            {/* Scan Line */}
+                                            <div className="absolute top-1/4 left-8 right-8 h-0.5 bg-red-500 shadow-[0_0_20px_#ef4444] animate-scan-line" />
+                                        </div>
+                                        <Button
+                                            onClick={stopScanning}
+                                            className="absolute bottom-6 left-1/2 -translate-x-1/2 z-20 rounded-full px-6 bg-white/90 hover:bg-white text-red-600 border border-white/50 backdrop-blur-md shadow-xl"
+                                        >
+                                            Stop Scanner
+                                        </Button>
+                                    </>
                                 )}
                             </div>
                         </div>
