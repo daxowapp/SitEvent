@@ -17,9 +17,9 @@ interface DisplayEvent {
     id: string;
     title: string;
     slug: string;
-    country: string;
-    city: string;
-    venueName: string;
+    country: string | null;
+    city: string | null;
+    venueName: string | null;
     bannerImageUrl: string | null;
     startDateTime: Date;
     status: string;
@@ -97,8 +97,8 @@ async function getEvents(): Promise<DisplayEvent[]> {
 
 async function getFilterOptions(): Promise<{ countries: string[]; cities: string[] }> {
     if (!isDatabaseConfigured()) {
-        const countries = Array.from(new Set(MOCK_EVENTS.map((e) => e.country))).sort();
-        const cities = Array.from(new Set(MOCK_EVENTS.map((e) => e.city))).sort();
+        const countries = Array.from(new Set(MOCK_EVENTS.map((e) => e.country).filter((c): c is string => !!c))).sort();
+        const cities = Array.from(new Set(MOCK_EVENTS.map((e) => e.city).filter((c): c is string => !!c))).sort();
         return { countries, cities };
     }
 
@@ -110,13 +110,13 @@ async function getFilterOptions(): Promise<{ countries: string[]; cities: string
             distinct: ["country", "city"],
         });
 
-        const countries = Array.from<string>(new Set(events.map((e: { country: string; city: string }) => e.country))).sort();
-        const cities = Array.from<string>(new Set(events.map((e: { country: string; city: string }) => e.city))).sort();
+        const countries = Array.from(new Set(events.map(e => e.country).filter((c): c is string => !!c))).sort();
+        const cities = Array.from(new Set(events.map(e => e.city).filter((c): c is string => !!c))).sort();
 
         return { countries, cities };
     } catch {
-        const countries = Array.from(new Set(MOCK_EVENTS.map((e) => e.country))).sort();
-        const cities = Array.from(new Set(MOCK_EVENTS.map((e) => e.city))).sort();
+        const countries = Array.from(new Set(MOCK_EVENTS.map((e) => e.country).filter((c): c is string => !!c))).sort();
+        const cities = Array.from(new Set(MOCK_EVENTS.map((e) => e.city).filter((c): c is string => !!c))).sort();
         return { countries, cities };
     }
 }
@@ -131,10 +131,10 @@ export default async function EventsPage({ searchParams }: EventsPageProps) {
     // Apply filters
     let events = allEvents;
     if (params.country) {
-        events = events.filter(e => e.country.toLowerCase().includes(params.country!.toLowerCase()));
+        events = events.filter(e => e.country?.toLowerCase().includes(params.country!.toLowerCase()));
     }
     if (params.city) {
-        events = events.filter(e => e.city.toLowerCase().includes(params.city!.toLowerCase()));
+        events = events.filter(e => e.city?.toLowerCase().includes(params.city!.toLowerCase()));
     }
     if (params.search) {
         events = events.filter(e =>
@@ -347,7 +347,7 @@ function EventCard({
                         <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground mb-2">
                             <span className="flex items-center gap-1">
                                 <span className="w-1.5 h-1.5 rounded-full bg-accent" />
-                                {event.city}, {event.country}
+                                {event.city || 'TBA'}, {event.country || 'TBA'}
                             </span>
                         </div>
                         <h3 className="font-display text-xl md:text-2xl font-bold text-foreground leading-tight group-hover:text-accent transition-colors mb-3">
