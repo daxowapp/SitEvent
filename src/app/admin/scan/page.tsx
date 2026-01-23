@@ -14,7 +14,7 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
-import jsQR from "jsqr";
+import { Html5Qrcode } from "html5-qrcode";
 
 interface Event {
     id: string;
@@ -40,8 +40,7 @@ export default function ScannerPage() {
     const [searchQuery, setSearchQuery] = useState("");
     const [lastResult, setLastResult] = useState<CheckInResult | null>(null);
     const [totalCheckins, setTotalCheckins] = useState(0);
-    const videoRef = useRef<HTMLVideoElement>(null);
-    const canvasRef = useRef<HTMLCanvasElement>(null);
+    const scannerRef = useRef<Html5Qrcode | null>(null);
 
     // Load events on mount
     useEffect(() => {
@@ -141,69 +140,60 @@ export default function ScannerPage() {
 
     // Start camera scanning
     const startScanning = async () => {
-        try {
-            const stream = await navigator.mediaDevices.getUserMedia({
-                video: { facingMode: "environment" },
-            });
+        if (scannerRef.current) return; // Already running logic check
 
-            if (videoRef.current) {
-                videoRef.current.srcObject = stream;
-                await videoRef.current.play();
-                setIsScanning(true);
-                scanFrame();
-            }
+        try {
+            const scanner = new Html5Qrcode("reader");
+            scannerRef.current = scanner;
+            setIsScanning(true);
+
+            await scanner.start(
+                { facingMode: "environment" },
+                {
+                    fps: 10,
+                    qrbox: { width: 250, height: 250 },
+                    aspectRatio: 1.0,
+                },
+                (decodedText) => {
+                    // Success callback
+                    const token = decodedText.includes("/r/") ? decodedText.split("/r/")[1] : decodedText;
+                    handleScan(token);
+                    stopScanning();
+                },
+                (errorMessage) => {
+                    // Parse error, ignore
+                }
+            );
         } catch (error) {
-            toast.error("Could not access camera");
+            console.error(error);
+            toast.error("Could not start camera. Please ensure permissions are granted.");
+            setIsScanning(false);
+            if (scannerRef.current) {
+                scannerRef.current.clear();
+                scannerRef.current = null;
+            }
         }
     };
 
-    const stopScanning = () => {
-        if (videoRef.current?.srcObject) {
-            const tracks = (videoRef.current.srcObject as MediaStream).getTracks();
-            tracks.forEach((track) => track.stop());
-            videoRef.current.srcObject = null;
+    const stopScanning = async () => {
+        if (scannerRef.current) {
+            try {
+                await scannerRef.current.stop();
+                scannerRef.current.clear();
+                scannerRef.current = null;
+            } catch (error) {
+                console.warn("Failed to stop scanner", error);
+            }
         }
         setIsScanning(false);
     };
 
-    // Scan video frame for QR codes
-    const scanFrame = async () => {
-        if (!videoRef.current || !canvasRef.current || !isScanning) return;
-
-        const video = videoRef.current;
-        const canvas = canvasRef.current;
-        const ctx = canvas.getContext("2d");
-
-        if (video.readyState === video.HAVE_ENOUGH_DATA && ctx) {
-            canvas.width = video.videoWidth;
-            canvas.height = video.videoHeight;
-            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-            // Use jsQR for decoding (works everywhere)
-            // @ts-ignore - jsQR is imported via require or needs types, assuming installed
-            const code = jsQR(imageData.data, imageData.width, imageData.height, {
-                inversionAttempts: "dontInvert",
-            });
-
-            if (code) {
-                const raw = code.data;
-                const token = raw.includes("/r/") ? raw.split("/r/")[1] : raw;
-                handleScan(token);
-                stopScanning();
-                return;
-            }
-        }
-
-        // Continue scanning
-        if (isScanning) {
-            requestAnimationFrame(scanFrame);
-        }
-    };
-
     useEffect(() => {
         return () => {
-            stopScanning();
+            if (scannerRef.current) {
+                scannerRef.current.stop().catch(console.error);
+                scannerRef.current.clear();
+            }
         };
     }, []);
 
@@ -329,13 +319,7 @@ export default function ScannerPage() {
                     <div className="relative">
                         <div className="sticky top-6">
                             <div className="relative aspect-[3/4] md:aspect-square bg-black rounded-3xl overflow-hidden border border-white/10 shadow-2xl">
-                                <video
-                                    ref={videoRef}
-                                    className="absolute inset-0 w-full h-full object-cover"
-                                    playsInline
-                                    muted
-                                />
-                                <canvas ref={canvasRef} className="hidden" />
+                                <div id="reader" className="w-full h-full bg-black" />
 
                                 {!isScanning && (
                                     <div className="absolute inset-0 flex flex-col items-center justify-center bg-slate-900/90 backdrop-blur-sm z-10">
@@ -353,30 +337,12 @@ export default function ScannerPage() {
                                 )}
 
                                 {isScanning && (
-                                    <>
-                                        {/* Scanner Overlay UI */}
-                                        <div className="absolute inset-0 pointer-events-none">
-                                            <div className="absolute top-0 left-0 right-0 h-1/4 bg-black/50 backdrop-blur-[2px]" />
-                                            <div className="absolute bottom-0 left-0 right-0 h-1/4 bg-black/50 backdrop-blur-[2px]" />
-                                            <div className="absolute top-1/4 left-0 w-8 h-1/2 bg-black/50 backdrop-blur-[2px]" />
-                                            <div className="absolute top-1/4 right-0 w-8 h-1/2 bg-black/50 backdrop-blur-[2px]" />
-
-                                            {/* Corners */}
-                                            <div className="absolute top-1/4 left-8 w-12 h-12 border-l-4 border-t-4 border-emerald-500 rounded-tl-xl" />
-                                            <div className="absolute top-1/4 right-8 w-12 h-12 border-r-4 border-t-4 border-emerald-500 rounded-tr-xl" />
-                                            <div className="absolute bottom-1/4 left-8 w-12 h-12 border-l-4 border-b-4 border-emerald-500 rounded-bl-xl" />
-                                            <div className="absolute bottom-1/4 right-8 w-12 h-12 border-r-4 border-b-4 border-emerald-500 rounded-br-xl" />
-
-                                            {/* Scan Line */}
-                                            <div className="absolute top-1/4 left-8 right-8 h-0.5 bg-emerald-400 shadow-[0_0_20px_#10b981] animate-scan-line" />
-                                        </div>
-                                        <Button
-                                            onClick={stopScanning}
-                                            className="absolute bottom-6 left-1/2 -translate-x-1/2 z-20 rounded-full px-6 bg-red-500/80 hover:bg-red-600 border border-red-400/50 backdrop-blur-md"
-                                        >
-                                            Stop Scanner
-                                        </Button>
-                                    </>
+                                    <Button
+                                        onClick={stopScanning}
+                                        className="absolute bottom-6 left-1/2 -translate-x-1/2 z-20 rounded-full px-6 bg-red-500/80 hover:bg-red-600 border border-red-400/50 backdrop-blur-md"
+                                    >
+                                        Stop Scanner
+                                    </Button>
                                 )}
                             </div>
                         </div>
