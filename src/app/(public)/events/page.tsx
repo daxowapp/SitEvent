@@ -17,9 +17,9 @@ interface DisplayEvent {
     id: string;
     title: string;
     slug: string;
-    country: string;
-    city: string;
-    venueName: string;
+    country: string | null;
+    city: string | null;
+    venueName: string | null;
     bannerImageUrl: string | null;
     startDateTime: Date;
     status: string;
@@ -110,8 +110,8 @@ async function getFilterOptions(): Promise<{ countries: string[]; cities: string
             distinct: ["country", "city"],
         });
 
-        const countries = Array.from<string>(new Set(events.map((e: { country: string; city: string }) => e.country))).sort();
-        const cities = Array.from<string>(new Set(events.map((e: { country: string; city: string }) => e.city))).sort();
+        const countries = Array.from(new Set(events.map(e => e.country).filter((c): c is string => !!c))).sort();
+        const cities = Array.from(new Set(events.map(e => e.city).filter((c): c is string => !!c))).sort();
 
         return { countries, cities };
     } catch {
@@ -131,10 +131,10 @@ export default async function EventsPage({ searchParams }: EventsPageProps) {
     // Apply filters
     let events = allEvents;
     if (params.country) {
-        events = events.filter(e => e.country.toLowerCase().includes(params.country!.toLowerCase()));
+        events = events.filter(e => e.country?.toLowerCase().includes(params.country!.toLowerCase()));
     }
     if (params.city) {
-        events = events.filter(e => e.city.toLowerCase().includes(params.city!.toLowerCase()));
+        events = events.filter(e => e.city?.toLowerCase().includes(params.city!.toLowerCase()));
     }
     if (params.search) {
         events = events.filter(e =>
@@ -317,7 +317,7 @@ function EventCard({
                     <div className="space-y-2 flex-1">
                         <div className="flex items-center gap-2 text-sm text-gray-500">
                             <span className="text-[hsl(var(--turkish-red))]">📍</span>
-                            <span>{event.city}, {event.country}</span>
+                            <span>{event.city || 'TBA'}, {event.country || 'TBA'}</span>
                         </div>
                         <div className="flex items-center gap-2 text-sm text-gray-500">
                             <span className="text-[hsl(var(--turkish-red))]">🏛️</span>
