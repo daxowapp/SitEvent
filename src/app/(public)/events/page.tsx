@@ -97,8 +97,8 @@ async function getEvents(): Promise<DisplayEvent[]> {
 
 async function getFilterOptions(): Promise<{ countries: string[]; cities: string[] }> {
     if (!isDatabaseConfigured()) {
-        const countries = Array.from(new Set(MOCK_EVENTS.map((e) => e.country))).sort();
-        const cities = Array.from(new Set(MOCK_EVENTS.map((e) => e.city))).sort();
+        const countries = Array.from(new Set(MOCK_EVENTS.map((e) => e.country).filter((c): c is string => !!c))).sort();
+        const cities = Array.from(new Set(MOCK_EVENTS.map((e) => e.city).filter((c): c is string => !!c))).sort();
         return { countries, cities };
     }
 
@@ -115,8 +115,8 @@ async function getFilterOptions(): Promise<{ countries: string[]; cities: string
 
         return { countries, cities };
     } catch {
-        const countries = Array.from(new Set(MOCK_EVENTS.map((e) => e.country))).sort();
-        const cities = Array.from(new Set(MOCK_EVENTS.map((e) => e.city))).sort();
+        const countries = Array.from(new Set(MOCK_EVENTS.map((e) => e.country).filter((c): c is string => !!c))).sort();
+        const cities = Array.from(new Set(MOCK_EVENTS.map((e) => e.city).filter((c): c is string => !!c))).sort();
         return { countries, cities };
     }
 }
