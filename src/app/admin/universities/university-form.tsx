@@ -8,9 +8,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
-import { ArrowLeft, Save, Loader2, Plus, X } from "lucide-react";
+import { ArrowLeft, Save, Loader2, Plus, X, Lock } from "lucide-react";
 import Link from "next/link";
-import { createUniversity, updateUniversity, deleteUniversity, generateUniversityData } from "./actions";
+import { createUniversity, updateUniversity, deleteUniversity, generateUniversityData, getUniversityUser, createOrUpdateUniversityUser } from "./actions";
 import { ALL_COUNTRIES } from "@/lib/constants/countries";
 import { AlertTriangle, Sparkles, Trash2 } from "lucide-react";
 import {
@@ -133,6 +133,43 @@ export function UniversityForm({ university, countries = [] }: UniversityFormPro
             toast.error("Failed to generate content. Check API Key.");
         } finally {
             setIsGenerating(false);
+        }
+    };
+
+    // Credential Management State
+    const [credData, setCredData] = useState({ email: "", password: "" });
+    const [hasUser, setHasUser] = useState(false);
+    const [isSavingCreds, setIsSavingCreds] = useState(false);
+
+    // Fetch existing user credentials
+    useEffect(() => {
+        if (university?.id) {
+            getUniversityUser(university.id).then(user => {
+                if (user) {
+                    setCredData(prev => ({ ...prev, email: user.email }));
+                    setHasUser(true);
+                } else if (university.contactEmail) {
+                    setCredData(prev => ({ ...prev, email: university.contactEmail || "" }));
+                }
+            });
+        }
+    }, [university]);
+
+    const handleSaveCredentials = async () => {
+        if (!university) return;
+        if (!credData.email) return toast.error("Email is required for login");
+        if (!hasUser && !credData.password) return toast.error("Password is required for new user");
+
+        setIsSavingCreds(true);
+        try {
+            await createOrUpdateUniversityUser(university.id, credData.email, credData.password);
+            toast.success(`User ${hasUser ? 'updated' : 'created'}! Password set.`);
+            setHasUser(true);
+            setCredData(prev => ({ ...prev, password: "" }));
+        } catch (e) {
+            toast.error("Failed to save credentials");
+        } finally {
+            setIsSavingCreds(false);
         }
     };
 

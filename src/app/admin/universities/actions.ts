@@ -181,12 +181,50 @@ export async function generateUniversityData(name: string) {
     }
 }
 
-export async function generateCityData(city: string, country: string) {
-    const { generateCityContent } = await import("@/lib/services/openai");
-    try {
-        return await generateCityContent(city, country);
-    } catch (error) {
-        console.error("AI Generation Error:", error);
-        throw new Error("Failed to generate city content. Ensure OPENAI_API_KEY is set.");
+// University User Management
+export async function getUniversityUser(universityId: string) {
+    return prisma.universityUser.findFirst({
+        where: { universityId },
+        select: { email: true, name: true }
+    });
+}
+
+export async function createOrUpdateUniversityUser(universityId: string, email: string, password?: string) {
+    const { hash } = await import("bcryptjs");
+
+    const data: any = {
+        email,
+        universityId,
+        name: "University Representative", // Default name
+    };
+
+    if (password) {
+        data.passwordHash = await hash(password, 10);
+    }
+
+    // Check if user exists for this university
+    const existingUser = await prisma.universityUser.findFirst({
+        where: { universityId }
+    });
+
+    if (existingUser) {
+        return prisma.universityUser.update({
+            where: { id: existingUser.id },
+            data
+        });
+    } else {
+        // Ensure email is unique across system if needed, but upsert handles id/unique constraints
+        // We use upsert on email to be safe if checking by email
+        return prisma.universityUser.upsert({
+            where: { email },
+            update: {
+                ...data,
+                universityId // Ensure linked
+            },
+            create: {
+                ...data,
+                passwordHash: data.passwordHash || "" // Should prompt for password if new
+            }
+        });
     }
 }
