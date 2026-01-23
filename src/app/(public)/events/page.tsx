@@ -4,6 +4,8 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { format } from "date-fns";
 
+export const dynamic = "force-dynamic";
+
 interface EventsPageProps {
     searchParams: Promise<{
         country?: string;
