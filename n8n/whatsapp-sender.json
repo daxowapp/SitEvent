@@ -1,0 +1,67 @@
+{
+    "name": "Send WhatsApp Notification",
+    "nodes": [
+        {
+            "parameters": {
+                "httpMethod": "POST",
+                "path": "send-whatsapp",
+                "options": {}
+            },
+            "id": "e43d1a8e-5b1e-4512-8e6a-1234567890ab",
+            "name": "Webhook",
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 1,
+            "position": [
+                460,
+                340
+            ],
+            "webhookId": "e43d1a8e-5b1e-4512-8e6a-1234567890ab"
+        },
+        {
+            "parameters": {
+                "resource": "whatsapp",
+                "operation": "send",
+                "from": "={{ $env.TWILIO_WHATSAPP_NUMBER || 'whatsapp:+14155238886' }}",
+                "to": "={{ $json.to.startsWith('whatsapp:') ? $json.to : 'whatsapp:' + $json.to.replace(/[^0-9+]/g, '') }}",
+                "body": "=Hi {{ $json.studentName }}! 👋\n\nYour registration for {{ $json.eventTitle }} on {{ $json.eventDate }} is confirmed! ✅\n\nAccess your entry pass here: {{ $json.qrUrl }}\n\nSee you there! 🎉"
+            },
+            "id": "f54e2b9f-6c2d-4623-9f7b-0987654321cd",
+            "name": "Twilio WhatsApp",
+            "type": "n8n-nodes-base.twilio",
+            "typeVersion": 1,
+            "position": [
+                680,
+                340
+            ],
+            "credentials": {
+                "twilioApi": {
+                    "id": "create-new-credential-id",
+                    "name": "Twilio Account"
+                }
+            }
+        }
+    ],
+    "pinData": {},
+    "connections": {
+        "Webhook": {
+            "main": [
+                [
+                    {
+                        "node": "Twilio WhatsApp",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    },
+    "active": true,
+    "settings": {},
+    "versionId": "generated-by-agent",
+    "meta": {
+        "templateCredsSetupCompleted": true,
+        "instanceId": "generated"
+    },
+    "id": "whatsapp-sender-workflow",
+    "tags": []
+}

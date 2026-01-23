@@ -1,0 +1,408 @@
+{
+    "common": {
+        "siteName": "EduFairs",
+        "tagline": "Connecting Students with Global Education",
+        "loading": "Loading...",
+        "error": "An error occurred",
+        "save": "Save",
+        "cancel": "Cancel",
+        "delete": "Delete",
+        "edit": "Edit",
+        "view": "View",
+        "search": "Search",
+        "filter": "Filter",
+        "all": "All",
+        "submit": "Submit",
+        "back": "Back",
+        "next": "Next",
+        "previous": "Previous",
+        "close": "Close",
+        "yes": "Yes",
+        "no": "No",
+        "required": "Required"
+    },
+    "nav": {
+        "home": "Home",
+        "events": "Events",
+        "about": "How It Works",
+        "recruit": "For Universities",
+        "contact": "Contact",
+        "partner": "Partner With Us",
+        "login": "Login",
+        "register": "Register",
+        "adminPortal": "Admin Portal",
+        "allEvents": "All Events",
+        "privacyPolicy": "Privacy Policy",
+        "termsOfService": "Terms of Service"
+    },
+    "home": {
+        "hero": {
+            "title": "Meet Top Universities at <span>Sit Connect</span> Near You",
+            "subtitle": "Connect with 50+ universities, explore study abroad opportunities, and take the first step toward your international education — completely free.",
+            "cta": "Find Events",
+            "badge": "10+ Events Across 5 Countries in 2025",
+            "searchPlaceholder": "Search by city or country...",
+            "findEvents": "Find Events",
+            "popular": "Popular",
+            "stats": {
+                "unis": "Universities",
+                "students": "Students Attended",
+                "years": "Years Running"
+            },
+            "ctaPartner": "Partner With Us",
+            "ctaSchedule": "View Schedule"
+        },
+        "stats": {
+            "trustedPlatform": "Trusted Platform",
+            "title": "Why Students & Universities Choose Us",
+            "subtitle": "Join thousands of students who have discovered their path to international education through our events.",
+            "universities": "Partner Universities",
+            "students": "Students Attended",
+            "countries": "Countries",
+            "yearsRunning": "Years Experience",
+            "desc": {
+                "unis": "Leading institutions from Europe, Asia, and beyond",
+                "students": "Growing community of aspiring international students",
+                "countries": "Events across {countries}, and more",
+                "years": "Trusted platform since 2017"
+            },
+            "leads": "Quality Leads",
+            "partners": "Partner Unis",
+            "roi": "Top Rated"
+        },
+        "howItWorks": {
+            "title": "How It Works",
+            "subtitle": "From finding an event to meeting your dream university — the entire process is free and takes just minutes.",
+            "simpleProcess": "Simple Process",
+            "step": "Step",
+            "trustNote": "100% Free for Students • No Hidden Costs • Instant Confirmation",
+            "step1": {
+                "title": "Find an Event",
+                "desc": "Browse upcoming education fairs in your city or country. Filter by location and date to find the perfect match."
+            },
+            "step2": {
+                "title": "Register for Free",
+                "desc": "Fill out a simple registration form with your basic details. It takes less than 2 minutes — no payment required."
+            },
+            "step3": {
+                "title": "Get Your QR Code",
+                "desc": "Receive instant confirmation via email and WhatsApp with your unique entry QR code."
+            },
+            "step4": {
+                "title": "Attend & Connect",
+                "desc": "Show your QR code at check-in and meet university representatives. Get information, scholarships, and more."
+            }
+        },
+        "universities": {
+            "badge": "For Universities & Partners",
+            "title": "Reach Thousands of Prospective Students",
+            "subtitle": "Partner with us to showcase your institution at our education fairs. Connect directly with motivated students seeking international education opportunities.",
+            "ctaInfo": "Request Partnership Info",
+            "ctaKit": "Download Media Kit",
+            "trustedBy": "Trusted by Leading Institutions",
+            "benefitsTitle": "Partnership Benefits",
+            "benefits": {
+                "attendees": "Average 2,000+ student attendees per event",
+                "marketing": "Pre-event marketing to registered students",
+                "leads": "Full lead export with contact details",
+                "support": "Dedicated event coordinator support"
+            }
+        },
+        "benefits": {
+            "title": "Why Partner With Us?",
+            "subtitle": "We provide an end-to-end recruitment ecosystem designed for results.",
+            "directAccess": {
+                "title": "1-on-1 Access",
+                "desc": "Meet thousands of pre-screened students and parents face-to-face."
+            },
+            "brandVisibility": {
+                "title": "Brand Visibility",
+                "desc": "Showcase your institution along with top global universities."
+            },
+            "smartData": {
+                "title": "Smart Data",
+                "desc": "Get instant access to student data via our lead scanning app."
+            },
+            "quality": {
+                "title": "Verified Quality",
+                "desc": "We pre-screen attendees to ensure you meet high-intent students ready for international education.",
+                "tags": {
+                    "seniors": "High School Seniors",
+                    "gpa": "GPA Verified",
+                    "english": "English Proficient"
+                }
+            },
+            "globalReach": "Global Reach"
+        },
+        "schedule": {
+            "title": "Upcoming Schedule",
+            "badge": "Tour Schedule",
+            "noEvents": "No upcoming recruitment events scheduled.",
+            "participationFee": "Participation Fee",
+            "contactPricing": "Contact for Pricing",
+            "bookNow": "Book Booth",
+            "downloadCalendar": "Download Full Calendar",
+            "fee": "Fee"
+        },
+        "inquiry": {
+            "title": "Partner With Us",
+            "subtitle": "Ready to boost your international student enrollment? Fill out the form to request our media kit or book your stand for upcoming events.",
+            "steps": {
+                "step1": {
+                    "title": "Submit Your Inquiry",
+                    "desc": "Tell us which region or events you are interested in."
+                },
+                "step2": {
+                    "title": "Consultation Call",
+                    "desc": "Our team will contact you to discuss the best package for your goals."
+                },
+                "step3": {
+                    "title": "Secure Your Spot",
+                    "desc": "Choose your booth location and start preparing for your trip."
+                }
+            }
+        }
+    },
+    "events": {
+        "browseEvents": "Browse Events",
+        "upcomingEvents": "Upcoming Education Fairs",
+        "subtitle": "Find an event near you and register for free. Meet university representatives face-to-face and explore your study abroad options.",
+        "noEvents": "No events available",
+        "viewAllEvents": "View All Upcoming Events",
+        "pastEvents": "Past Events",
+        "viewDetails": "View Details & Register",
+        "viewSummary": "View Event Summary",
+        "registerNow": "Register Now",
+        "registered": "Registered",
+        "eventDetails": "Event Details",
+        "location": "Location",
+        "date": "Date",
+        "time": "Time",
+        "venue": "Venue",
+        "participatingUniversities": "universities participating",
+        "registrationOpen": "Registration Open",
+        "aboutEvent": "About This Event",
+        "registrationClosed": "Registration Closed",
+        "eventEnded": "Past Event",
+        "spotsRemaining": "{count} spots remaining",
+        "unlimited": "Unlimited spots",
+        "backToEvents": "Back to Events",
+        "upcomingEvent": "Upcoming Event",
+        "pastEvent": "Past Event",
+        "startHere": "Start Here",
+        "almostFull": "Almost Full! Only {count} spots remaining",
+        "secureYourSpot": "Secure Your Spot",
+        "getQrCode": "Get your fast-track entry QR code.",
+        "instantConfirmation": "Instant Confirmation",
+        "freeEntry": "Free Entry",
+        "eventTakenPlace": "This event has already taken place.",
+        "registrationUnavailable": "Registration is currently unavailable.",
+        "participatingUniversitiesTitle": "Participating Universities",
+        "universitiesCount": "{count} Universities",
+        "booth": "Booth",
+        "eventInformation": "Event Information",
+        "dateTime": "Date & Time",
+        "openInMaps": "Open in Maps"
+    },
+    "registration": {
+        "title": "Register for Event",
+        "subtitle": "Fill in your details to register for this event",
+        "fullName": "Full Name",
+        "email": "Email Address",
+        "phone": "Phone Number",
+        "country": "Country",
+        "city": "City",
+        "nationality": "Nationality",
+        "levelOfStudy": "Level of Study",
+        "fieldOfInterest": "Field of Interest",
+        "preferredUniversities": "Preferred Universities",
+        "submitRegistration": "Complete Registration",
+        "success": "Registration Successful!",
+        "successMessage": "You have been registered for this event. Check your email for confirmation and QR code.",
+        "alreadyRegistered": "You are already registered for this event.",
+        "levelOptions": {
+            "highSchool": "High School",
+            "bachelor": "Bachelor's Degree",
+            "master": "Master's Degree",
+            "phd": "PhD",
+            "other": "Other"
+        },
+        "placeholders": {
+            "fullName": "Enter your full name",
+            "email": "your@email.com",
+            "phone": "Enter phone number",
+            "country": "Select your country",
+            "city": "Your city",
+            "level": "Select level (optional)",
+            "major": "e.g., Computer Science, Medicine..."
+        },
+        "consent": "I agree to the processing of my personal data and accept the <link>Privacy Policy</link> *",
+        "registering": "Registering..."
+    },
+    "footer": {
+        "description": "Connecting students with world-class universities through free education fairs across Europe and beyond.",
+        "quickLinks": "Quick Links",
+        "links": {
+            "events": "Upcoming Events",
+            "howItWorks": "How It Works",
+            "recruit": "For Universities",
+            "about": "About Us",
+            "faq": "FAQ"
+        },
+        "legal": "Legal",
+        "legalLinks": {
+            "privacy": "Privacy Policy",
+            "terms": "Terms of Service",
+            "cookies": "Cookie Policy",
+            "gdpr": "GDPR Compliance"
+        },
+        "contact": "Contact Us",
+        "contactInfo": {
+            "email": "Email",
+            "phone": "Phone",
+            "office": "Office",
+            "address": "Istanbul, Türkiye"
+        },
+        "copyright": "© {year} Sit Connect. All rights reserved.",
+        "organizedBy": "Organized by"
+    },
+    "languages": {
+        "en": "English",
+        "tr": "Turkish",
+        "ar": "Arabic"
+    },
+    "privacy": {
+        "title": "Privacy Policy",
+        "lastUpdated": "Last updated: {date}",
+        "sections": {
+            "infoCollect": "Information We Collect",
+            "howUse": "How We Use Your Information",
+            "infoSharing": "Information Sharing",
+            "dataSecurity": "Data Security",
+            "yourRights": "Your Rights",
+            "cookies": "Cookies",
+            "thirdParty": "Third-Party Services",
+            "children": "Children's Privacy",
+            "changes": "Changes to This Policy",
+            "contactUs": "Contact Us"
+        }
+    },
+    "universities": {
+        "title": "Universities",
+        "participatingAt": "Participating at this event",
+        "viewWebsite": "Visit Website",
+        "programs": "Programs Offered",
+        "location": "Location"
+    },
+    "qr": {
+        "scanToCheckIn": "Scan to Check In",
+        "yourQRCode": "Your QR Code",
+        "showAtEntrance": "Show this QR code at the event entrance"
+    },
+    "email": {
+        "confirmation": {
+            "subject": "Registration Confirmed - {eventName}",
+            "greeting": "Hello {name}!",
+            "body": "Thank you for registering for {eventName}. We're excited to have you join us!",
+            "eventDetails": "Event Details",
+            "qrInstructions": "Please show the QR code below at the event entrance for check-in.",
+            "seeYou": "See you at the event!",
+            "dateLabel": "Date",
+            "venueLabel": "Venue",
+            "openPass": "Open Full Screen Pass",
+            "proTipTitle": "Pro Tip:",
+            "proTipBody": "Arrive 15 minutes early to beat the queue. Have your QR code ready on your phone (or printed) for express check-in.",
+            "youreIn": "You're In!",
+            "registrationConfirmed": "Your registration is confirmed.",
+            "yourEntryPass": "Your Entry Pass"
+        },
+        "reminder": {
+            "subject": "Reminder: {eventName} is coming up!",
+            "greeting": "Hello {name}!",
+            "body": "This is a friendly reminder that {eventName} is happening soon.",
+            "dontForget": "Don't forget to bring your QR code for check-in."
+        }
+    },
+    "success": {
+        "title": "Registration Successful!",
+        "subtitle": "Thank you for registering, <highlight>{name}</highlight>.",
+        "entryPass": "Your Entry Pass",
+        "scanInstructions": "Scan this code at the venue entrance",
+        "openPass": "Open Full Screen Pass",
+        "eventDetails": "Event Details",
+        "dateTime": "Date & Time",
+        "venue": "Venue",
+        "openInMaps": "Open in Google Maps",
+        "addToCalendar": "Add to Google Calendar",
+        "browseMore": "Browse More Events",
+        "emailConfirmation": "We've sent a confirmation email to <highlight>{email}</highlight>. You will also receive a WhatsApp reminder before the event."
+    },
+    "recruit": {
+        "hero": {
+            "badge": "For Universities & Partners",
+            "title": "Reach Thousands of Prospective Students",
+            "subtitle": "Partner with us to showcase your institution at our education fairs. Connect directly with motivated students seeking international education opportunities.",
+            "ctaPartner": "Partner With Us",
+            "ctaSchedule": "View Schedule"
+        },
+        "stats": {
+            "leads": "Quality Leads",
+            "countries": "Countries",
+            "partners": "Partner Universities",
+            "roi": "Top Rated"
+        },
+        "benefits": {
+            "title": "Why Partner With Us?",
+            "subtitle": "We provide an end-to-end recruitment ecosystem designed for results.",
+            "directAccess": {
+                "title": "1-on-1 Access",
+                "desc": "Meet thousands of pre-screened students and parents face-to-face."
+            },
+            "brandVisibility": {
+                "title": "Brand Visibility",
+                "desc": "Showcase your institution along with top global universities."
+            },
+            "globalReach": "Global Reach",
+            "smartData": {
+                "title": "Smart Data",
+                "desc": "Get instant access to student data via our lead scanning app."
+            },
+            "quality": {
+                "title": "Verified Quality",
+                "desc": "We pre-screen attendees to ensure you meet high-intent students ready for international education.",
+                "tags": {
+                    "seniors": "High School Seniors",
+                    "gpa": "GPA Verified",
+                    "english": "English Proficient"
+                }
+            }
+        },
+        "schedule": {
+            "badge": "Tour Schedule",
+            "title": "Upcoming Schedule",
+            "downloadCalendar": "Download Full Calendar",
+            "noEvents": "No upcoming recruitment events scheduled.",
+            "fee": "Participation Fee",
+            "contactPricing": "Contact for Pricing",
+            "bookNow": "Book Booth"
+        },
+        "inquiry": {
+            "title": "Partner With Us",
+            "subtitle": "Ready to boost your international student enrollment? Fill out the form to request our media kit or book your stand for upcoming events.",
+            "steps": {
+                "step1": {
+                    "title": "Submit Your Inquiry",
+                    "desc": "Tell us which region or events you are interested in."
+                },
+                "step2": {
+                    "title": "Consultation Call",
+                    "desc": "Our team will contact you to discuss the best package for your goals."
+                },
+                "step3": {
+                    "title": "Secure Your Spot",
+                    "desc": "Choose your booth location and start preparing for your trip."
+                }
+            }
+        }
+    }
+}

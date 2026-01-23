@@ -1,0 +1,29 @@
+import { notFound } from "next/navigation";
+import { prisma } from "@/lib/db";
+import { UniversityForm } from "../../university-form";
+import { getUniversity } from "../../actions";
+
+async function getCountries() {
+    return prisma.country.findMany({
+        orderBy: { name: 'asc' },
+        select: { id: true, name: true, flagEmoji: true }
+    });
+}
+
+interface EditUniversityPageProps {
+    params: Promise<{ id: string }>;
+}
+
+export default async function EditUniversityPage({ params }: EditUniversityPageProps) {
+    const { id } = await params;
+    const [university, countries] = await Promise.all([
+        getUniversity(id),
+        getCountries()
+    ]);
+
+    if (!university) {
+        notFound();
+    }
+
+    return <UniversityForm university={university} countries={countries} />;
+}

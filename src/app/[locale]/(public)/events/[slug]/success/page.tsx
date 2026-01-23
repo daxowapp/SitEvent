@@ -1,0 +1,298 @@
+import { notFound } from "next/navigation";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { prisma } from "@/lib/db";
+import { format } from "date-fns";
+import { enUS, tr, ar } from "date-fns/locale";
+import { QrCodeDisplay } from "./qr-display";
+import { getTranslations } from "next-intl/server";
+
+interface SuccessPageProps {
+    params: Promise<{ slug: string; locale: string }>;
+    searchParams: Promise<{ token?: string }>;
+}
+
+// Mock data for fallback
+const MOCK_EVENTS = [
+    {
+        id: "1",
+        title: "Education Fair Istanbul 2026",
+        slug: "education-fair-istanbul-2026",
+        country: "Turkey",
+        city: "Istanbul",
+        venueName: "Istanbul Congress Center",
+        venueAddress: "Darülbedai Cad. No:3, 34367 Şişli/İstanbul",
+        startDateTime: new Date("2026-03-15T10:00:00"),
+        endDateTime: new Date("2026-03-15T18:00:00"),
+        description: "Join us for the premier education fair in Istanbul.",
+    },
+    {
+        id: "2",
+        title: "Study Abroad Expo Dubai 2026",
+        slug: "study-abroad-expo-dubai-2026",
+        country: "UAE",
+        city: "Dubai",
+        venueName: "Dubai World Trade Centre",
+        venueAddress: "Sheikh Zayed Rd - Dubai - United Arab Emirates",
+        startDateTime: new Date("2026-04-20T09:00:00"),
+        endDateTime: new Date("2026-04-20T17:00:00"),
+        description: "Explore study options in Dubai and abroad.",
+    },
+];
+
+async function getRegistration(token: string) {
+    if (token && token.startsWith('mock-')) {
+        return null;
+    }
+
+    try {
+        if (process.env.DATABASE_URL && !process.env.DATABASE_URL.includes('[project-ref]')) {
+            const registration = await prisma.registration.findUnique({
+                where: { qrToken: token },
+                include: {
+                    event: true,
+                    registrant: true,
+                },
+            });
+            if (registration) return registration;
+        }
+    } catch (error) {
+        console.warn("DB lookup failed:", error);
+        return null;
+    }
+    return null;
+}
+
+const locales = {
+    en: enUS,
+    tr: tr,
+    ar: ar,
+};
+
+export default async function SuccessPage({
+    params,
+    searchParams,
+}: SuccessPageProps) {
+    const { slug, locale } = await params;
+    const { token } = await searchParams;
+    const t = await getTranslations({ locale, namespace: "success" });
+    const dateLocale = locales[locale as keyof typeof locales] || enUS;
+
+    if (!token) {
+        notFound();
+    }
+
+    let registration = await getRegistration(token);
+
+    if (!registration) {
+        if (token && token.startsWith('mock-')) {
+            try {
+                const base64 = token.split('mock-')[1];
+                const payload = JSON.parse(Buffer.from(base64, 'base64').toString('utf-8'));
+                const mockEvent = MOCK_EVENTS.find(e => e.id === payload.eid) || MOCK_EVENTS.find(e => e.slug === slug);
+
+                if (mockEvent) {
+                    registration = {
+                        id: "mock-reg-id",
+                        eventId: mockEvent.id,
+                        registrantId: "mock-user-id",
+                        qrToken: token,
+                        status: "REGISTERED",
+                        createdAt: new Date(payload.ts || Date.now()),
+                        updatedAt: new Date(),
+                        event: { ...mockEvent, status: "PUBLISHED" },
+                        registrant: {
+                            id: "mock-user-id",
+                            fullName: payload.n || "Valued Attendee",
+                            email: payload.e || "attendee@example.com",
+                            phone: "+000000000",
+                            country: "Unknown",
+                            city: "Unknown",
+                            consentAccepted: true,
+                            consentTimestamp: new Date(),
+                        }
+                    } as any;
+                }
+            } catch (e) {
+                console.error("Failed to decode mock token", e);
+            }
+        }
+
+        if (!registration && slug) {
+            const mockEvent = MOCK_EVENTS.find(e => e.slug === slug);
+            if (mockEvent) {
+                registration = {
+                    id: "mock-reg-id",
+                    eventId: mockEvent.id,
+                    registrantId: "mock-user-id",
+                    qrToken: token,
+                    status: "REGISTERED",
+                    createdAt: new Date(),
+                    updatedAt: new Date(),
+                    event: { ...mockEvent, status: "PUBLISHED" },
+                    registrant: {
+                        id: "mock-user-id",
+                        fullName: "Guest User",
+                        email: "guest@example.com",
+                        phone: "+000000000",
+                        country: "Unknown",
+                        city: "Unknown",
+                        consentAccepted: true,
+                        consentTimestamp: new Date(),
+                    }
+                } as any;
+            }
+        }
+    }
+
+    if (!registration || registration.event.slug !== slug) {
+        notFound();
+    }
+
+    const { event, registrant } = registration;
+
+    const calendarEvent = {
+        title: event.title,
+        start: event.startDateTime.toISOString(),
+        end: event.endDateTime.toISOString(),
+        location: `${event.venueName}, ${event.venueAddress}, ${event.city}, ${event.country}`,
+        description: event.description || "",
+    };
+
+    const googleCalendarUrl = new URL("https://calendar.google.com/calendar/render");
+    googleCalendarUrl.searchParams.set("action", "TEMPLATE");
+    googleCalendarUrl.searchParams.set("text", calendarEvent.title);
+    googleCalendarUrl.searchParams.set("dates", `${event.startDateTime.toISOString().replace(/[-:]/g, "").split(".")[0]}Z/${event.endDateTime.toISOString().replace(/[-:]/g, "").split(".")[0]}Z`);
+    googleCalendarUrl.searchParams.set("location", calendarEvent.location);
+    googleCalendarUrl.searchParams.set("details", calendarEvent.description);
+
+    return (
+        <div className="min-h-screen bg-transparent">
+            {/* Navbar Spacer */}
+            <div className="h-24 md:h-28" />
+
+            <div className="container mx-auto px-4 py-8 md:py-12">
+                <div className="mx-auto max-w-3xl">
+                    {/* Success Icon & Header */}
+                    <div className="text-center space-y-6 mb-12">
+                        <div className="w-20 h-20 bg-green-50 rounded-full flex items-center justify-center mx-auto mb-6 shadow-sm border border-green-100">
+                            <svg className="w-10 h-10 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                            </svg>
+                        </div>
+
+                        <div className="space-y-2">
+                            <h1 className="display-text text-4xl md:text-5xl font-bold text-gray-900 leading-tight">
+                                {t('title')}
+                            </h1>
+                            <p className="text-xl text-gray-500 font-light">
+                                {t.rich('subtitle', {
+                                    name: registrant.fullName,
+                                    highlight: (chunks) => <span className="font-medium text-gray-900">{chunks}</span>
+                                })}
+                            </p>
+                        </div>
+                    </div>
+
+                    <div className="grid md:grid-cols-2 gap-8 items-start">
+                        {/* QR Code Section - Left Column */}
+                        <div className="bg-white rounded-2xl shadow-xl shadow-[hsl(var(--turkish-red))]/5 border border-[hsl(var(--turkish-red))]/10 overflow-hidden relative group">
+                            <div className="absolute top-0 left-0 w-full h-2 bg-[hsl(var(--turkish-red))]" />
+                            <div className="p-8 text-center space-y-6">
+                                <div>
+                                    <h3 className="text-lg font-bold text-gray-900 mb-1">{t('entryPass')}</h3>
+                                    <p className="text-sm text-gray-500">{t('scanInstructions')}</p>
+                                </div>
+
+                                <div className="bg-white p-4 rounded-xl border-2 border-dashed border-gray-200 inline-block mx-auto group-hover:border-[hsl(var(--turkish-red))]/30 transition-colors">
+                                    <QrCodeDisplay token={registration.qrToken} />
+                                </div>
+
+                                <Button asChild variant="outline" size="sm" className="w-full">
+                                    <Link href={`/r/${registration.qrToken}`} target="_blank">
+                                        🔗 {t('openPass')}
+                                    </Link>
+                                </Button>
+                            </div>
+                        </div>
+
+                        {/* Event Details & Actions - Right Column */}
+                        <div className="space-y-6">
+                            <div className="bg-white rounded-2xl p-8 border border-gray-100 shadow-sm">
+                                <h3 className="text-sm uppercase tracking-widest font-bold text-gray-400 mb-6">
+                                    {t('eventDetails')}
+                                </h3>
+
+                                <div className="space-y-6">
+                                    <div>
+                                        <h4 className="font-bold text-gray-900 text-lg leading-snug mb-2">
+                                            {event.title}
+                                        </h4>
+                                    </div>
+
+                                    <div className="flex gap-4">
+                                        <div className="w-10 h-10 rounded-lg bg-gray-50 flex items-center justify-center text-[hsl(var(--turkish-red))] shrink-0 border border-gray-100">
+                                            📅
+                                        </div>
+                                        <div>
+                                            <p className="font-bold text-gray-900">{t('dateTime')}</p>
+                                            <p className="text-gray-600 text-sm mt-1">{format(new Date(event.startDateTime), "EEEE, MMMM d, yyyy", { locale: dateLocale })}</p>
+                                            <p className="text-gray-500 text-sm">
+                                                {format(new Date(event.startDateTime), "h:mm a", { locale: dateLocale })} - {format(new Date(event.endDateTime), "h:mm a", { locale: dateLocale })}
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    <div className="flex gap-4">
+                                        <div className="w-10 h-10 rounded-lg bg-gray-50 flex items-center justify-center text-[hsl(var(--turkish-red))] shrink-0 border border-gray-100">
+                                            📍
+                                        </div>
+                                        <div>
+                                            <p className="font-bold text-gray-900">{t('venue')}</p>
+                                            <p className="text-gray-600 text-sm mt-1">{event.venueName}</p>
+                                            <p className="text-gray-500 text-sm">{event.venueAddress} {event.city}, {event.country}</p>
+                                            <Button asChild variant="link" className="p-0 h-auto font-normal text-[hsl(var(--turkish-red))] hover:text-[hsl(var(--turkish-red))]/80 mt-1">
+                                                <a
+                                                    href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${event.venueName} ${event.venueAddress} ${event.city}`)}`}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                >
+                                                    {t('openInMaps')} ↗
+                                                </a>
+                                            </Button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="space-y-3">
+                                <Button asChild variant="default" size="lg" className="w-full bg-[hsl(var(--turkish-red))] hover:bg-[hsl(var(--turkish-red))]/90 text-white shadow-lg shadow-[hsl(var(--turkish-red))]/20">
+                                    <a href={googleCalendarUrl.toString()} target="_blank" rel="noopener noreferrer">
+                                        📅 {t('addToCalendar')}
+                                    </a>
+                                </Button>
+
+                                <Button asChild variant="outline" size="lg" className="w-full">
+                                    <Link href="/events">
+                                        {t('browseMore')}
+                                    </Link>
+                                </Button>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Footer Info */}
+                    <div className="mt-16 pt-8 border-t border-gray-100 text-center text-sm text-gray-400 max-w-lg mx-auto leading-relaxed">
+                        <p>
+                            {t.rich('emailConfirmation', {
+                                email: registrant.email,
+                                highlight: (chunks) => <strong className="text-gray-900">{chunks}</strong>
+                            })}
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+}

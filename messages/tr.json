@@ -1,0 +1,286 @@
+{
+    "common": {
+        "siteName": "EduFairs",
+        "tagline": "Öğrencileri Küresel Eğitimle Buluşturuyoruz",
+        "loading": "Yükleniyor...",
+        "error": "Bir hata oluştu",
+        "save": "Kaydet",
+        "cancel": "İptal",
+        "delete": "Sil",
+        "edit": "Düzenle",
+        "view": "Görüntüle",
+        "search": "Ara",
+        "filter": "Filtrele",
+        "all": "Tümü",
+        "submit": "Gönder",
+        "back": "Geri",
+        "next": "İleri",
+        "previous": "Önceki",
+        "close": "Kapat",
+        "yes": "Evet",
+        "no": "Hayır",
+        "required": "Zorunlu"
+    },
+    "nav": {
+        "home": "Ana Sayfa",
+        "events": "Etkinlikler",
+        "about": "Nasıl Çalışır",
+        "recruit": "Üniversiteler İçin",
+        "contact": "İletişim",
+        "partner": "Bize Katılın",
+        "login": "Giriş",
+        "register": "Kayıt Ol",
+        "adminPortal": "Yönetici Paneli",
+        "allEvents": "Tüm Etkinlikler",
+        "privacyPolicy": "Gizlilik Politikası",
+        "termsOfService": "Hizmet Şartları"
+    },
+    "home": {
+        "hero": {
+            "title": "Yakınınızdaki <span>Sit Connect</span> Eğitim Fuarlarında En İyi Üniversitelerle Tanışın",
+            "subtitle": "50'den fazla üniversite ile bağlantı kurun, yurtdışında eğitim fırsatlarını keşfedin ve uluslararası eğitiminize doğru ilk adımı atın — tamamen ücretsiz.",
+            "cta": "Etkinlikleri Keşfet",
+            "badge": "2025'te 5 Ülkede 10+ Etkinlik",
+            "searchPlaceholder": "Şehir veya ülke ara...",
+            "findEvents": "Etkinlik Bul",
+            "popular": "Popüler",
+            "stats": {
+                "unis": "Üniversite",
+                "students": "Öğrenci Katılımı",
+                "years": "Yıldır Faaliyette"
+            },
+            "ctaPartner": "Bizimle Ortak Olun",
+            "ctaSchedule": "Programı Görüntüle"
+        },
+        "stats": {
+            "trustedPlatform": "Güvenilir Platform",
+            "title": "Neden Öğrenciler ve Üniversiteler Bizi Seçiyor",
+            "subtitle": "Etkinliklerimiz sayesinde uluslararası eğitim yollarını keşfeden binlerce öğrenciye katılın.",
+            "universities": "Ortak Üniversiteler",
+            "students": "Öğrenci Katılımı",
+            "countries": "Ülkeler",
+            "yearsRunning": "Yıllık Tecrübe",
+            "desc": {
+                "unis": "Avrupa, Asya ve ötesinden önde gelen kurumlar",
+                "students": "Büyüyen uluslararası öğrenci topluluğu",
+                "countries": "{countries} ve daha fazlasında etkinlikler",
+                "years": "2017'den beri güvenilir platform"
+            },
+            "leads": "Kaliteli Adaylar",
+            "partners": "Ortak Üniversiteler",
+            "roi": "En Çok Tercih Edilen"
+        },
+        "howItWorks": {
+            "title": "Nasıl Çalışır",
+            "subtitle": "Etkinlik bulmaktan hayalinizdeki üniversiteyle tanışmaya kadar tüm süreç ücretsiz ve sadece birkaç dakika sürer.",
+            "simpleProcess": "Kolay Süreç",
+            "step": "Adım",
+            "trustNote": "Öğrenciler için %100 Ücretsiz • Gizli Maliyet Yok • Anında Onay",
+            "step1": {
+                "title": "Etkinlik Bul",
+                "desc": "Şehrinizdeki veya ülkenizdeki yaklaşan eğitim fuarlarına göz atın. Mükemmel eşleşmeyi bulmak için konuma ve tarihe göre filtreleyin."
+            },
+            "step2": {
+                "title": "Ücretsiz Kayıt Ol",
+                "desc": "Bilgilerinizle basit bir kayıt formu doldurun. 2 dakikadan az sürer — ödeme gerekmez."
+            },
+            "step3": {
+                "title": "QR Kodunu Al",
+                "desc": "Giriş QR kodunuzla birlikte e-posta ve WhatsApp üzerinden anında onay alın."
+            },
+            "step4": {
+                "title": "Katıl ve Bağlan",
+                "desc": "Kapıda QR kodunuzu gösterin ve üniversite temsilcileriyle tanışın. Burslar ve daha fazlası hakkında bilgi alın."
+            }
+        },
+        "universities": {
+            "badge": "Üniversiteler ve Ortaklar İçin",
+            "title": "Binlerce Aday Öğrenciye Ulaşın",
+            "subtitle": "Eğitim fuarlarımızda kurumunuzu sergilemek için bizimle ortak olun. Uluslararası eğitim fırsatları arayan motive öğrencilerle doğrudan bağlantı kurun.",
+            "ctaInfo": "Ortaklık Bilgisi İste",
+            "ctaKit": "Medya Kitini İndir",
+            "trustedBy": "Önde Gelen Kurumlar Tarafından Güveniliyor",
+            "benefitsTitle": "Ortaklık Avantajları",
+            "benefits": {
+                "attendees": "Etkinlik başına ortalama 2,000+ öğrenci katılımı",
+                "marketing": "Kayıtlı öğrencilere etkinlik öncesi pazarlama",
+                "leads": "İletişim detaylarıyla tam aday dışa aktarımı",
+                "support": "Özel etkinlik koordinatör desteği"
+            }
+        },
+        "benefits": {
+            "title": "Neden Bizimle Ortak Olmalısınız?",
+            "subtitle": "Sonuç odaklı uçtan uca bir işe alım ekosistemi sunuyoruz.",
+            "directAccess": {
+                "title": "Birebir Erişim",
+                "desc": "Binlerce ön elemeden geçmiş öğrenci ve veli ile yüz yüze tanışın."
+            },
+            "brandVisibility": {
+                "title": "Marka Görünürlüğü",
+                "desc": "Kurumunuzu en iyi küresel üniversitelerle birlikte sergileyin."
+            },
+            "smartData": {
+                "title": "Akıllı Veri",
+                "desc": "Aday tarama uygulamamız aracılığıyla öğrenci verilerine anında erişin."
+            },
+            "quality": {
+                "title": "Onaylanmış Kalite",
+                "desc": "Uluslararası eğitime hazır, yüksek istekli öğrencilerle tanışmanızı sağlamak için katılımcıları önceden tarıyoruz.",
+                "tags": {
+                    "seniors": "Lise Son Sınıflar",
+                    "gpa": "GPA Onaylı",
+                    "english": "İngilizce Yeterliliği"
+                }
+            },
+            "globalReach": "Küresel Erişim"
+        },
+        "schedule": {
+            "title": "Yaklaşan Program",
+            "badge": "Tur Programı",
+            "noEvents": "Planlanmış işe alım etkinliği yok.",
+            "participationFee": "Katılım Ücreti",
+            "contactPricing": "Fiyatlandırma için İletişime Geçin",
+            "bookNow": "Stand Ayırt",
+            "downloadCalendar": "Tam Takvimi İndir",
+            "fee": "Ücret"
+        },
+        "inquiry": {
+            "title": "Bizimle Ortak Olun",
+            "subtitle": "Uluslararası öğrenci kayıtlarınızı artırmaya hazır mısınız? Medya kitimizi talep etmek veya gelecek etkinlikler için standınızı ayırtmak üzere formu doldurun.",
+            "steps": {
+                "step1": {
+                    "title": "Talebini Gönder",
+                    "desc": "Hangi bölge veya etkinliklerle ilgilendiğinizi bize bildirin."
+                },
+                "step2": {
+                    "title": "Danışma Görüşmesi",
+                    "desc": "Hedefleriniz için en iyi paketi görüşmek üzere ekibimiz sizinle iletişime geçecektir."
+                },
+                "step3": {
+                    "title": "Yerini Garantile",
+                    "desc": "Stand konumunuzu seçin ve seyahatiniz için hazırlanmaya başlayın."
+                }
+            }
+        }
+    },
+    "events": {
+        "title": "Eğitim Etkinlikleri",
+        "subtitle": "Yakınınızdaki eğitim fuarlarını ve üniversite etkinliklerini bulun ve kaydolun",
+        "noEvents": "Etkinlik bulunamadı",
+        "upcomingEvents": "Yaklaşan Etkinlikler",
+        "pastEvents": "Geçmiş Etkinlikler",
+        "registerNow": "Şimdi Kayıt Ol",
+        "registered": "Kayıtlı",
+        "eventDetails": "Etkinlik Detayları",
+        "location": "Konum",
+        "date": "Tarih",
+        "time": "Saat",
+        "venue": "Mekan",
+        "participatingUniversities": "Katılımcı Üniversiteler",
+        "aboutEvent": "Bu Etkinlik Hakkında",
+        "registrationClosed": "Kayıt Kapalı",
+        "eventEnded": "Etkinlik Sona Erdi",
+        "spotsRemaining": "{count} kalan kontenjan",
+        "unlimited": "Sınırsız kontenjan"
+    },
+    "registration": {
+        "title": "Etkinliğe Kayıt Ol",
+        "subtitle": "Bu etkinliğe kaydolmak için bilgilerinizi girin",
+        "fullName": "Ad Soyad",
+        "email": "E-posta Adresi",
+        "phone": "Telefon Numarası",
+        "country": "Ülke",
+        "city": "Şehir",
+        "nationality": "Uyruk",
+        "levelOfStudy": "Eğitim Seviyesi",
+        "fieldOfInterest": "İlgi Alanı",
+        "preferredUniversities": "Tercih Edilen Üniversiteler",
+        "submitRegistration": "Kaydı Tamamla",
+        "success": "Kayıt Başarılı!",
+        "successMessage": "Bu etkinliğe kaydınız yapıldı. Onay ve QR kodunuz için e-postanızı kontrol edin.",
+        "alreadyRegistered": "Bu etkinliğe zaten kayıtlısınız.",
+        "levelOptions": {
+            "highSchool": "Lise",
+            "bachelor": "Lisans",
+            "master": "Yüksek Lisans",
+            "phd": "Doktora",
+            "other": "Diğer"
+        }
+    },
+    "footer": {
+        "description": "Hırslı öğrencileri dünya çapındaki seçkin etkinlikler aracılığıyla dünya standartlarında eğitim fırsatlarıyla buluşturuyoruz.",
+        "quickLinks": "Hızlı Bağlantılar",
+        "links": {
+            "events": "Yaklaşan Etkinlikler",
+            "howItWorks": "Nasıl Çalışır",
+            "recruit": "Üniversiteler İçin",
+            "about": "Hakkımızda",
+            "faq": "SSS"
+        },
+        "legal": "Yasal",
+        "legalLinks": {
+            "privacy": "Gizlilik Politikası",
+            "terms": "Hizmet Şartları",
+            "cookies": "Çerez Politikası",
+            "gdpr": "GDPR Uyumluluğu"
+        },
+        "contact": "İletişim",
+        "contactInfo": {
+            "email": "E-posta",
+            "phone": "Telefon",
+            "office": "Ofis",
+            "address": "İstanbul, Türkiye"
+        },
+        "copyright": "© {year} Sit Connect. Tüm hakları saklıdır.",
+        "organizedBy": "Organize eden"
+    },
+    "languages": {
+        "en": "İngilizce",
+        "tr": "Türkçe",
+        "ar": "Arapça"
+    },
+    "privacy": {
+        "title": "Gizlilik Politikası",
+        "lastUpdated": "Son güncelleme: {date}",
+        "sections": {
+            "infoCollect": "Topladığımız Bilgiler",
+            "howUse": "Bilgilerinizi Nasıl Kullanıyoruz",
+            "infoSharing": "Bilgi Paylaşımı",
+            "dataSecurity": "Veri Güvenliği",
+            "yourRights": "Haklarınız",
+            "cookies": "Çerezler",
+            "thirdParty": "Üçüncü Taraf Hizmetler",
+            "children": "Çocuk Gizliliği",
+            "changes": "Bu Politikadaki Değişiklikler",
+            "contactUs": "İletişim"
+        }
+    },
+    "universities": {
+        "title": "Üniversiteler",
+        "participatingAt": "Bu etkinlikte katılıyor",
+        "viewWebsite": "Web Sitesini Ziyaret Et",
+        "programs": "Sunulan Programlar",
+        "location": "Konum"
+    },
+    "qr": {
+        "scanToCheckIn": "Giriş İçin Taratın",
+        "yourQRCode": "QR Kodunuz",
+        "showAtEntrance": "Bu QR kodunu etkinlik girişinde gösterin"
+    },
+    "email": {
+        "confirmation": {
+            "subject": "Kayıt Onaylandı - {eventName}",
+            "greeting": "Merhaba {name}!",
+            "body": "{eventName} etkinliğine kaydolduğunuz için teşekkürler. Sizi aramızda görmekten heyecan duyuyoruz!",
+            "eventDetails": "Etkinlik Detayları",
+            "qrInstructions": "Lütfen giriş yapmak için aşağıdaki QR kodunu etkinlik girişinde gösterin.",
+            "seeYou": "Etkinlikte görüşmek üzere!"
+        },
+        "reminder": {
+            "subject": "Hatırlatma: {eventName} yaklaşıyor!",
+            "greeting": "Merhaba {name}!",
+            "body": "{eventName} etkinliğinin yakında gerçekleşeceğini hatırlatmak isteriz.",
+            "dontForget": "Giriş yapmak için QR kodunuzu getirmeyi unutmayın."
+        }
+    }
+}

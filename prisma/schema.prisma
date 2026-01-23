@@ -1,0 +1,338 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// ============================================
+// ENUMS
+// ============================================
+
+enum EventStatus {
+  DRAFT
+  PUBLISHED
+  FINISHED
+}
+
+enum RegistrationStatus {
+  REGISTERED
+  CANCELLED
+}
+
+enum CheckInMethod {
+  QR
+  MANUAL
+}
+
+enum AdminRole {
+  SUPER_ADMIN
+  EVENT_MANAGER
+  EVENT_STAFF
+  USHER
+}
+
+enum MessageChannel {
+  EMAIL
+  WHATSAPP
+}
+
+enum MessageStatus {
+  QUEUED
+  SENT
+  FAILED
+}
+
+// ============================================
+// CORE MODELS
+// ============================================
+
+// ============================================
+// LOCATION MANAGEMENT
+// ============================================
+
+model Country {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  code      String   @unique  // ISO 3166-1 alpha-2 (e.g., "EG", "TR")
+  flagEmoji String?
+  timezone  String   @default("UTC")
+  
+  cities    City[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model City {
+  id          String   @id @default(cuid())
+  name        String
+  countryId   String
+  country     Country  @relation(fields: [countryId], references: [id], onDelete: Cascade)
+  
+  // Reusable City Content
+  description     String?  @db.Text
+  bannerImageUrl  String?
+  attractions     Json?    // Array of { name, description, imageUrl, mapUrl }
+  cafesAndFood    Json?    // Array of { name, cuisine, priceRange, address, mapUrl }
+  transportation  Json?    // { airport, metro, taxi, tips }
+  localTips       String?  @db.Text
+  emergencyInfo   String?  @db.Text  // Police, hospitals, embassy contacts
+  
+  events      Event[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([countryId, name])
+}
+
+model Event {
+  id                  String      @id @default(cuid())
+  title               String
+  slug                String      @unique
+  // Location (new system)
+  cityId              String?
+  cityRef             City?       @relation(fields: [cityId], references: [id])
+  
+  // Legacy location fields (for backward compatibility)
+  country             String?
+  city                String?
+  venueName           String
+  venueAddress        String
+  mapUrl              String?
+  startDateTime       DateTime
+  endDateTime         DateTime
+  timezone            String      @default("UTC")
+  bannerImageUrl      String?
+  galleryImages       String[]
+  description         String?     @db.Text
+  
+  // Multi-language content translations
+  // Format: { "en": "...", "tr": "...", "ar": "..." }
+  titleTranslations       Json?   // Translated titles
+  descriptionTranslations Json?   // Translated descriptions
+  
+  // University Participation Pricing
+  participationFee    Float?      // Fee for universities to join
+  currency            String      @default("USD")
+  
+  registrationOpenAt  DateTime?
+  registrationCloseAt DateTime?
+  capacity            Int?
+  status              EventStatus @default(DRAFT)
+  createdById         String
+  createdAt           DateTime    @default(now())
+  updatedAt           DateTime    @updatedAt
+
+  // Marketing Tracking Codes
+  gaTrackingId        String?   // Google Analytics (e.g., G-XXXXXXX)
+  fbPixelId           String?   // Facebook Pixel ID
+  linkedInPartnerId   String?   // LinkedIn Insight Tag Partner ID
+  tiktokPixelId       String?   // TikTok Pixel ID
+  snapPixelId         String?   // Snapchat Pixel ID
+  customHeadScript    String?   @db.Text // Custom <head> scripts
+  customBodyScript    String?   @db.Text // Custom scripts before </body>
+
+  // Zoho CRM Integration
+  zohoCampaignId      String?   // Zoho Campaign ID for this event
+  zohoLeadSource      String?   // Lead Source value
+
+  createdBy     AdminUser            @relation(fields: [createdById], references: [id])
+  universities  EventParticipating[]
+  registrations Registration[]
+  messageLogs   MessageLog[]
+  reminderRules ReminderRule[]
+}
+
+model University {
+  id           String   @id @default(cuid())
+  name         String
+  logoUrl      String?
+  website      String?
+  country      String   @default("Unknown")
+  city         String?
+  description  String?  @db.Text
+  contactEmail String?
+  contactPhone String?
+  programs     Json?    // Array of program names/types
+  isActive     Boolean  @default(true)
+  
+  users        UniversityUser[]
+  events       EventParticipating[]
+  
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model UniversityUser {
+  id           String     @id @default(cuid())
+  email        String     @unique
+  passwordHash String
+  name         String?
+  universityId String
+  university   University @relation(fields: [universityId], references: [id], onDelete: Cascade)
+  
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+}
+
+model EventParticipating {
+  id           String   @id @default(cuid())
+  eventId      String
+  event        Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  universityId String
+  university   University @relation(fields: [universityId], references: [id], onDelete: Cascade)
+  
+  status       ParticipationStatus @default(INVITED)
+  boothNumber  String?
+  notes        String?
+  
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@unique([eventId, universityId])
+}
+
+enum ParticipationStatus {
+  INVITED
+  ACCEPTED
+  DECLINED
+  REQUESTED
+}
+
+model Registrant {
+  id               String   @id @default(cuid())
+  fullName         String
+  email            String
+  phone            String
+  country          String
+  city             String
+  nationality      String?
+  levelOfStudy     String?
+  interestedMajor  String?
+  consentAccepted  Boolean
+  consentTimestamp DateTime
+  utmSource        String?
+  utmMedium        String?
+  utmCampaign      String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  registrations Registration[]
+}
+
+model Registration {
+  id           String             @id @default(cuid())
+  eventId      String
+  registrantId String
+  qrToken      String             @unique @default(cuid())
+  status       RegistrationStatus @default(REGISTERED)
+  createdAt    DateTime           @default(now())
+  updatedAt    DateTime           @updatedAt
+
+  event       Event        @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  registrant  Registrant   @relation(fields: [registrantId], references: [id], onDelete: Cascade)
+  checkIn     CheckIn?
+  messageLogs MessageLog[]
+
+  @@unique([eventId, registrantId])
+}
+
+model CheckIn {
+  id             String        @id @default(cuid())
+  registrationId String        @unique
+  checkedInAt    DateTime      @default(now())
+  checkedInById  String
+  method         CheckInMethod
+
+  registration Registration @relation(fields: [registrationId], references: [id], onDelete: Cascade)
+  checkedInBy  AdminUser    @relation(fields: [checkedInById], references: [id])
+}
+
+model MessageLog {
+  id                String         @id @default(cuid())
+  eventId           String
+  registrationId    String?
+  channel           MessageChannel
+  templateName      String
+  providerMessageId String?
+  status            MessageStatus  @default(QUEUED)
+  errorText         String?
+  createdAt         DateTime       @default(now())
+  sentAt            DateTime?
+
+  event        Event         @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  registration Registration? @relation(fields: [registrationId], references: [id], onDelete: SetNull)
+}
+
+model ReminderRule {
+  id           String   @id @default(cuid())
+  eventId      String
+  reminderName String   // e.g., "Reminder #1", "Reminder #2"
+  daysBefore   Int      // Days before event
+  hoursBefore  Int?     // Hours before event (alternative to days)
+  sendAtHour   Int      @default(9) // Hour of day to send (24h format)
+  sendAtMinute Int      @default(0)
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+}
+
+// ============================================
+// AUTH MODELS
+// ============================================
+
+model AdminUser {
+  id           String    @id @default(cuid())
+  name         String
+  email        String    @unique
+  passwordHash String?
+  role         AdminRole @default(EVENT_STAFF)
+  isActive     Boolean   @default(true)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  lastLoginAt  DateTime?
+  accessCode   String?   @unique
+
+  events   Event[]
+  checkIns CheckIn[]
+}
+
+// ============================================
+// MESSAGE TEMPLATES
+// ============================================
+
+model MessageTemplate {
+  id          String         @id @default(cuid())
+  name        String         @unique // e.g., "confirmation_email", "reminder_1_whatsapp"
+  channel     MessageChannel
+  subject     String?        // For emails
+  body        String         @db.Text
+  description String?
+  isDefault   Boolean        @default(false)
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+}
+
+// ============================================
+// AUDIT LOG
+// ============================================
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  userId     String?
+  action     String
+  entityType String
+  entityId   String?
+  metadata   Json?
+  ipAddress  String?
+  createdAt  DateTime @default(now())
+}
+
