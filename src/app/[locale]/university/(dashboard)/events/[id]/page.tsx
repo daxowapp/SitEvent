@@ -71,7 +71,7 @@ export default async function UniversityEventPage({ params }: { params: Promise<
         orderBy: { createdAt: 'desc' }
     });
 
-    const cityData = CITY_GUIDES[event.city] || CITY_GUIDES["default"];
+    const cityData = (event.city && CITY_GUIDES[event.city]) || CITY_GUIDES["default"];
 
     return (
         <div className="space-y-6">
