@@ -1,6 +1,7 @@
 "use server";
 
 import { prisma } from "@/lib/db";
+import { Prisma } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
@@ -34,7 +35,9 @@ export async function duplicateEvent(eventId: string) {
                 title: newTitle,
                 slug: newSlug,
                 status: "DRAFT",
-                createdById: session.user.id, // Assign to current user
+                createdById: session.user.id,
+                titleTranslations: eventData.titleTranslations ?? Prisma.JsonNull,
+                descriptionTranslations: eventData.descriptionTranslations ?? Prisma.JsonNull,
             },
         });
 
