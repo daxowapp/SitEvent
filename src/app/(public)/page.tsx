@@ -3,6 +3,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 
+export const dynamic = "force-dynamic";
+
 // Type for event display
 interface DisplayEvent {
     id: string;

@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { PrintButton } from "@/components/common/print-button";
 
+export const dynamic = "force-dynamic";
+
 interface QrPageProps {
     params: Promise<{ token: string }>;
 }
