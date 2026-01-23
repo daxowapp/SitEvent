@@ -67,7 +67,7 @@ const EventCard = ({
                 {/* Location Overlay */}
                 <div className="absolute bottom-4 left-4 right-4 flex items-center gap-2 text-primary-foreground">
                     <MapPin className="w-4 h-4" />
-                    <span className="font-medium">{city}, {country}</span>
+                    <span className="font-medium">{city || 'TBA'}, {country || 'TBA'}</span>
                 </div>
             </div>
 
@@ -84,7 +84,7 @@ const EventCard = ({
                     </div>
                     <div className="flex items-center gap-2 text-sm text-muted-foreground">
                         <MapPin className="w-4 h-4" />
-                        <span>{venueName}</span>
+                        <span>{venueName || 'Venue TBA'}</span>
                     </div>
                     <div className="flex items-center gap-2 text-sm text-muted-foreground">
                         <Users className="w-4 h-4" />

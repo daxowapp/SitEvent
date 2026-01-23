@@ -9,9 +9,9 @@ interface DisplayEvent {
     id: string;
     title: string;
     slug: string;
-    country: string;
-    city: string;
-    venueName: string;
+    country: string | null;
+    city: string | null;
+    venueName: string | null;
     bannerImageUrl: string | null;
     startDateTime: Date;
     status: string;
