@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { EventForm } from "../event-form";
 import { prisma } from "@/lib/db";
+import { Prisma } from "@prisma/client";
 import { auth } from "@/lib/auth";
 
 // Get countries for the form dropdown
@@ -88,8 +89,8 @@ async function createEvent(data: {
             galleryImages: data.galleryImages || [],
             description: data.description || null,
             // Multi-language translations
-            titleTranslations: data.titleTranslations || null,
-            descriptionTranslations: data.descriptionTranslations || null,
+            titleTranslations: data.titleTranslations ?? Prisma.JsonNull,
+            descriptionTranslations: data.descriptionTranslations ?? Prisma.JsonNull,
             // University Pricing
             participationFee: data.participationFee || null,
             currency: data.currency || "USD",
