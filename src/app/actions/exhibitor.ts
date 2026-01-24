@@ -16,31 +16,38 @@ export async function submitExhibitorInquiry(eventId: string, data: ExhibitorFor
     const { institutionName, contactPerson, email, phone, country, website, notes } = validatedFields.data;
 
     try {
-        // Create a message log entry to track this inquiry
-        await prisma.messageLog.create({
-            data: {
-                eventId,
-                channel: MessageChannel.EMAIL,
-                templateName: "exhibitor_inquiry",
-                status: "QUEUED",
-                providerMessageId: null,
-                errorText: JSON.stringify({
-                    type: "exhibitor_inquiry",
-                    details: {
-                        institutionName,
-                        contactPerson,
-                        email,
-                        phone,
-                        country,
-                        website,
-                        notes
+        // Create a message log entry to track this inquiry (only if attached to a specific event)
+        if (eventId && eventId !== "general") {
+            try {
+                await prisma.messageLog.create({
+                    data: {
+                        eventId,
+                        channel: MessageChannel.EMAIL,
+                        templateName: "exhibitor_inquiry",
+                        status: "QUEUED",
+                        providerMessageId: null,
+                        errorText: JSON.stringify({
+                            type: "exhibitor_inquiry",
+                            details: {
+                                institutionName,
+                                contactPerson,
+                                email,
+                                phone,
+                                country,
+                                website,
+                                notes
+                            }
+                        }),
                     }
-                }),
+                });
+            } catch (dbError) {
+                console.error("Failed to create message log:", dbError);
+                // Continue to send email even if logging fails
             }
-        });
+        }
 
         // Send Email Notification to Admins
-        await sendExhibitorInquiryEmail({
+        const emailResult = await sendExhibitorInquiryEmail({
             institutionName,
             contactPerson,
             email,
@@ -50,6 +57,11 @@ export async function submitExhibitorInquiry(eventId: string, data: ExhibitorFor
             notes: notes || undefined,
             eventId
         });
+
+        if (!emailResult.success) {
+            console.error("Failed to send email:", emailResult.error);
+            return { error: "Failed to send email. Please try again." };
+        }
 
         console.log("New Exhibitor Inquiry:", { eventId, ...validatedFields.data });
 
