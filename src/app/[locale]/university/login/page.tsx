@@ -32,11 +32,11 @@ export default function UniversityLoginPage() {
             if (result?.error) {
                 toast.error("Invalid credentials");
                 setIsLoading(false);
-                return;
+            } else {
+                toast.success("Login successful! Redirecting...");
+                router.push("/university/dashboard");
+                router.refresh();
             }
-
-            router.push("/university/dashboard");
-            router.refresh();
         } catch (error) {
             toast.error("Something went wrong");
             setIsLoading(false);
