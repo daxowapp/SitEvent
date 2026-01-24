@@ -36,6 +36,14 @@ export default async function UniversityDashboard() {
         }
     });
 
+    const totalLeads = await prisma.registration.count({
+        where: {
+            event: {
+                universities: { some: { universityId } }
+            }
+        }
+    });
+
     if (!university) return <div>University not found</div>;
 
     const upcomingEvents = university.events.filter(e => new Date(e.event.endDateTime) >= new Date());
@@ -90,8 +98,8 @@ export default async function UniversityDashboard() {
                         <CardTitle className="text-sm font-medium text-red-800 uppercase tracking-widest">Total Leads</CardTitle>
                     </CardHeader>
                     <CardContent className="relative z-10">
-                        <div className="text-4xl font-display font-bold text-red-600">---</div>
-                        <p className="text-sm text-red-800/60 mt-1">Students scanned</p>
+                        <div className="text-4xl font-display font-bold text-red-600">{totalLeads}</div>
+                        <p className="text-sm text-red-800/60 mt-1">Total potential students</p>
                     </CardContent>
                 </Card>
             </div>
@@ -119,8 +127,8 @@ export default async function UniversityDashboard() {
                                 <CardHeader>
                                     <div className="flex justify-between items-start mb-2">
                                         <div className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider border ${status === 'ACCEPTED' ? 'bg-red-50 text-red-700 border-red-200' :
-                                                status === 'INVITED' ? 'bg-gray-50 text-gray-700 border-gray-200' :
-                                                    'bg-white text-gray-400 border-gray-100'
+                                            status === 'INVITED' ? 'bg-gray-50 text-gray-700 border-gray-200' :
+                                                'bg-white text-gray-400 border-gray-100'
                                             }`}>
                                             {status}
                                         </div>

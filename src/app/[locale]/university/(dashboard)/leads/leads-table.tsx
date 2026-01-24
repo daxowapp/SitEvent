@@ -13,17 +13,29 @@ interface GlobalLeadsTableProps {
 
 export function GlobalLeadsTable({ data }: GlobalLeadsTableProps) {
     const [search, setSearch] = useState("");
+    const [selectedEvent, setSelectedEvent] = useState("All Events");
+    const [selectedMajor, setSelectedMajor] = useState("All Majors");
+
+    // Extract unique values
+    const uniqueEvents = Array.from(new Set(data.map(item => item.event.title))).sort();
+    // @ts-ignore
+    const uniqueMajors = Array.from(new Set(data.map(item => item.registrant.interestedMajor).filter(Boolean))).sort();
 
     // Derived state for filtering
     const filteredData = data.filter(item => {
         const term = search.toLowerCase();
         const r = item.registrant;
-        const eventTitle = item.event.title.toLowerCase();
+        const eventTitle = item.event.title;
+        const major = r.interestedMajor;
 
-        return r.fullName.toLowerCase().includes(term) ||
+        const matchesSearch = r.fullName.toLowerCase().includes(term) ||
             r.email.toLowerCase().includes(term) ||
-            eventTitle.includes(term) ||
             (r.interestedMajor && r.interestedMajor.toLowerCase().includes(term));
+
+        const matchesEvent = selectedEvent === "All Events" || eventTitle === selectedEvent;
+        const matchesMajor = selectedMajor === "All Majors" || major === selectedMajor;
+
+        return matchesSearch && matchesEvent && matchesMajor;
     });
 
     const downloadCSV = () => {
@@ -55,17 +67,38 @@ export function GlobalLeadsTable({ data }: GlobalLeadsTableProps) {
 
     return (
         <div className="space-y-4">
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-4 rounded-lg border shadow-sm">
-                <div className="relative w-full sm:w-72">
-                    <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-                    <Input
-                        placeholder="Search leads..."
-                        className="pl-8"
-                        value={search}
-                        onChange={(e) => setSearch(e.target.value)}
-                    />
+            <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4 bg-white p-4 rounded-lg border shadow-sm">
+                <div className="flex flex-col sm:flex-row gap-4 w-full xl:w-auto">
+                    <div className="relative w-full sm:w-72">
+                        <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+                        <Input
+                            placeholder="Search leads..."
+                            className="pl-8"
+                            value={search}
+                            onChange={(e) => setSearch(e.target.value)}
+                        />
+                    </div>
+
+                    <select
+                        className="h-10 w-full sm:w-48 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                        value={selectedEvent}
+                        onChange={(e) => setSelectedEvent(e.target.value)}
+                    >
+                        <option value="All Events">All Events</option>
+                        {uniqueEvents.map((e: any) => <option key={e} value={e}>{e}</option>)}
+                    </select>
+
+                    <select
+                        className="h-10 w-full sm:w-48 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                        value={selectedMajor}
+                        onChange={(e) => setSelectedMajor(e.target.value)}
+                    >
+                        <option value="All Majors">All Majors</option>
+                        {uniqueMajors.map((m: any) => <option key={m} value={m}>{m}</option>)}
+                    </select>
                 </div>
-                <Button variant="outline" onClick={downloadCSV} className="w-full sm:w-auto">
+
+                <Button variant="outline" onClick={downloadCSV} className="w-full xl:w-auto">
                     <Download className="mr-2 h-4 w-4" /> Export CSV
                 </Button>
             </div>
