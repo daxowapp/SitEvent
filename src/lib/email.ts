@@ -249,10 +249,61 @@ export async function sendReminderEmail(
       messageId: data?.id,
     };
   } catch (error) {
-    console.error("Failed to send reminder email:", error);
     return {
       success: false,
       error: error instanceof Error ? error.message : "Unknown error",
     };
+  }
+}
+
+interface SendExhibitorInquiryParams {
+  institutionName: string;
+  contactPerson: string;
+  email: string;
+  phone: string;
+  country: string;
+  website?: string;
+  notes?: string;
+  eventId: string;
+}
+
+export async function sendExhibitorInquiryEmail(params: SendExhibitorInquiryParams): Promise<{ success: boolean; error?: string }> {
+  try {
+    const { institutionName, contactPerson, email, phone, country, website, notes, eventId } = params;
+
+    const { data, error } = await resend.emails.send({
+      from: process.env.RESEND_FROM_EMAIL || "Events Team <onboarding@resend.dev>",
+      to: ["ahmed@sitconnect.net", "mahmoud@sitconnect.net"],
+      subject: `New Partner Inquiry: ${institutionName}`,
+      html: `
+        <div style="font-family: sans-serif; padding: 20px;">
+          <h1 style="color: #E30A17;">New Partnership Inquiry</h1>
+          <div style="background: #f9fafb; padding: 20px; border-radius: 8px; border: 1px solid #e5e7eb;">
+            <p><strong>Institution:</strong> ${institutionName}</p>
+            <p><strong>Contact Person:</strong> ${contactPerson}</p>
+            <p><strong>Email:</strong> <a href="mailto:${email}">${email}</a></p>
+            <p><strong>Phone:</strong> ${phone}</p>
+            <p><strong>Country:</strong> ${country}</p>
+            <p><strong>Website:</strong> ${website || "N/A"}</p>
+            <p><strong>Target Event:</strong> ${eventId}</p>
+          </div>
+          <br />
+          <p><strong>Additional Notes:</strong></p>
+          <div style="background: #fff; padding: 15px; border-radius: 4px; border: 1px solid #ddd;">
+            ${notes ? notes.replace(/\n/g, '<br>') : "None"}
+          </div>
+        </div>
+      `
+    });
+
+    if (error) {
+      console.error("Resend error:", error);
+      throw new Error(error.message);
+    }
+
+    return { success: true };
+  } catch (error) {
+    console.error("Failed to send exhibitor email:", error);
+    return { success: false, error: error instanceof Error ? error.message : "Unknown error" };
   }
 }
