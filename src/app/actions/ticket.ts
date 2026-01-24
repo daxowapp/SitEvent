@@ -11,15 +11,18 @@ export async function resendTicket(email: string) {
         // Find latest registration for a future or ongoing event
         const registration = await prisma.registration.findFirst({
             where: {
-                email: email,
+                registrant: {
+                    email: email
+                },
                 event: {
                     endDateTime: {
-                        gte: new Date() // Only resend for future/active events
+                        gte: new Date()
                     }
                 }
             },
             include: {
-                event: true
+                event: true,
+                registrant: true
             },
             orderBy: {
                 createdAt: 'desc'
@@ -27,14 +30,13 @@ export async function resendTicket(email: string) {
         });
 
         if (!registration) {
-            // Security: Don't reveal if email exists, but for UX maybe say "No active registration found".
             return { success: false, error: "No active event registration found for this email." };
         }
 
         // Resend email
         await sendConfirmationEmail({
-            to: registration.email,
-            studentName: registration.studentName,
+            to: registration.registrant.email,
+            studentName: registration.registrant.fullName,
             eventTitle: registration.event.title,
             eventDate: format(new Date(registration.event.startDateTime), "PPP"),
             eventVenue: registration.event.venueAddress || registration.event.venueName || "TBA",

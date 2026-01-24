@@ -53,10 +53,10 @@ export default async function UniversityEventPage({ params }: { params: Promise<
     if (!event) return <div>Event not found</div>;
 
     const participation = event.universities[0];
-    if (!participation || participation.status !== "ACCEPTED") {
+    if (!participation) {
         return (
-            <div className="p-8 text-center text-red-500 bg-red-50 rounded-lg">
-                Access Denied: You are not an accepted participant for this event.
+            <div className="p-8 text-center text-red-600 bg-red-50 rounded-lg border border-red-100">
+                Access Denied: You are not assigned to this event.
             </div>
         );
     }
@@ -84,7 +84,7 @@ export default async function UniversityEventPage({ params }: { params: Promise<
                             <span className="flex items-center gap-1"><MapPin className="h-4 w-4" /> {event.venueName}, {event.city}</span>
                         </div>
                     </div>
-                    <Badge className="bg-green-600">Booth: {participation.boothNumber || "Assigned at Venue"}</Badge>
+                    <Badge className="bg-gray-100 text-gray-800 hover:bg-gray-200 border-gray-200">Booth: {participation.boothNumber || "Assigned at Venue"}</Badge>
                 </div>
             </div>
 
@@ -123,12 +123,12 @@ export default async function UniversityEventPage({ params }: { params: Promise<
                         <Card>
                             <CardHeader><CardTitle>Quick Stats</CardTitle></CardHeader>
                             <CardContent className="grid grid-cols-2 gap-4">
-                                <div className="bg-blue-50 p-4 rounded-lg text-center">
-                                    <div className="text-2xl font-bold text-blue-600">{registrations.length}</div>
-                                    <div className="text-xs text-gray-500 uppercase font-semibold">Total Students</div>
+                                <div className="bg-red-50 border border-red-100 p-4 rounded-lg text-center">
+                                    <div className="text-2xl font-bold text-red-600">{registrations.length}</div>
+                                    <div className="text-xs text-red-800/60 uppercase font-semibold">Total Students</div>
                                 </div>
-                                <div className="bg-purple-50 p-4 rounded-lg text-center">
-                                    <div className="text-2xl font-bold text-purple-600">12%</div>
+                                <div className="bg-gray-50 border border-gray-100 p-4 rounded-lg text-center">
+                                    <div className="text-2xl font-bold text-gray-700">--%</div>
                                     <div className="text-xs text-gray-500 uppercase font-semibold">Interest Rate</div>
                                 </div>
                             </CardContent>
