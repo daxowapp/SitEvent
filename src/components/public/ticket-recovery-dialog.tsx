@@ -8,8 +8,10 @@ import { Label } from "@/components/ui/label";
 import { Loader2, Send } from "lucide-react";
 import { toast } from "sonner";
 import { resendTicket } from "@/app/actions/ticket";
+import { useTranslations } from "next-intl";
 
 export function TicketRecoveryDialog() {
+    const t = useTranslations('recovery');
     const [open, setOpen] = useState(false);
     const [email, setEmail] = useState("");
     const [loading, setLoading] = useState(false);
@@ -17,7 +19,7 @@ export function TicketRecoveryDialog() {
     async function handleRecover(e: React.FormEvent) {
         e.preventDefault();
         if (!email) {
-            toast.error("Please enter your email");
+            toast.error(t('emptyEmail'));
             return;
         }
 
@@ -25,14 +27,14 @@ export function TicketRecoveryDialog() {
         try {
             const result = await resendTicket(email);
             if (result.success) {
-                toast.success("Ticket sent! Check your email.");
+                toast.success(t('success'));
                 setOpen(false);
                 setEmail("");
             } else {
-                toast.error(result.error || "Failed to find registration.");
+                toast.error(result.error || t('error'));
             }
         } catch {
-            toast.error("Something went wrong. Please try again.");
+            toast.error(t('errorGeneric'));
         } finally {
             setLoading(false);
         }
@@ -42,23 +44,23 @@ export function TicketRecoveryDialog() {
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
                 <button className="text-sm font-medium text-white/80 hover:text-white transition-colors hover:underline">
-                    Lost Ticket?
+                    {t('lostTicket')}
                 </button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-md">
                 <DialogHeader>
-                    <DialogTitle>Recover Your Ticket</DialogTitle>
+                    <DialogTitle>{t('title')}</DialogTitle>
                     <DialogDescription>
-                        Enter the email address you used to register. We'll resend your QR code immediately.
+                        {t('description')}
                     </DialogDescription>
                 </DialogHeader>
                 <form onSubmit={handleRecover} className="space-y-4">
                     <div className="space-y-2">
-                        <Label htmlFor="recovery-email">Email Address</Label>
+                        <Label htmlFor="recovery-email">{t('emailLabel')}</Label>
                         <Input
                             id="recovery-email"
                             type="email"
-                            placeholder="you@example.com"
+                            placeholder={t('placeholder')}
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
                             required
@@ -68,12 +70,12 @@ export function TicketRecoveryDialog() {
                         {loading ? (
                             <>
                                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                Sending...
+                                {t('sending')}
                             </>
                         ) : (
                             <>
                                 <Send className="mr-2 h-4 w-4" />
-                                Resend My Ticket
+                                {t('submit')}
                             </>
                         )}
                     </Button>

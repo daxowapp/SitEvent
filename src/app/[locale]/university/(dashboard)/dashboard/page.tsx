@@ -126,11 +126,8 @@ export default async function UniversityDashboard() {
                             <Card key={event.id} className="group bg-white border-gray-200 hover:border-red-200 hover:shadow-lg transition-all duration-300 text-gray-900 overflow-hidden rounded-3xl">
                                 <CardHeader>
                                     <div className="flex justify-between items-start mb-2">
-                                        <div className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider border ${status === 'ACCEPTED' ? 'bg-red-50 text-red-700 border-red-200' :
-                                            status === 'INVITED' ? 'bg-gray-50 text-gray-700 border-gray-200' :
-                                                'bg-white text-gray-400 border-gray-100'
-                                            }`}>
-                                            {status}
+                                        <div className="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-white text-emerald-600 border border-emerald-100 flex items-center gap-1 shadow-sm">
+                                            <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.4)]" /> Access Open
                                         </div>
                                     </div>
                                     <CardTitle className="text-xl font-bold line-clamp-1 group-hover:text-red-700 transition-colors">{event.title}</CardTitle>

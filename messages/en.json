@@ -35,6 +35,19 @@
         "privacyPolicy": "Privacy Policy",
         "termsOfService": "Terms of Service"
     },
+    "recovery": {
+        "lostTicket": "Lost Ticket?",
+        "title": "Recover Your Ticket",
+        "description": "Enter the email address you used to register. We'll resend your QR code immediately.",
+        "emailLabel": "Email Address",
+        "placeholder": "you@example.com",
+        "submit": "Resend My Ticket",
+        "sending": "Sending...",
+        "success": "Ticket sent! Check your email.",
+        "error": "Failed to find registration.",
+        "errorGeneric": "Something went wrong. Please try again.",
+        "emptyEmail": "Please enter your email"
+    },
     "home": {
         "hero": {
             "title": "Meet Top Universities at <span>Sit Connect</span> Near You",
