@@ -58,23 +58,31 @@ export function RegistrationForm({ eventId, eventSlug }: RegistrationFormProps) 
     const [defaultCountry, setDefaultCountry] = useState<Country | undefined>(undefined);
 
     // Auto-detect user location
-    const { country, city, loading: locationLoading } = useGeolocation();
+    const { country, countryCode, city, loading: locationLoading } = useGeolocation();
 
-    const {
-        register,
-        handleSubmit,
-        formState: { errors },
-        setValue,
-        watch,
-        control,
-    } = useForm<RegistrationFormData>({
-        resolver: zodResolver(registrationSchema),
-        defaultValues: {
-            consent: false,
-        },
-    });
+    // Update phone input default country
+    useEffect(() => {
+        if (countryCode) {
+            setDefaultCountry(countryCode as Country);
+        }
+    }, [countryCode]);
 
-    // ... (keep useEffects for geolocation/autofill as is) ...
+    // Autofill location fields
+    useEffect(() => {
+        if (!locationLoading && country) {
+            // We use setValue to pre-fill. 
+            // Note: If the country name from API doesn't exactly match our dropdown list, 
+            // the Select might not show it selected, but the value is set.
+            //Ideally we should check if country exists in COUNTRIES.
+            const countryExists = COUNTRIES.includes(country);
+            if (countryExists) {
+                setValue("country", country);
+            }
+            if (city) {
+                setValue("city", city);
+            }
+        }
+    }, [locationLoading, country, city, setValue]);
 
     const consentValue = watch("consent");
 
