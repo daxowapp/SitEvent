@@ -73,7 +73,7 @@ export function ExhibitorForm({ eventId, eventName, className }: ExhibitorFormPr
                     </div>
                     <div className="space-y-2">
                         <Label htmlFor="website">Website</Label>
-                        <Input id="website" placeholder="https://..." {...register("website")} />
+                        <Input id="website" placeholder="www.university.edu" {...register("website")} />
                         {errors.website && <p className="text-red-500 text-xs">{errors.website.message}</p>}
                     </div>
                 </div>
