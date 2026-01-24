@@ -380,181 +380,182 @@ export function UniversityForm({ university, countries = [] }: UniversityFormPro
                             </div>
                         </div>
                     </CardContent>
-                    <Card>
-                        <CardHeader>
-                            <CardTitle className="flex items-center gap-2">
-                                <Lock className="h-5 w-5 text-muted-foreground" />
-                                Portal Access
-                            </CardTitle>
-                            <CardDescription>Manage login credentials for the university portal</CardDescription>
-                        </CardHeader>
-                        <CardContent className="space-y-4">
-                            <div className="grid gap-4 md:grid-cols-2 items-start">
-                                <div className="space-y-2">
-                                    <Label htmlFor="portalEmail">Login Email</Label>
-                                    <Input
-                                        id="portalEmail"
-                                        type="email"
-                                        placeholder="user@university.edu"
-                                        value={credData.email}
-                                        onChange={(e) => setCredData({ ...credData, email: e.target.value })}
-                                    />
-                                </div>
-                                <div className="space-y-2">
-                                    <Label htmlFor="portalPassword">Set Password</Label>
-                                    <Input
-                                        id="portalPassword"
-                                        type="text"
-                                        placeholder={hasUser ? "Enter to reset (leave blank to keep)" : "Required for new user"}
-                                        value={credData.password}
-                                        onChange={(e) => setCredData({ ...credData, password: e.target.value })}
-                                    />
-                                </div>
-                            </div>
-                            <div className="flex justify-between items-center">
-                                <div>
-                                    {!university && (
-                                        <span className="text-xs text-amber-600 bg-amber-50 px-2 py-1 rounded border border-amber-200">
-                                            ⚠️ Save university first to create login.
-                                        </span>
-                                    )}
-                                    {hasUser && (
-                                        <span className="text-xs text-emerald-600 bg-emerald-50 px-2 py-1 rounded border border-emerald-200">
-                                            ✅ Active User Exists
-                                        </span>
-                                    )}
-                                </div>
-                                <Button
-                                    type="button"
-                                    onClick={handleSaveCredentials}
-                                    disabled={isSavingCreds || !university}
-                                    variant="outline"
-                                    className="border-gray-200 hover:bg-gray-50"
-                                >
-                                    {isSavingCreds ? (
-                                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                                    ) : (
-                                        <Save className="h-4 w-4 mr-2" />
-                                    )}
-                                    {hasUser ? "Update Credentials" : "Create Login"}
-                                </Button>
-                            </div>
-                        </CardContent>
-                    </Card>
-
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>Programs</CardTitle>
-                            <CardDescription>List of programs or majors offered</CardDescription>
-                        </CardHeader>
-                        <CardContent className="space-y-4">
-                            <div className="flex gap-2">
+                </Card>
+                <Card>
+                    <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                            <Lock className="h-5 w-5 text-muted-foreground" />
+                            Portal Access
+                        </CardTitle>
+                        <CardDescription>Manage login credentials for the university portal</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                        <div className="grid gap-4 md:grid-cols-2 items-start">
+                            <div className="space-y-2">
+                                <Label htmlFor="portalEmail">Login Email</Label>
                                 <Input
-                                    placeholder="Add a program (e.g., Computer Science)"
-                                    value={newProgram}
-                                    onChange={(e) => setNewProgram(e.target.value)}
-                                    onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addProgram())}
-                                />
-                                <Button type="button" onClick={addProgram} variant="outline">
-                                    <Plus className="h-4 w-4" />
-                                </Button>
-                            </div>
-
-                            {formData.programs.length > 0 && (
-                                <div className="flex flex-wrap gap-2">
-                                    {formData.programs.map((program, index) => (
-                                        <div
-                                            key={index}
-                                            className="flex items-center gap-1 bg-muted px-3 py-1 rounded-full text-sm"
-                                        >
-                                            <span>{program}</span>
-                                            <button
-                                                type="button"
-                                                onClick={() => removeProgram(index)}
-                                                className="text-muted-foreground hover:text-foreground"
-                                            >
-                                                <X className="h-3 w-3" />
-                                            </button>
-                                        </div>
-                                    ))}
-                                </div>
-                            )}
-                        </CardContent>
-                    </Card>
-
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>Status</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="flex items-center justify-between">
-                                <div>
-                                    <Label htmlFor="isActive">Active</Label>
-                                    <p className="text-sm text-muted-foreground">
-                                        Inactive universities won't appear in event assignments
-                                    </p>
-                                </div>
-                                <Switch
-                                    id="isActive"
-                                    checked={formData.isActive}
-                                    onCheckedChange={(checked) => setFormData({ ...formData, isActive: checked })}
+                                    id="portalEmail"
+                                    type="email"
+                                    placeholder="user@university.edu"
+                                    value={credData.email}
+                                    onChange={(e) => setCredData({ ...credData, email: e.target.value })}
                                 />
                             </div>
-                        </CardContent>
-                    </Card>
-
-                    <div className="flex justify-between items-center">
-                        <div>
-                            {university && (
-                                <AlertDialog>
-                                    <AlertDialogTrigger asChild>
-                                        <Button type="button" variant="destructive">
-                                            <Trash2 className="h-4 w-4 mr-2" />
-                                            Delete University
-                                        </Button>
-                                    </AlertDialogTrigger>
-                                    <AlertDialogContent>
-                                        <AlertDialogHeader>
-                                            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                                            <AlertDialogDescription>
-                                                This action cannot be undone. This will permanently delete the university
-                                                and remove it from all events.
-                                            </AlertDialogDescription>
-                                        </AlertDialogHeader>
-                                        <AlertDialogFooter>
-                                            <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                            <AlertDialogAction
-                                                onClick={handleDelete}
-                                                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                                                disabled={isDeleting}
-                                            >
-                                                {isDeleting ? "Deleting..." : "Delete"}
-                                            </AlertDialogAction>
-                                        </AlertDialogFooter>
-                                    </AlertDialogContent>
-                                </AlertDialog>
-                            )}
+                            <div className="space-y-2">
+                                <Label htmlFor="portalPassword">Set Password</Label>
+                                <Input
+                                    id="portalPassword"
+                                    type="text"
+                                    placeholder={hasUser ? "Enter to reset (leave blank to keep)" : "Required for new user"}
+                                    value={credData.password}
+                                    onChange={(e) => setCredData({ ...credData, password: e.target.value })}
+                                />
+                            </div>
                         </div>
-
-                        <div className="flex gap-4">
-                            <Button type="button" variant="outline" asChild>
-                                <Link href="/admin/universities">Cancel</Link>
-                            </Button>
-                            <Button type="submit" disabled={isSubmitting}>
-                                {isSubmitting ? (
-                                    <>
-                                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                                        Saving...
-                                    </>
-                                ) : (
-                                    <>
-                                        <Save className="h-4 w-4 mr-2" />
-                                        {university ? "Update University" : "Create University"}
-                                    </>
+                        <div className="flex justify-between items-center">
+                            <div>
+                                {!university && (
+                                    <span className="text-xs text-amber-600 bg-amber-50 px-2 py-1 rounded border border-amber-200">
+                                        ⚠️ Save university first to create login.
+                                    </span>
                                 )}
+                                {hasUser && (
+                                    <span className="text-xs text-emerald-600 bg-emerald-50 px-2 py-1 rounded border border-emerald-200">
+                                        ✅ Active User Exists
+                                    </span>
+                                )}
+                            </div>
+                            <Button
+                                type="button"
+                                onClick={handleSaveCredentials}
+                                disabled={isSavingCreds || !university}
+                                variant="outline"
+                                className="border-gray-200 hover:bg-gray-50"
+                            >
+                                {isSavingCreds ? (
+                                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                ) : (
+                                    <Save className="h-4 w-4 mr-2" />
+                                )}
+                                {hasUser ? "Update Credentials" : "Create Login"}
                             </Button>
                         </div>
+                    </CardContent>
+                </Card>
+
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Programs</CardTitle>
+                        <CardDescription>List of programs or majors offered</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                        <div className="flex gap-2">
+                            <Input
+                                placeholder="Add a program (e.g., Computer Science)"
+                                value={newProgram}
+                                onChange={(e) => setNewProgram(e.target.value)}
+                                onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addProgram())}
+                            />
+                            <Button type="button" onClick={addProgram} variant="outline">
+                                <Plus className="h-4 w-4" />
+                            </Button>
+                        </div>
+
+                        {formData.programs.length > 0 && (
+                            <div className="flex flex-wrap gap-2">
+                                {formData.programs.map((program, index) => (
+                                    <div
+                                        key={index}
+                                        className="flex items-center gap-1 bg-muted px-3 py-1 rounded-full text-sm"
+                                    >
+                                        <span>{program}</span>
+                                        <button
+                                            type="button"
+                                            onClick={() => removeProgram(index)}
+                                            className="text-muted-foreground hover:text-foreground"
+                                        >
+                                            <X className="h-3 w-3" />
+                                        </button>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </CardContent>
+                </Card>
+
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Status</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <Label htmlFor="isActive">Active</Label>
+                                <p className="text-sm text-muted-foreground">
+                                    Inactive universities won't appear in event assignments
+                                </p>
+                            </div>
+                            <Switch
+                                id="isActive"
+                                checked={formData.isActive}
+                                onCheckedChange={(checked) => setFormData({ ...formData, isActive: checked })}
+                            />
+                        </div>
+                    </CardContent>
+                </Card>
+
+                <div className="flex justify-between items-center">
+                    <div>
+                        {university && (
+                            <AlertDialog>
+                                <AlertDialogTrigger asChild>
+                                    <Button type="button" variant="destructive">
+                                        <Trash2 className="h-4 w-4 mr-2" />
+                                        Delete University
+                                    </Button>
+                                </AlertDialogTrigger>
+                                <AlertDialogContent>
+                                    <AlertDialogHeader>
+                                        <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                                        <AlertDialogDescription>
+                                            This action cannot be undone. This will permanently delete the university
+                                            and remove it from all events.
+                                        </AlertDialogDescription>
+                                    </AlertDialogHeader>
+                                    <AlertDialogFooter>
+                                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                        <AlertDialogAction
+                                            onClick={handleDelete}
+                                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                            disabled={isDeleting}
+                                        >
+                                            {isDeleting ? "Deleting..." : "Delete"}
+                                        </AlertDialogAction>
+                                    </AlertDialogFooter>
+                                </AlertDialogContent>
+                            </AlertDialog>
+                        )}
                     </div>
+
+                    <div className="flex gap-4">
+                        <Button type="button" variant="outline" asChild>
+                            <Link href="/admin/universities">Cancel</Link>
+                        </Button>
+                        <Button type="submit" disabled={isSubmitting}>
+                            {isSubmitting ? (
+                                <>
+                                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                    Saving...
+                                </>
+                            ) : (
+                                <>
+                                    <Save className="h-4 w-4 mr-2" />
+                                    {university ? "Update University" : "Create University"}
+                                </>
+                            )}
+                        </Button>
+                    </div>
+                </div>
             </form>
         </div>
     );
