@@ -13,12 +13,16 @@ import {
     LogOut,
     Menu,
     QrCode,
-    Sparkles
+    Sparkles,
+    BarChart3,
+    Users
 } from "lucide-react";
 
 const navItems = [
     { name: "Overview", href: "/university/dashboard", icon: LayoutDashboard },
-    { name: "My Schedule", href: "/university/events", icon: Calendar },
+    { name: "Analytics", href: "/university/analytics", icon: BarChart3 },
+    { name: "Global Leads", href: "/university/leads", icon: Users },
+    { name: "My Events", href: "/university/events", icon: Calendar },
     { name: "Lead Scanner", href: "/university/scan", icon: QrCode },
     { name: "Event Market", href: "/university/explore", icon: Search },
 ];
@@ -27,9 +31,9 @@ export function UniversitySidebar({ user }: { user: any }) {
     const pathname = usePathname();
 
     const NavContent = () => (
-        <div className="flex flex-col h-full bg-black/50 backdrop-blur-xl border-r border-white/10 text-white">
-            <div className="flex h-20 items-center px-6 gap-3 border-b border-white/10 bg-white/5">
-                <div className="p-2 rounded-lg bg-gradient-to-br from-emerald-500 to-cyan-500 shadow-lg shadow-emerald-500/20">
+        <div className="flex flex-col h-full bg-slate-900 border-r border-white/5 text-white">
+            <div className="flex h-20 items-center px-6 gap-3 border-b border-white/5 bg-white/[0.02]">
+                <div className="p-2 rounded-lg bg-red-600 shadow-lg shadow-red-600/20">
                     <Sparkles className="h-5 w-5 text-white" />
                 </div>
                 <div>
@@ -50,28 +54,25 @@ export function UniversitySidebar({ user }: { user: any }) {
                             className={cn(
                                 "flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-all duration-200 group relative overflow-hidden",
                                 isActive
-                                    ? "bg-white/10 text-white shadow-inner"
+                                    ? "bg-red-600 text-white shadow-lg shadow-red-900/20"
                                     : "text-white/60 hover:bg-white/5 hover:text-white"
                             )}
                         >
-                            {isActive && (
-                                <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-emerald-400 to-cyan-400 rounded-r-full" />
-                            )}
-                            <Icon className={cn("h-5 w-5 transition-colors", isActive ? "text-emerald-400" : "text-white/40 group-hover:text-white")} />
+                            <Icon className={cn("h-5 w-5 transition-colors", isActive ? "text-white" : "text-white/40 group-hover:text-white")} />
                             {item.name}
                         </Link>
                     );
                 })}
             </div>
 
-            <div className="p-4 border-t border-white/10 bg-white/5">
+            <div className="p-4 border-t border-white/5 bg-white/[0.02]">
                 <div className="mb-4 px-3 py-3 rounded-xl bg-white/5 border border-white/5">
-                    <p className="text-[10px] text-emerald-400 uppercase font-bold tracking-widest mb-1">Signed in as</p>
+                    <p className="text-[10px] text-red-400 uppercase font-bold tracking-widest mb-1">Signed in as</p>
                     <p className="text-sm font-medium truncate text-white/90">{user.email}</p>
                 </div>
                 <Button
                     variant="ghost"
-                    className="w-full justify-start gap-3 text-rose-400 hover:bg-rose-500/10 hover:text-rose-300 transition-colors h-11 rounded-xl"
+                    className="w-full justify-start gap-3 text-white/50 hover:bg-red-600/10 hover:text-red-400 transition-colors h-11 rounded-xl"
                     onClick={() => signOut({ callbackUrl: "/university/login" })}
                 >
                     <LogOut className="h-4 w-4" />
@@ -84,7 +85,7 @@ export function UniversitySidebar({ user }: { user: any }) {
     return (
         <>
             {/* Mobile Nav */}
-            <div className="md:hidden fixed top-0 left-0 right-0 h-16 bg-black/80 backdrop-blur-md border-b border-white/10 z-40 flex items-center px-4 justify-between">
+            <div className="md:hidden fixed top-0 left-0 right-0 h-16 bg-slate-900/80 backdrop-blur-md border-b border-white/5 z-40 flex items-center px-4 justify-between">
                 <Sheet>
                     <SheetTrigger asChild>
                         <Button variant="ghost" size="icon" className="text-white hover:bg-white/10">
@@ -96,7 +97,7 @@ export function UniversitySidebar({ user }: { user: any }) {
                     </SheetContent>
                 </Sheet>
                 <div className="font-bold flex items-center gap-2 text-white">
-                    <Sparkles className="h-5 w-5 text-emerald-400" />
+                    <Sparkles className="h-5 w-5 text-red-500" />
                     <span>Sit Connect</span>
                 </div>
                 <div className="w-8" />
