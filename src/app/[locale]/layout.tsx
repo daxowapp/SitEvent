@@ -20,6 +20,9 @@ const cairo = Cairo({
 export const metadata = {
     title: "Sit Connect - Connect with Top Universities",
     description: "Meet university representatives at education fairs near you.",
+    icons: {
+        icon: "/logo-red.svg",
+    },
 };
 
 export function generateStaticParams() {
