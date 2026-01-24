@@ -9,6 +9,7 @@ import { useTranslations, useLocale } from "next-intl";
 import { LanguageSwitcher } from "./language-switcher";
 import { cn } from "@/lib/utils";
 import { Menu, X, ArrowRight, Sparkles, Home, Calendar, Info, GraduationCap, Phone } from "lucide-react";
+import { TicketRecoveryDialog } from "./ticket-recovery-dialog";
 
 export const Header = () => {
     const t = useTranslations('nav');
@@ -101,6 +102,8 @@ export const Header = () => {
 
                         {/* Actions & Locale */}
                         <div className="hidden md:flex items-center gap-4">
+                            <TicketRecoveryDialog />
+                            <div className={cn("h-6 w-px", showSolidHeader ? "bg-border/50" : "bg-white/20")} />
                             <LanguageSwitcher className={cn(
                                 showSolidHeader ? "text-muted-foreground hover:text-foreground" : "text-white/90 hover:text-white hover:bg-white/10"
                             )} />
