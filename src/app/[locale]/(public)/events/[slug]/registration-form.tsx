@@ -60,6 +60,22 @@ export function RegistrationForm({ eventId, eventSlug }: RegistrationFormProps) 
     // Auto-detect user location
     const { country, countryCode, city, loading: locationLoading } = useGeolocation();
 
+    const {
+        register,
+        handleSubmit,
+        formState: { errors },
+        setValue,
+        watch,
+        control,
+    } = useForm<RegistrationFormData>({
+        resolver: zodResolver(registrationSchema),
+        defaultValues: {
+            consent: false,
+        },
+    });
+
+    const consentValue = watch("consent");
+
     // Update phone input default country
     useEffect(() => {
         if (countryCode) {
@@ -83,8 +99,6 @@ export function RegistrationForm({ eventId, eventSlug }: RegistrationFormProps) 
             }
         }
     }, [locationLoading, country, city, setValue]);
-
-    const consentValue = watch("consent");
 
     const onSubmit = async (data: RegistrationFormData) => {
         setIsSubmitting(true);
