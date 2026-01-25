@@ -24,10 +24,15 @@ async function getEvents() {
         const { prisma } = await import("@/lib/db");
         return await prisma.event.findMany({
             orderBy: { startDateTime: "desc" },
+            include: {
+                _count: {
+                    select: { registrations: true }
+                }
+            }
         });
     } catch {
         return [
-            { id: "1", title: "Istanbul Fair", slug: "istanbul-fair", country: "Turkey", city: "Istanbul", status: "PUBLISHED", startDateTime: new Date() },
+            { id: "1", title: "Istanbul Fair", slug: "istanbul-fair", country: "Turkey", city: "Istanbul", status: "PUBLISHED", startDateTime: new Date(), _count: { registrations: 0 } },
         ];
     }
 }
@@ -58,6 +63,7 @@ export default async function AdminEventsPage() {
                                 <TableHead>Event Title</TableHead>
                                 <TableHead>Location</TableHead>
                                 <TableHead>Date</TableHead>
+                                <TableHead>Registrations</TableHead>
                                 <TableHead>Status</TableHead>
                                 <TableHead className="text-right">Actions</TableHead>
                             </TableRow>
@@ -71,6 +77,9 @@ export default async function AdminEventsPage() {
                                     </TableCell>
                                     <TableCell>
                                         {format(new Date(event.startDateTime), "PP")}
+                                    </TableCell>
+                                    <TableCell>
+                                        {event._count?.registrations || 0}
                                     </TableCell>
                                     <TableCell>
                                         <Badge
