@@ -16,6 +16,9 @@ All notable changes to this project will be documented in this file.
 - **Partner University Linking**
   - Updated "Trusted by Leading Institutions" section on Home Page to link to individual university profiles (`/university/[id]`).
 
+- **Analytics**
+  - Added **Meta Pixel** (ID: 1378542223283943) to root layout for comprehensive event tracking.
+
 ### Changed
 - **Footer Updates**
   - Updated contact information (Email: Mahmoud@sitconnect.net, Phone: +20 106 271 7279).

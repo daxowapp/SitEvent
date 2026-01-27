@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chatwoot Test</title>
+</head>
+<body>
+    <h1>Chatwoot Integration Test</h1>
+    <p>Check the bottom right corner for the chat widget.</p>
+
+<script>
+  (function(d,t) {
+    var BASE_URL="https://chat.sitconnect.net";
+    var g=d.createElement(t),s=d.getElementsByTagName(t)[0];
+    g.src=BASE_URL+"/packs/js/sdk.js";
+    g.async = true;
+    s.parentNode.insertBefore(g,s);
+    g.onload=function(){
+      window.chatwootSDK.run({
+        websiteToken: 'fBVZEcKU6YGqXpw21aeD1r4u',
+        baseUrl: BASE_URL
+      })
+    }
+  })(document,"script");
+</script>
+
+</body>
+</html>
