@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 
 ## [0.2.1] - 2026-01-23
 
+### Fixed
+- **Admin UI Polish**
+  - Resized Sidebar/Header logo to `h-6` for better alignment with search bars and navigation text.
+  - Fixed Admin Page Titles using a global metadata template (`Page | SitConnect Admin`) for Events and Registrations pages.
+
 ### Added
 - **UTM Tracking Visibility**
   - Added "Source", "Medium", and "Campaign" columns to Admin Registrations table.

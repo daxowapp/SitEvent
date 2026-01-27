@@ -10,6 +10,13 @@ const inter = Inter({
     variable: "--font-inter",
 });
 
+export const metadata = {
+    title: {
+        template: "%s | SitConnect Admin",
+        default: "Admin Dashboard | SitConnect",
+    },
+};
+
 export default async function AdminLayout({
     children,
 }: {

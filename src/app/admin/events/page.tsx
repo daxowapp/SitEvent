@@ -13,6 +13,10 @@ import {
 import { format } from "date-fns";
 import { DuplicateEventButton } from "@/components/admin/DuplicateEventButton";
 
+export const metadata = {
+    title: "Events",
+};
+
 async function getEvents() {
     if (!(process.env.DATABASE_URL && !process.env.DATABASE_URL.includes('[project-ref]'))) {
         return [

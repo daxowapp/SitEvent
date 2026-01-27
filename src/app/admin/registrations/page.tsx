@@ -5,6 +5,10 @@ import Link from "next/link";
 import { prisma } from "@/lib/db";
 import { RegistrationsTable } from "./registrations-table";
 
+export const metadata = {
+    title: "Registrations",
+};
+
 interface PageProps {
     searchParams: Promise<{
         page?: string;
