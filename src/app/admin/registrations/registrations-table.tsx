@@ -29,6 +29,7 @@ interface RegistrationsTableProps {
     events: { id: string; title: string }[];
     pageCount: number;
     currentPage: number;
+    sources: string[];
 }
 
 export function RegistrationsTable({
@@ -36,6 +37,7 @@ export function RegistrationsTable({
     events,
     pageCount,
     currentPage,
+    sources,
 }: RegistrationsTableProps) {
     const router = useRouter();
     const searchParams = useSearchParams();
@@ -73,8 +75,8 @@ export function RegistrationsTable({
     return (
         <div className="space-y-4">
             {/* Filters */}
-            <div className="flex flex-col sm:flex-row gap-4">
-                <div className="relative flex-1">
+            <div className="flex flex-col sm:flex-row gap-4 flex-wrap">
+                <div className="relative flex-1 min-w-[200px]">
                     <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                     <Input
                         placeholder="Search by name or email..."
@@ -95,6 +97,22 @@ export function RegistrationsTable({
                         {events.map((evt) => (
                             <SelectItem key={evt.id} value={evt.id}>
                                 {evt.title}
+                            </SelectItem>
+                        ))}
+                    </SelectContent>
+                </Select>
+                <Select
+                    onValueChange={(val) => updateParam("source", val === "ALL" ? null : val)}
+                    defaultValue={searchParams.get("source") || "ALL"}
+                >
+                    <SelectTrigger className="w-full sm:w-[150px]">
+                        <SelectValue placeholder="All Sources" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="ALL">All Sources</SelectItem>
+                        {sources.map((src) => (
+                            <SelectItem key={src} value={src}>
+                                {src}
                             </SelectItem>
                         ))}
                     </SelectContent>
@@ -127,6 +145,8 @@ export function RegistrationsTable({
                         <TableRow>
                             <TableHead>Registrant</TableHead>
                             <TableHead>Event</TableHead>
+                            <TableHead>Source / Medium</TableHead>
+                            <TableHead>Campaign</TableHead>
                             <TableHead>Date</TableHead>
                             <TableHead>Status</TableHead>
                             <TableHead>Check-in</TableHead>
@@ -136,7 +156,7 @@ export function RegistrationsTable({
                     <TableBody>
                         {registrations.length === 0 ? (
                             <TableRow>
-                                <TableCell colSpan={6} className="h-24 text-center">
+                                <TableCell colSpan={8} className="h-24 text-center">
                                     No registrations found.
                                 </TableCell>
                             </TableRow>
@@ -149,11 +169,22 @@ export function RegistrationsTable({
                                             {reg.registrant.email}
                                         </div>
                                     </TableCell>
-                                    <TableCell className="max-w-[200px] truncate" title={reg.event.title}>
+                                    <TableCell className="max-w-[150px] truncate" title={reg.event.title}>
                                         {reg.event.title}
                                     </TableCell>
-                                    <TableCell className="text-sm text-muted-foreground">
-                                        {format(new Date(reg.createdAt), "MMM d, yyyy HH:mm")}
+                                    <TableCell className="max-w-[150px]">
+                                        <div className="text-xs font-medium truncate" title={reg.registrant.utmSource || ""}>
+                                            {reg.registrant.utmSource || "-"}
+                                        </div>
+                                        <div className="text-[10px] text-muted-foreground truncate" title={reg.registrant.utmMedium || ""}>
+                                            {reg.registrant.utmMedium}
+                                        </div>
+                                    </TableCell>
+                                    <TableCell className="max-w-[120px] truncate text-xs text-muted-foreground" title={reg.registrant.utmCampaign || ""}>
+                                        {reg.registrant.utmCampaign || "-"}
+                                    </TableCell>
+                                    <TableCell className="text-xs text-muted-foreground">
+                                        {format(new Date(reg.createdAt), "MMM d, HH:mm")}
                                     </TableCell>
                                     <TableCell>
                                         <Badge

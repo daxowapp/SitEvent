@@ -13,7 +13,7 @@ export async function submitExhibitorInquiry(eventId: string, data: ExhibitorFor
         return { error: "Invalid form data" };
     }
 
-    const { institutionName, contactPerson, email, phone, country, website, notes } = validatedFields.data;
+    const { institutionName, contactPerson, email, phone, country, website, notes, utmSource, utmMedium, utmCampaign } = validatedFields.data;
 
     try {
         // Create a message log entry to track this inquiry (only if attached to a specific event)
@@ -35,7 +35,10 @@ export async function submitExhibitorInquiry(eventId: string, data: ExhibitorFor
                                 phone,
                                 country,
                                 website,
-                                notes
+                                notes,
+                                utmSource,
+                                utmMedium,
+                                utmCampaign
                             }
                         }),
                     }

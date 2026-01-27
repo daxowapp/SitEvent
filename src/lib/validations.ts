@@ -75,6 +75,9 @@ export const exhibitorSchema = z.object({
     country: z.string().min(2, "Country is required"),
     website: z.string().url().optional().or(z.literal("")),
     notes: z.string().optional(),
+    utmSource: z.string().optional(),
+    utmMedium: z.string().optional(),
+    utmCampaign: z.string().optional(),
 });
 
 export type ExhibitorFormData = z.infer<typeof exhibitorSchema>;

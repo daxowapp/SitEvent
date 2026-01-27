@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 ## [0.2.1] - 2026-01-23
 
 ### Added
+- **UTM Tracking Visibility**
+  - Added "Source", "Medium", and "Campaign" columns to Admin Registrations table.
+  - Added "Top Sources" widget to Registrations Dashboard for real-time marketing performance tracking.
+  - Added **UTM Source Filter** to registrations list to easily segregate leads by marketing channel.
+  - Enabled UTM parameter tracking for **Exhibitor Inquiry** forms (`/recruit`).
+
 - **Legal & Compliance Pages**
   - Created dedicated pages for Privacy Policy, Terms of Service, Cookie Policy, and GDPR Compliance.
   - Linked all legal pages in the footer.

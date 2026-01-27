@@ -37,7 +37,18 @@ export function ExhibitorForm({ eventId, eventName, className }: ExhibitorFormPr
             // If no eventId is provided, we use a generic placeholder or "general-inquiry"
             const targetEventId = eventId || "general";
 
-            const result = await submitExhibitorInquiry(targetEventId, data);
+            // Get UTM params from URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const utmSource = urlParams.get("utm_source") || undefined;
+            const utmMedium = urlParams.get("utm_medium") || undefined;
+            const utmCampaign = urlParams.get("utm_campaign") || undefined;
+
+            const result = await submitExhibitorInquiry(targetEventId, {
+                ...data,
+                utmSource,
+                utmMedium,
+                utmCampaign,
+            });
 
             if (result.error) {
                 toast.error(result.error);

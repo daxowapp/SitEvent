@@ -11,6 +11,7 @@ interface PageProps {
         q?: string;
         eventId?: string;
         status?: string;
+        source?: string;
     }>;
 }
 
@@ -23,6 +24,7 @@ export default async function RegistrationsPage({ searchParams }: PageProps) {
     const query = params.q || "";
     const eventId = params.eventId;
     const status = params.status;
+    const source = params.source;
 
     // Filter construction
     const where: any = {};
@@ -40,15 +42,20 @@ export default async function RegistrationsPage({ searchParams }: PageProps) {
     if (status) {
         where.status = status;
     }
+    if (source) {
+        // If we already have a registrant filter (from query), merge it
+        if (!where.registrant) where.registrant = {};
+        where.registrant.utmSource = source;
+    }
 
     // Parallel data fetching
-    const [registrations, totalCount, events, stats] = await Promise.all([
+    const [registrations, totalCount, events, stats, sourceStats, uniqueSources] = await Promise.all([
         prisma.registration.findMany({
             where,
             include: {
                 registrant: true,
                 event: { select: { title: true } },
-                checkIn: true, // Include check-in info
+                checkIn: true,
             },
             orderBy: { createdAt: "desc" },
             take: limit,
@@ -59,10 +66,38 @@ export default async function RegistrationsPage({ searchParams }: PageProps) {
             select: { id: true, title: true },
             orderBy: { startDateTime: "desc" },
         }),
-        // Aggregate stats (global, or filtered? Let's do global metrics for cards usually)
         prisma.registration.aggregate({
             _count: { _all: true },
         }),
+        // Aggregate top sources for stats card
+        prisma.registrant.groupBy({
+            by: ['utmSource'],
+            _count: {
+                utmSource: true,
+            },
+            orderBy: {
+                _count: {
+                    utmSource: 'desc',
+                }
+            },
+            take: 5,
+            where: {
+                utmSource: { not: null },
+            }
+        }),
+        // Fetch distinct sources for filter dropdown
+        prisma.registrant.findMany({
+            where: {
+                utmSource: { not: null }
+            },
+            select: {
+                utmSource: true
+            },
+            distinct: ['utmSource'],
+            orderBy: {
+                utmSource: 'asc'
+            }
+        })
     ]);
 
     // Separate check-in count query for accuracy
@@ -89,7 +124,7 @@ export default async function RegistrationsPage({ searchParams }: PageProps) {
                 </Button>
             </div>
 
-            <div className="grid gap-4 md:grid-cols-3">
+            <div className="grid gap-4 md:grid-cols-4">
                 <Card>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                         <CardTitle className="text-sm font-medium">Total Registrations</CardTitle>
@@ -114,6 +149,28 @@ export default async function RegistrationsPage({ searchParams }: PageProps) {
                 </Card>
                 <Card>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                        <CardTitle className="text-sm font-medium">Top Sources</CardTitle>
+                        <Users className="h-4 w-4 text-muted-foreground" />
+                    </CardHeader>
+                    <CardContent>
+                        <div className="text-sm space-y-1">
+                            {sourceStats.length > 0 ? (
+                                sourceStats.map((s) => (
+                                    <div key={s.utmSource} className="flex justify-between">
+                                        <span className="font-medium truncate max-w-[80px]" title={s.utmSource || ""}>
+                                            {s.utmSource}
+                                        </span>
+                                        <span className="text-muted-foreground">{s._count.utmSource}</span>
+                                    </div>
+                                ))
+                            ) : (
+                                <p className="text-xs text-muted-foreground">No tracked sources yet</p>
+                            )}
+                        </div>
+                    </CardContent>
+                </Card>
+                <Card>
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                         <CardTitle className="text-sm font-medium">Events Active</CardTitle>
                         <Users className="h-4 w-4 text-muted-foreground" />
                     </CardHeader>
@@ -134,6 +191,7 @@ export default async function RegistrationsPage({ searchParams }: PageProps) {
                         events={events}
                         pageCount={pageCount}
                         currentPage={page}
+                        sources={uniqueSources.map(s => s.utmSource).filter(Boolean) as string[]}
                     />
                 </CardContent>
             </Card>
