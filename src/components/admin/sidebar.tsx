@@ -42,8 +42,8 @@ export function AdminSidebar({ user }: { user: any }) {
         <aside className="fixed inset-y-0 left-0 z-50 hidden w-64 flex-col bg-gray-900 text-white md:flex">
             <div className="flex h-16 items-center border-b border-gray-800 px-6">
                 <Link href="/admin" className="flex items-center gap-2 font-bold text-xl">
-                    <span className="text-purple-400 text-2xl">🎓</span>
-                    <span>Admin Panel</span>
+                    <img src="/logo-red.svg" alt="SitConnect" className="h-8 w-auto mix-blend-screen" />
+                    <span>SitConnect</span>
                 </Link>
             </div>
 
@@ -101,8 +101,8 @@ export function AdminMobileNav({ user }: { user: any }) {
                 <SheetContent side="left" className="w-64 bg-gray-900 border-r-0 p-0 text-white">
                     <div className="flex h-16 items-center border-b border-gray-800 px-6">
                         <Link href="/admin" className="flex items-center gap-2 font-bold text-xl">
-                            <span className="text-purple-400 text-2xl">🎓</span>
-                            <span>Admin Panel</span>
+                            <img src="/logo-red.svg" alt="SitConnect" className="h-8 w-auto mix-blend-screen" />
+                            <span>SitConnect</span>
                         </Link>
                     </div>
 
@@ -145,8 +145,8 @@ export function AdminMobileNav({ user }: { user: any }) {
 
             <div className="flex flex-1 items-center justify-between">
                 <Link href="/admin" className="flex items-center gap-2 font-bold">
-                    <span className="text-purple-600">🎓</span>
-                    <span>Admin</span>
+                    <img src="/logo-red.svg" alt="SitConnect" className="h-8 w-auto mix-blend-screen" />
+                    <span>SitConnect</span>
                 </Link>
             </div>
         </header>

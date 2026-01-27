@@ -19,6 +19,10 @@ All notable changes to this project will be documented in this file.
 - **Analytics**
   - Added **Meta Pixel** (ID: 1378542223283943) to root layout for comprehensive event tracking.
 
+- **Admin Rebranding**
+  - Updated admin login page title to **"SitConnect - Login"**.
+  - Replaced "EduFairs" branding in admin sidebar and mobile navigation with **"SitConnect"** and official logo.
+
 ### Changed
 - **Footer Updates**
   - Updated contact information (Email: Mahmoud@sitconnect.net, Phone: +20 106 271 7279).

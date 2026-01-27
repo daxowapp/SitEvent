@@ -14,7 +14,7 @@ const playfair = Playfair_Display({
 });
 
 export const metadata: Metadata = {
-    title: "EduFairs - Login",
+    title: "SitConnect - Login",
     description: "Event Management Platform",
 };
 
