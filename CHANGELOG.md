@@ -6,6 +6,8 @@ All notable changes to this project will be documented in this file.
 
 ### Fixed
 - **Admin UI Polish**
+  - **Event Analytics**: Added dedicated dashboard for each event with visualizations for Daily Growth (Area Chart), Traffic Sources (Pie Chart), and KPI Cards (Conversion Rates).
+  - **Filter Redesign**: Replaced legacy dropdowns with professional "Faceted Filters" (Toolbar style) on the Registrations page. Features multi-select capabilities and a cleaner "Reset" workflow.
   - Resized Sidebar/Header logo to `h-6` for better alignment with search bars and navigation text.
   - Fixed Admin Page Titles using a global metadata template (`Page | SitConnect Admin`) for Events and Registrations pages.
 

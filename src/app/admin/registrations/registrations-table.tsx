@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useTransition } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { format } from "date-fns";
 import {
@@ -12,17 +12,7 @@ import {
     TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
-import { Search, Loader2 } from "lucide-react";
-import Link from "next/link"; // For future linking to details
+import { DataTableToolbar } from "./data-table-toolbar";
 
 interface RegistrationsTableProps {
     registrations: any[];
@@ -56,167 +46,99 @@ export function RegistrationsTable({
         });
     };
 
-    const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const value = e.target.value;
-        // Debounce simple implementation could differ, but here we just update for simplicity 
-        // In real app, consider useDebounce
-        const params = new URLSearchParams(searchParams.toString());
-        if (value) {
-            params.set("q", value);
-        } else {
-            params.delete("q");
-        }
-        params.set("page", "1");
-        startTransition(() => {
-            router.replace(`?${params.toString()}`);
-        });
-    };
-
     return (
         <div className="space-y-4">
-            {/* Filters */}
-            <div className="flex flex-col sm:flex-row gap-4 flex-wrap">
-                <div className="relative flex-1 min-w-[200px]">
-                    <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                    <Input
-                        placeholder="Search by name or email..."
-                        className="pl-8"
-                        onChange={handleSearch}
-                        defaultValue={searchParams.get("q")?.toString()}
-                    />
-                </div>
-                <Select
-                    onValueChange={(val) => updateParam("eventId", val === "ALL" ? null : val)}
-                    defaultValue={searchParams.get("eventId") || "ALL"}
-                >
-                    <SelectTrigger className="w-full sm:w-[200px]">
-                        <SelectValue placeholder="All Events" />
-                    </SelectTrigger>
-                    <SelectContent>
-                        <SelectItem value="ALL">All Events</SelectItem>
-                        {events.map((evt) => (
-                            <SelectItem key={evt.id} value={evt.id}>
-                                {evt.title}
-                            </SelectItem>
-                        ))}
-                    </SelectContent>
-                </Select>
-                <Select
-                    onValueChange={(val) => updateParam("source", val === "ALL" ? null : val)}
-                    defaultValue={searchParams.get("source") || "ALL"}
-                >
-                    <SelectTrigger className="w-full sm:w-[150px]">
-                        <SelectValue placeholder="All Sources" />
-                    </SelectTrigger>
-                    <SelectContent>
-                        <SelectItem value="ALL">All Sources</SelectItem>
-                        {sources.map((src) => (
-                            <SelectItem key={src} value={src}>
-                                {src}
-                            </SelectItem>
-                        ))}
-                    </SelectContent>
-                </Select>
-                <Select
-                    onValueChange={(val) => updateParam("status", val === "ALL" ? null : val)}
-                    defaultValue={searchParams.get("status") || "ALL"}
-                >
-                    <SelectTrigger className="w-full sm:w-[150px]">
-                        <SelectValue placeholder="All Status" />
-                    </SelectTrigger>
-                    <SelectContent>
-                        <SelectItem value="ALL">All Status</SelectItem>
-                        <SelectItem value="REGISTERED">Registered</SelectItem>
-                        <SelectItem value="Attended">Attended</SelectItem> {/* If we have accurate status mapping */}
-                        <SelectItem value="CANCELLED">Cancelled</SelectItem>
-                    </SelectContent>
-                </Select>
-            </div>
+            <DataTableToolbar
+                searchQuery={searchParams.get("q")?.toString() || ""}
+                setSearchQuery={(val) => {
+                    const params = new URLSearchParams(searchParams.toString());
+                    if (val) {
+                        params.set("q", val);
+                    } else {
+                        params.delete("q");
+                    }
+                    params.set("page", "1");
+                    startTransition(() => {
+                        router.replace(`?${params.toString()}`);
+                    });
+                }}
+                eventId={searchParams.get("eventId")}
+                setEventId={(val) => updateParam("eventId", val)}
+                status={searchParams.get("status")}
+                setStatus={(val) => updateParam("status", val)}
+                source={searchParams.get("source")}
+                setSource={(val) => updateParam("source", val)}
+                events={events}
+                sources={sources}
+            />
 
-            {/* Table */}
             <div className="rounded-md border bg-white relative">
                 {isPending && (
                     <div className="absolute inset-0 bg-white/50 z-10 flex items-center justify-center">
-                        <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                        <div className="h-6 w-6 animate-spin rounded-full border-2 border-gray-300 border-t-blue-600" />
                     </div>
                 )}
                 <Table>
                     <TableHeader>
                         <TableRow>
-                            <TableHead>Registrant</TableHead>
                             <TableHead>Event</TableHead>
+                            <TableHead>Full Name</TableHead>
+                            <TableHead>Email</TableHead>
                             <TableHead>Source / Medium</TableHead>
                             <TableHead>Campaign</TableHead>
                             <TableHead>Date</TableHead>
                             <TableHead>Status</TableHead>
                             <TableHead>Check-in</TableHead>
-                            <TableHead className="text-right">Actions</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        {registrations.length === 0 ? (
-                            <TableRow>
-                                <TableCell colSpan={8} className="h-24 text-center">
-                                    No registrations found.
+                        {registrations.map((reg) => (
+                            <TableRow key={reg.id}>
+                                <TableCell className="font-medium">
+                                    {reg.event.title}
+                                </TableCell>
+                                <TableCell>{reg.registrant.fullName}</TableCell>
+                                <TableCell>{reg.registrant.email}</TableCell>
+                                <TableCell>
+                                    {reg.registrant.utmSource ? (
+                                        <div className="flex flex-col">
+                                            <span className="font-medium text-xs bg-slate-100 px-2 py-0.5 rounded w-fit mb-1">{reg.registrant.utmSource}</span>
+                                            {reg.registrant.utmMedium && <span className="text-xs text-muted-foreground">{reg.registrant.utmMedium}</span>}
+                                        </div>
+                                    ) : (
+                                        <span className="text-muted-foreground text-xs">-</span>
+                                    )}
+                                </TableCell>
+                                <TableCell>
+                                    <span className="text-xs text-muted-foreground">
+                                        {reg.registrant.utmCampaign || "-"}
+                                    </span>
+                                </TableCell>
+                                <TableCell>
+                                    {format(new Date(reg.createdAt), "PP")}
+                                </TableCell>
+                                <TableCell>
+                                    <span className="inline-flex items-center rounded-full bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-700/10">
+                                        {reg.status}
+                                    </span>
+                                </TableCell>
+                                <TableCell>
+                                    {reg.checkIn ? (
+                                        <span className="inline-flex items-center rounded-full bg-green-50 px-2 py-1 text-xs font-medium text-green-700 ring-1 ring-inset ring-green-600/20">
+                                            Checked In
+                                        </span>
+                                    ) : (
+                                        <span className="text-muted-foreground text-xs">
+                                            -
+                                        </span>
+                                    )}
                                 </TableCell>
                             </TableRow>
-                        ) : (
-                            registrations.map((reg) => (
-                                <TableRow key={reg.id}>
-                                    <TableCell>
-                                        <div className="font-medium">{reg.registrant.fullName}</div>
-                                        <div className="text-xs text-muted-foreground">
-                                            {reg.registrant.email}
-                                        </div>
-                                    </TableCell>
-                                    <TableCell className="max-w-[150px] truncate" title={reg.event.title}>
-                                        {reg.event.title}
-                                    </TableCell>
-                                    <TableCell className="max-w-[150px]">
-                                        <div className="text-xs font-medium truncate" title={reg.registrant.utmSource || ""}>
-                                            {reg.registrant.utmSource || "-"}
-                                        </div>
-                                        <div className="text-[10px] text-muted-foreground truncate" title={reg.registrant.utmMedium || ""}>
-                                            {reg.registrant.utmMedium}
-                                        </div>
-                                    </TableCell>
-                                    <TableCell className="max-w-[120px] truncate text-xs text-muted-foreground" title={reg.registrant.utmCampaign || ""}>
-                                        {reg.registrant.utmCampaign || "-"}
-                                    </TableCell>
-                                    <TableCell className="text-xs text-muted-foreground">
-                                        {format(new Date(reg.createdAt), "MMM d, HH:mm")}
-                                    </TableCell>
-                                    <TableCell>
-                                        <Badge
-                                            variant={
-                                                reg.status === "REGISTERED"
-                                                    ? "default"
-                                                    : reg.status === "CANCELLED"
-                                                        ? "destructive"
-                                                        : "secondary"
-                                            }
-                                        >
-                                            {reg.status}
-                                        </Badge>
-                                    </TableCell>
-                                    <TableCell>
-                                        <Badge variant={reg.checkIn ? "outline" : "secondary"} className={reg.checkIn ? "bg-green-50 text-green-700 border-green-200" : "opacity-50"}>
-                                            {reg.checkIn ? "Checked In" : "Pending"}
-                                        </Badge>
-                                    </TableCell>
-                                    <TableCell className="text-right">
-                                        <Button variant="ghost" size="sm" asChild>
-                                            <Link href={`/admin/registrations/${reg.id}`}>View</Link>
-                                        </Button>
-                                    </TableCell>
-                                </TableRow>
-                            ))
-                        )}
+                        ))}
                     </TableBody>
                 </Table>
             </div>
 
-            {/* Pagination controls can be added here */}
             {pageCount > 1 && (
                 <div className="flex items-center justify-end space-x-2 py-4">
                     <Button

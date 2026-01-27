@@ -108,6 +108,9 @@ export default async function AdminEventsPage() {
                                                     Visit
                                                 </Link>
                                             </Button>
+                                            <Button variant="ghost" size="sm" asChild>
+                                                <Link href={`/admin/events/${event.id}/analytics`}>Analytics</Link>
+                                            </Button>
                                             <DuplicateEventButton eventId={event.id} />
                                         </div>
                                     </TableCell>
