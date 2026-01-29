@@ -4,8 +4,11 @@ import { Plus, Globe, MapPin, Edit, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { getCountries } from "./actions";
 import { DeleteCountryButton } from "./delete-button";
+import { requireRole } from "@/lib/role-check";
+import { AdminRole } from "@prisma/client";
 
 export default async function CountriesPage() {
+    await requireRole([AdminRole.SUPER_ADMIN]);
     const countries = await getCountries();
 
     return (

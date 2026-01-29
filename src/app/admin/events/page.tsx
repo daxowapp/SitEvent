@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/table";
 import { format } from "date-fns";
 import { DuplicateEventButton } from "@/components/admin/DuplicateEventButton";
+import { requireManagerOrAbove } from "@/lib/role-check";
 
 export const metadata = {
     title: "Events",
@@ -42,6 +43,7 @@ async function getEvents() {
 }
 
 export default async function AdminEventsPage() {
+    await requireManagerOrAbove();
     const events = await getEvents();
 
     return (

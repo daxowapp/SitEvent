@@ -7,6 +7,7 @@ import { ArrowLeft, User, Calendar, QrCode, Mail, Phone, MapPin, CheckCircle, XC
 import Link from "next/link";
 import { prisma } from "@/lib/db";
 import Image from "next/image";
+import { requireManagerOrAbove } from "@/lib/role-check";
 
 interface PageProps {
     params: Promise<{
@@ -15,6 +16,7 @@ interface PageProps {
 }
 
 export default async function RegistrationDetailsPage({ params }: PageProps) {
+    await requireManagerOrAbove();
     const { id } = await params;
 
     if (!process.env.DATABASE_URL || process.env.DATABASE_URL.includes('[project-ref]')) {

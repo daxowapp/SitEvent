@@ -26,7 +26,6 @@ export async function sendWhatsAppConfirmation(
         // Check for n8n Webhook URL prioritization
         const n8nWebhookUrl = process.env.N8N_WEBHOOK_URL;
         if (n8nWebhookUrl) {
-            console.log("Delegating WhatsApp message to n8n Webhook:", n8nWebhookUrl);
             try {
                 const response = await fetch(n8nWebhookUrl, {
                     method: "POST",
@@ -80,8 +79,6 @@ export async function sendWhatsAppConfirmation(
             from: whatsappFrom,
             to: whatsappTo
         });
-
-        console.log("Twilio Message Sent:", message.sid);
 
         return {
             success: true,

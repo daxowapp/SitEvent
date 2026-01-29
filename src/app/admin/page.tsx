@@ -5,8 +5,10 @@ import { GeoMap } from "@/components/admin/dashboard/geo-map";
 import { ActivityTimeline } from "@/components/admin/dashboard/activity-timeline";
 import { RegistrationChart, EventStatusChart } from "@/components/admin/dashboard/overview-charts";
 import { Plus, Scan, BarChart3, Settings } from "lucide-react";
+import { requireManagerOrAbove } from "@/lib/role-check";
 
 export default async function AdminDashboardPage() {
+    await requireManagerOrAbove();
     const data = await getDashboardData();
     const { stats, trendData, statusCounts, recentActivity, actionOverview, geoData } = data;
 

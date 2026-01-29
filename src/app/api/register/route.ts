@@ -7,8 +7,32 @@ import { sendWhatsAppConfirmation } from "@/lib/whatsapp";
 import { format } from "date-fns";
 import { enUS, tr, ar } from "date-fns/locale";
 import { getTranslations } from "next-intl/server";
+import { checkRateLimit, getClientIdentifier } from "@/lib/rate-limit";
 
 export async function POST(request: NextRequest) {
+    // Rate limiting: 5 registrations per minute per IP
+    const clientId = getClientIdentifier(request.headers);
+    const rateLimit = checkRateLimit(`register:${clientId}`, {
+        limit: 5,
+        windowSeconds: 60,
+    });
+
+    if (!rateLimit.success) {
+        return NextResponse.json(
+            { 
+                error: "Too many registration attempts. Please try again later.",
+                retryAfter: Math.ceil((rateLimit.reset - Date.now()) / 1000)
+            },
+            { 
+                status: 429,
+                headers: {
+                    "Retry-After": Math.ceil((rateLimit.reset - Date.now()) / 1000).toString(),
+                    "X-RateLimit-Remaining": rateLimit.remaining.toString(),
+                }
+            }
+        );
+    }
+
     try {
         const body = await request.json();
         const { eventId, utmSource, utmMedium, utmCampaign, locale = 'en', ...formData } = body;
@@ -226,14 +250,8 @@ export async function POST(request: NextRequest) {
                 utmMedium,
                 utmCampaign,
                 eventTitle: event.title,
-            }).then((result) => {
-                if (result.success) {
-                    console.log("Zoho lead created:", result.leadId);
-                } else {
-                    console.error("Zoho lead creation failed:", result.error);
-                }
-            });
-        }).catch(console.error);
+            }).catch(console.error);
+        });
 
         return NextResponse.json({
             success: true,

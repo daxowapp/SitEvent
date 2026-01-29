@@ -55,7 +55,6 @@ Highlights:
 ];
 
 async function getEvent(slug: string) {
-    console.log(`Fetching event for slug: ${slug}`);
 
     // Always try DB first
     try {
@@ -76,12 +75,10 @@ async function getEvent(slug: string) {
             return event;
         }
     } catch (error) {
-        console.error("Database fetch failed:", error);
-        throw error; // Force error to be visible
+        throw error;
     }
 
     // Fallback to mock data
-    console.log(`Searching mock data for slug: ${slug}`);
     return MOCK_EVENTS.find(e => e.slug === slug) || null;
 }
 

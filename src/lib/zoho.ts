@@ -89,7 +89,6 @@ export async function createZohoLead(leadData: ZohoLeadData): Promise<ZohoCreate
 
     // Check if Zoho is configured
     if (!process.env.ZOHO_CLIENT_ID || !process.env.ZOHO_REFRESH_TOKEN) {
-        console.log("Zoho CRM not configured, skipping lead creation");
         return { success: false, error: "Zoho CRM not configured" };
     }
 

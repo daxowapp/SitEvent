@@ -4,6 +4,7 @@ import { Download, Users, UserCheck, Ticket } from "lucide-react";
 import Link from "next/link";
 import { prisma } from "@/lib/db";
 import { RegistrationsTable } from "./registrations-table";
+import { requireManagerOrAbove } from "@/lib/role-check";
 
 export const metadata = {
     title: "Registrations",
@@ -20,6 +21,7 @@ interface PageProps {
 }
 
 export default async function RegistrationsPage({ searchParams }: PageProps) {
+    await requireManagerOrAbove();
     const params = await searchParams;
     const page = Number(params.page) || 1;
     const limit = 20;

@@ -1,7 +1,25 @@
 import { NextRequest, NextResponse } from "next/server";
 import { sendWhatsAppConfirmation } from "@/lib/whatsapp";
+import { auth } from "@/lib/auth";
+import { AdminRole } from "@prisma/client";
 
 export async function POST(request: NextRequest) {
+    // Block in production
+    if (process.env.NODE_ENV === "production") {
+        return NextResponse.json({ error: "Not available" }, { status: 404 });
+    }
+
+    // Require SUPER_ADMIN authentication
+    const session = await auth();
+    if (!session?.user) {
+        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+    const userType = (session.user as any).type;
+    const userRole = session.user.role as AdminRole;
+    if (userType !== "ADMIN" || userRole !== AdminRole.SUPER_ADMIN) {
+        return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+
     try {
         const body = await request.json();
         const { phone } = body;
@@ -25,10 +43,10 @@ export async function POST(request: NextRequest) {
 
         return NextResponse.json(result);
     } catch (error) {
-        console.error("Test Endpoint Error:", error);
         return NextResponse.json(
             { success: false, error: error instanceof Error ? error.message : "Internal Server Error" },
             { status: 500 }
         );
     }
 }
+

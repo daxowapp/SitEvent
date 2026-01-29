@@ -4,6 +4,7 @@ import { EventForm } from "../event-form";
 import { prisma } from "@/lib/db";
 import { Prisma } from "@prisma/client";
 import { auth } from "@/lib/auth";
+import { requireManagerOrAbove } from "@/lib/role-check";
 
 // Get countries for the form dropdown
 async function getCountries() {
@@ -117,6 +118,7 @@ async function createEvent(data: {
 }
 
 export default async function NewEventPage() {
+    await requireManagerOrAbove();
     const countries = await getCountries();
 
     return (

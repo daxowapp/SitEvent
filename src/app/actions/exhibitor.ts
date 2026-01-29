@@ -66,8 +66,6 @@ export async function submitExhibitorInquiry(eventId: string, data: ExhibitorFor
             return { error: "Failed to send email. Please try again." };
         }
 
-        console.log("New Exhibitor Inquiry:", { eventId, ...validatedFields.data });
-
         return { success: true };
     } catch (error) {
         console.error("Failed to submit exhibitor inquiry:", error);

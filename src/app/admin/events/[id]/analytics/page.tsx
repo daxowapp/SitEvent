@@ -3,6 +3,7 @@ import { AnalyticsDashboard } from "@/components/admin/analytics/analytics-dashb
 import { format } from "date-fns";
 import { notFound } from "next/navigation";
 import { Metadata } from "next";
+import { requireManagerOrAbove } from "@/lib/role-check";
 
 export const metadata: Metadata = {
     title: "Analytics",
@@ -13,6 +14,7 @@ interface PageProps {
 }
 
 export default async function EventAnalyticsPage({ params }: PageProps) {
+    await requireManagerOrAbove();
     const { id } = await params;
 
     // Check if event exists

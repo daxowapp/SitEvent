@@ -14,9 +14,14 @@ export async function requireRole(allowedRoles: AdminRole[]) {
         redirect("/login");
     }
 
+    // Check if user is an admin type (not UNIVERSITY)
+    if ((session.user as any).type !== "ADMIN") {
+        redirect("/login");
+    }
+
     if (!allowedRoles.includes(session.user.role as AdminRole)) {
         // Redirect based on role defaults if unauthorized
-        if (session.user.role === AdminRole.EVENT_STAFF) {
+        if (session.user.role === AdminRole.EVENT_STAFF || session.user.role === AdminRole.USHER) {
             redirect("/admin/scan");
         } else {
             redirect("/admin");
@@ -24,4 +29,30 @@ export async function requireRole(allowedRoles: AdminRole[]) {
     }
 
     return session.user;
+}
+
+/**
+ * Require any admin user (not UNIVERSITY type).
+ * Allows all AdminRole types.
+ */
+export async function requireAdmin() {
+    const session = await auth();
+
+    if (!session?.user) {
+        redirect("/login");
+    }
+
+    // Check if user is an admin type (not UNIVERSITY)
+    if ((session.user as any).type !== "ADMIN") {
+        redirect("/login");
+    }
+
+    return session.user;
+}
+
+/**
+ * Require SUPER_ADMIN or EVENT_MANAGER role.
+ */
+export async function requireManagerOrAbove() {
+    return requireRole([AdminRole.SUPER_ADMIN, AdminRole.EVENT_MANAGER]);
 }

@@ -6,6 +6,7 @@ import { prisma } from "@/lib/db";
 import { auth } from "@/lib/auth";
 import { formatInTimeZone, fromZonedTime } from "date-fns-tz";
 import { EventUniversityManager } from "@/components/admin/events/event-university-manager";
+import { requireManagerOrAbove } from "@/lib/role-check";
 
 // Get countries for the form dropdown
 async function getCountries() {
@@ -157,6 +158,7 @@ async function getAllUniversities() {
 }
 
 export default async function EditEventPage({ params }: { params: Promise<{ id: string }> }) {
+    await requireManagerOrAbove();
     const { id } = await params;
     const [event, countries, allUniversities] = await Promise.all([
         getEvent(id),

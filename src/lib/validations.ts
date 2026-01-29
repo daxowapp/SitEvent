@@ -1,4 +1,5 @@
 import { z } from "zod";
+import DOMPurify from "isomorphic-dompurify";
 
 // Registration form schema
 export const registrationSchema = z.object({
@@ -42,6 +43,18 @@ export const eventSchema = z.object({
     registrationCloseAt: z.string().datetime().optional(),
     capacity: z.number().int().positive().optional(),
     status: z.enum(["DRAFT", "PUBLISHED", "FINISHED"]).default("DRAFT"),
+    // Tracking Scripts - Sanitized to prevent XSS
+    customHeadScript: z.string().optional().transform((val) => val ? DOMPurify.sanitize(val) : val),
+    customBodyScript: z.string().optional().transform((val) => val ? DOMPurify.sanitize(val) : val),
+    
+    // Pixel IDs
+    gaTrackingId: z.string().optional(),
+    fbPixelId: z.string().optional(),
+    linkedInPartnerId: z.string().optional(),
+    tiktokPixelId: z.string().optional(),
+    snapPixelId: z.string().optional(),
+    zohoLeadSource: z.string().optional(),
+    zohoCampaignId: z.string().optional(),
 });
 
 export type EventFormData = z.infer<typeof eventSchema>;

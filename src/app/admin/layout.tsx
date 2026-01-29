@@ -4,6 +4,8 @@ import { AdminSidebar, AdminMobileNav } from "@/components/admin/sidebar";
 import { Inter, Playfair_Display } from "next/font/google"; // Import fonts
 import "../globals.css"; // Import globals
 import { Toaster } from "@/components/ui/sonner";
+import { AdminRole } from "@prisma/client";
+import { headers } from "next/headers";
 
 const inter = Inter({
     subsets: ["latin"],
@@ -29,8 +31,25 @@ export default async function AdminLayout({
         redirect("/login");
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const role = session.user.role;
+    // Check if user is an admin type (not UNIVERSITY)
+    const userType = (session.user as any).type;
+    if (userType !== "ADMIN") {
+        redirect("/login");
+    }
+
+    const role = session.user.role as AdminRole;
+
+    // Get current path to check if staff/usher is accessing restricted pages
+    const headersList = await headers();
+    const pathname = headersList.get("x-pathname") || headersList.get("x-invoke-path") || "";
+    
+    // EVENT_STAFF and USHER can only access /admin/scan
+    if (role === AdminRole.EVENT_STAFF || role === AdminRole.USHER) {
+        // Allow only scan page for staff/usher
+        if (!pathname.includes("/admin/scan") && pathname !== "/admin/scan") {
+            redirect("/admin/scan");
+        }
+    }
 
     return (
         <html lang="en" className={`${inter.variable}`}>

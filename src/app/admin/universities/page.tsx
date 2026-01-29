@@ -4,8 +4,10 @@ import { Plus, GraduationCap, Calendar, Users, Globe, Edit, ExternalLink } from 
 import Link from "next/link";
 import { getUniversities } from "./actions";
 import { Badge } from "@/components/ui/badge";
+import { requireManagerOrAbove } from "@/lib/role-check";
 
 export default async function UniversitiesPage() {
+    await requireManagerOrAbove();
     const universities = await getUniversities();
 
     return (

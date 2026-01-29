@@ -4,12 +4,15 @@ import { Plus, MapPin, Calendar, Building2, Globe } from "lucide-react";
 import Link from "next/link";
 import { getCities } from "./actions";
 import { getCountries } from "../countries/actions";
+import { requireRole } from "@/lib/role-check";
+import { AdminRole } from "@prisma/client";
 
 interface PageProps {
     searchParams: Promise<{ countryId?: string }>;
 }
 
 export default async function CitiesPage({ searchParams }: PageProps) {
+    await requireRole([AdminRole.SUPER_ADMIN]);
     const params = await searchParams;
     const [cities, countries] = await Promise.all([
         getCities(params.countryId),

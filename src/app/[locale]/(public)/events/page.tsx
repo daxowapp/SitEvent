@@ -79,7 +79,6 @@ function isDatabaseConfigured(): boolean {
 
 async function getEvents(): Promise<DisplayEvent[]> {
     if (!isDatabaseConfigured()) {
-        console.log("Database not configured, using mock data");
         return MOCK_EVENTS;
     }
 
@@ -89,8 +88,7 @@ async function getEvents(): Promise<DisplayEvent[]> {
             where: { status: "PUBLISHED" },
             orderBy: { startDateTime: "asc" },
         });
-    } catch (error) {
-        console.error("Database error, using mock data:", error);
+    } catch {
         return MOCK_EVENTS;
     }
 }

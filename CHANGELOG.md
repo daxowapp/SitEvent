@@ -2,9 +2,34 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.2.2] - 2026-01-29
+
+### Security
+
+- **Critical: Admin Access Control Fix**
+  - Fixed vulnerability where any logged-in user (including University users) could access all admin pages
+  - Added role-based access control to admin layout - blocks non-admin users at the layout level
+  - Added `requireRole()` checks to 18 previously unprotected admin pages
+  - Added `requireAdmin()` and `requireManagerOrAbove()` helper functions
+  - Added role checks to admin API routes (`/api/admin/events`, `/api/admin/checkin`)
+- **API Security**
+  - Protected debug/test endpoints (`/api/debug-db`, `/api/test-whatsapp`) from production access
+  - Added rate limiting to registration API (5 requests/minute per IP)
+  - Added input sanitization for script fields using `isomorphic-dompurify`
+  - Added comprehensive security headers (HSTS, X-Frame-Options, etc.)
+
+### Changed
+
+- Updated `role-check.ts` with additional helper functions and USHER role handling
+- Admin layout now verifies user type is "ADMIN" before granting access
+- Removed sensitive `console.log` statements from production code
+- Added error boundaries for graceful error handling in Admin and Public pages
+- Added loading skeletons for Admin pages
+
 ## [0.2.1] - 2026-01-23
 
 ### Fixed
+
 - **Admin UI Polish**
   - **Event Analytics**: Added dedicated dashboard for each event with visualizations for Daily Growth (Area Chart), Traffic Sources (Pie Chart), and KPI Cards (Conversion Rates).
   - **Filter Redesign**: Replaced legacy dropdowns with professional "Faceted Filters" (Toolbar style) on the Registrations page. Features multi-select capabilities and a cleaner "Reset" workflow.
@@ -12,6 +37,7 @@ All notable changes to this project will be documented in this file.
   - Fixed Admin Page Titles using a global metadata template (`Page | SitConnect Admin`) for Events and Registrations pages.
 
 ### Added
+
 - **UTM Tracking Visibility**
   - Added "Source", "Medium", and "Campaign" columns to Admin Registrations table.
   - Added "Top Sources" widget to Registrations Dashboard for real-time marketing performance tracking.
@@ -37,6 +63,7 @@ All notable changes to this project will be documented in this file.
   - Replaced "EduFairs" branding in admin sidebar and mobile navigation with **"SitConnect"** and official logo.
 
 ### Changed
+
 - **Footer Updates**
   - Updated contact information (Email: Mahmoud@sitconnect.net, Phone: +20 106 271 7279).
   - Updated social media links (Facebook, Instagram, LinkedIn, Twitter) to point to `@studyintk`.
@@ -51,6 +78,7 @@ All notable changes to this project will be documented in this file.
 ## [0.2.0] - 2026-01-22
 
 ### Added
+
 - **Multi-Language Support (i18n) - NEW**
   - 3 languages: English (en), Turkish (tr), Arabic (ar) with RTL support
   - next-intl integration with URL-based locale detection (`/`, `/tr/`, `/ar/`)
@@ -102,6 +130,7 @@ All notable changes to this project will be documented in this file.
   - Fallback to English for missing translations
 
 ### Fixed
+
 - **Event Form Infinite Loop Bug** - Fixed Select components causing maximum update depth exceeded error by using empty string fallbacks for undefined values
 - Added missing countries prop to event edit page
 
@@ -133,6 +162,7 @@ All notable changes to this project will be documented in this file.
   - Sidebar navigation for Countries, Cities, Universities
 
 ### Fixed
+
 - Analytics route check-in query (corrected to use `checkIn` relation)
 - University dashboard event participation query
 - Auth adapter type compatibility with next-auth beta
@@ -141,6 +171,7 @@ All notable changes to this project will be documented in this file.
 ## [0.1.0] - 2026-01-21
 
 ### Added
+
 - **Project Initialization**
   - Next.js 15 with TypeScript, Tailwind CSS, and App Router
   - Prisma ORM with PostgreSQL (Supabase compatible)
@@ -211,5 +242,6 @@ All notable changes to this project will be documented in this file.
   - Supabase connection pooling support
 
 ### Configuration
+
 - Environment variables template (`.env.example`)
 - Prisma scripts: generate, migrate, seed, push, studio
