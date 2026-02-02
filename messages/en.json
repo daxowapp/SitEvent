@@ -277,7 +277,8 @@
             "address": "Istanbul, Türkiye"
         },
         "copyright": "© {year} Sit Connect. All rights reserved.",
-        "organizedBy": "Organized by"
+        "organizedBy": "Organized by",
+        "poweredBy": "Powered by"
     },
     "languages": {
         "en": "English",

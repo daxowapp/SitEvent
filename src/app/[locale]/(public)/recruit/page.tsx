@@ -1,6 +1,7 @@
 import { getTranslations } from 'next-intl/server';
 import { setRequestLocale } from 'next-intl/server';
 import { ExhibitorForm } from "@/components/public/exhibitor-form";
+import { CalendarDownloadButton } from "@/components/public/calendar-download-button";
 import { Check, Calendar, MapPin, Users, TrendingUp, ArrowRight, Sparkles, Globe, Target } from "lucide-react";
 import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
@@ -226,7 +227,7 @@ export default async function RecruitPage({
                             <span className="text-primary font-bold tracking-widest uppercase text-sm mb-2 block">{t('schedule.badge')}</span>
                             <h2 className="font-display text-4xl md:text-5xl font-bold text-foreground">{t('schedule.title')}</h2>
                         </div>
-                        <Button variant="outline" className="rounded-full">{t('schedule.downloadCalendar')}</Button>
+                        <CalendarDownloadButton events={events} label={t('schedule.downloadCalendar')} />
                     </div>
 
                     <div className="space-y-3">

@@ -20,6 +20,17 @@ All notable changes to this project will be documented in this file.
 - **Leads Management**: Added client-side pagination (10 items/page), unified search/filter toolbar, and column width optimizations.
 - **Admin Event Analytics**: Updated `/admin/events/[id]/analytics` to include the new AI-driven charts, ensuring consistency with the University dashboard.
 
+### Fixed
+
+- **Deployment Fixes**
+  - Resolved `Users` icon missing import in Admin Dashboard.
+  - Fixed malformed CSS regex in global styles causing build failures.
+  - Fixed TypeScript type mismatch in Analytics Charts (`PieLabel`).
+- **Functionality**
+  - **Dynamic University Count**: Home page now displays real-time count of active universities from database.
+  - **Recruit Page**: Fixed broken "Download Full Calendar" button by implementing client-side ICS generation.
+  - **Footer**: Updated "Organized by" text to "Powered by" with correct localization keys (EN/TR/AR).
+
 ## [0.2.2] - 2026-01-29
 
 ### Security

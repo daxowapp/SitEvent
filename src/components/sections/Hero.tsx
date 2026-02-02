@@ -9,9 +9,10 @@ import { useRouter, usePathname } from "@/i18n/routing";
 interface HeroProps {
     initialQuery?: string;
     popularSearchTerms?: string[];
+    universityCount?: number;
 }
 
-const Hero = ({ initialQuery = "", popularSearchTerms = [] }: HeroProps) => {
+const Hero = ({ initialQuery = "", popularSearchTerms = [], universityCount }: HeroProps) => {
     const t = useTranslations('home.hero');
     const [searchQuery, setSearchQuery] = useState(initialQuery);
     const router = useRouter();
@@ -109,7 +110,7 @@ const Hero = ({ initialQuery = "", popularSearchTerms = [] }: HeroProps) => {
                     {/* Stats */}
                     <div className="grid grid-cols-3 gap-8 mt-8 pb-12 max-w-xl mx-auto animate-fade-up" style={{ animationDelay: "0.4s" }}>
                         <div className="text-center">
-                            <div className="text-3xl md:text-4xl font-bold text-primary-foreground mb-1">50+</div>
+                            <div className="text-3xl md:text-4xl font-bold text-primary-foreground mb-1">{universityCount ? `${universityCount}+` : "40+"}</div>
                             <div className="text-sm text-primary-foreground/70">{t('stats.unis')}</div>
                         </div>
                         <div className="text-center border-x border-primary-foreground/20">

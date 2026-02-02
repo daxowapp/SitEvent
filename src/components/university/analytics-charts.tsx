@@ -160,7 +160,7 @@ export function AnalyticsCharts({ leadsOverTime, topMajors, studyLevels, categor
                                     cx="50%"
                                     cy="50%"
                                     labelLine={false}
-                                    label={({ name, percent }: { name: string; percent: number }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                                    label={({ name, percent }: { name?: string; percent?: number }) => `${name || ''} ${(percent ? (percent * 100).toFixed(0) : '0')}%`}
                                     outerRadius={100}
                                     fill="#8884d8"
                                     dataKey="count"

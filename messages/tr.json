@@ -232,7 +232,8 @@
             "address": "İstanbul, Türkiye"
         },
         "copyright": "© {year} Sit Connect. Tüm hakları saklıdır.",
-        "organizedBy": "Organize eden"
+        "organizedBy": "Organize eden",
+        "poweredBy": "Powered by"
     },
     "languages": {
         "en": "İngilizce",

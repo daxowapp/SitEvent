@@ -145,9 +145,9 @@ const Footer = () => {
                     <div className="flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-background/60">
                         <p>{t('copyright', { year: new Date().getFullYear() })}</p>
                         <p>
-                            {t('organizedBy')}{" "}
+                            {t('poweredBy')}{" "}
                             <a href="https://fuarinn.com/" target="_blank" rel="noopener noreferrer" className="text-accent hover:underline">
-                                By Fuar inn
+                                Fuar inn
                             </a>
                         </p>
                     </div>

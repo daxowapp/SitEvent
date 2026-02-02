@@ -277,7 +277,8 @@
             "address": "إسطنبول، تركيا"
         },
         "copyright": "© {year} Sit Connect. جميع الحقوق محفوظة.",
-        "organizedBy": "تنظيم بواسطة"
+        "organizedBy": "تنظيم بواسطة",
+        "poweredBy": "مشغل بواسطة"
     },
     "languages": {
         "en": "الإنجليزية",

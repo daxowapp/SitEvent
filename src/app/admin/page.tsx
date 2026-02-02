@@ -4,7 +4,7 @@ import { StatCard } from "@/components/admin/dashboard/stat-card";
 import { GeoMap } from "@/components/admin/dashboard/geo-map";
 import { ActivityTimeline } from "@/components/admin/dashboard/activity-timeline";
 import { RegistrationChart, EventStatusChart } from "@/components/admin/dashboard/overview-charts";
-import { Plus, Scan, BarChart3, Settings } from "lucide-react";
+import { Plus, Scan, BarChart3, Settings, Users } from "lucide-react";
 import { requireManagerOrAbove } from "@/lib/role-check";
 
 export default async function AdminDashboardPage() {
@@ -25,7 +25,7 @@ export default async function AdminDashboardPage() {
                         {greeting}
                     </h1>
                     <p className="text-slate-500 mt-2 font-['Outfit']">
-                        Here's what's happening across your events today
+                        Here&apos;s what&apos;s happening across your events today
                     </p>
                 </div>
 

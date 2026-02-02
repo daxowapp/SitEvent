@@ -47,7 +47,7 @@ async function getUpcomingEvents(searchQuery?: string): Promise<DisplayEvent[]> 
         });
 
         return events;
-    } catch (error) {
+    } catch {
         console.warn("Database unavailable");
         return [];
     }
@@ -83,7 +83,7 @@ async function getEventStats() {
         const { prisma } = await import("@/lib/db");
 
         // Parallel queries
-        const [countries, topUniversities] = await Promise.all([
+        const [countries, topUniversities, universityCount] = await Promise.all([
             prisma.event.findMany({
                 where: { status: "PUBLISHED" },
                 select: { country: true },
@@ -93,6 +93,9 @@ async function getEventStats() {
                 take: 6,
                 select: { id: true, name: true, logoUrl: true },
                 orderBy: { name: 'asc' } // Or random/popularity if available
+            }),
+            prisma.university.count({
+                where: { isActive: true }
             })
         ]);
 
@@ -103,10 +106,11 @@ async function getEventStats() {
         return {
             countryCount: countryList.length || 5,
             countryList: countryList.length > 0 ? countryList : ["Türkiye", "Germany", "UK", "Netherlands", "USA"],
-            universities: topUniversities
+            universities: topUniversities,
+            universityCount
         };
-    } catch (error) {
-        return { countryCount: 5, countryList: ["Türkiye", "Germany", "UK"], universities: [] };
+    } catch {
+        return { countryCount: 5, countryList: ["Türkiye", "Germany", "UK"], universities: [], universityCount: 0 };
     }
 }
 
@@ -132,7 +136,7 @@ export default async function HomePage({
     return (
         <div className="min-h-screen bg-background">
             <main>
-                <Hero initialQuery={q} popularSearchTerms={stats.countryList} />
+                <Hero initialQuery={q} popularSearchTerms={stats.countryList} universityCount={stats.universityCount} />
                 <EventsSection upcomingEvents={upcomingEvents} pastEvents={pastEvents} />
                 <HowItWorks />
                 <StatsSection countryCount={stats.countryCount} countryList={stats.countryList} />
