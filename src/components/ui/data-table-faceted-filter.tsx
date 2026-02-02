@@ -93,6 +93,7 @@ export function DataTableFacetedFilter<TData, TValue>({
                                 return (
                                     <CommandItem
                                         key={option.value}
+                                        value={option.label}
                                         onSelect={() => {
                                             // Toggle behavior for strictly single select? 
                                             // Or treating as radio? 

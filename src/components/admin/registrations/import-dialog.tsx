@@ -70,16 +70,42 @@ export function ImportRegistrationsDialog({ eventId, events, onSuccess }: Import
     }
 
     const parseFile = async (file: File): Promise<any[]> => {
-        const XLSX = await import("xlsx")
+        // Use Papaparse for CSV files
+        if (file.type === "text/csv" || file.name.endsWith(".csv")) {
+            const Papa = (await import("papaparse")).default
+            return new Promise((resolve, reject) => {
+                Papa.parse(file, {
+                    header: true,
+                    skipEmptyLines: true,
+                    complete: (results) => {
+                        resolve(results.data)
+                    },
+                    error: (error) => {
+                        reject(error)
+                    }
+                })
+            })
+        }
+
+        // Use XLSX for Excel files
+        const importedModule = await import("xlsx")
+        console.log("Dynamic import result:", importedModule)
+        const read = importedModule.read || importedModule.default?.read
+        const utils = importedModule.utils || importedModule.default?.utils
+        
+        if (!read || !utils) {
+            throw new Error("Could not load XLSX library correctly")
+        }
+
         return new Promise((resolve, reject) => {
             const reader = new FileReader()
             reader.onload = (e) => {
                 try {
                     const data = e.target?.result
-                    const workbook = XLSX.read(data, { type: "binary" })
+                    const workbook = read(data, { type: "binary" })
                     const sheetName = workbook.SheetNames[0]
                     const sheet = workbook.Sheets[sheetName]
-                    const jsonData = XLSX.utils.sheet_to_json(sheet)
+                    const jsonData = utils.sheet_to_json(sheet)
                     resolve(jsonData)
                 } catch (err) {
                     reject(err)

@@ -43,7 +43,7 @@ export function AdminSidebar({ user }: { user: any }) {
             <div className="flex h-16 items-center border-b border-gray-800 px-6">
                 <Link href="/admin" className="flex items-center gap-2 font-bold text-xl">
                     <img src="/logo-red.svg" alt="SitConnect" className="h-6 w-auto mix-blend-screen" />
-                    <span>SitConnect</span>
+                    {/* <span>SitConnect</span> */}
                 </Link>
             </div>
 
@@ -146,7 +146,7 @@ export function AdminMobileNav({ user }: { user: any }) {
             <div className="flex flex-1 items-center justify-between">
                 <Link href="/admin" className="flex items-center gap-2 font-bold">
                     <img src="/logo-red.svg" alt="SitConnect" className="h-6 w-auto mix-blend-screen" />
-                    <span>SitConnect</span>
+                    {/* <span>SitConnect</span> */}
                 </Link>
             </div>
         </header>
