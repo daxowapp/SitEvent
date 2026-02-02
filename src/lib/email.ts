@@ -307,3 +307,39 @@ export async function sendExhibitorInquiryEmail(params: SendExhibitorInquiryPara
     return { success: false, error: error instanceof Error ? error.message : "Unknown error" };
   }
 }
+
+export async function sendUniversityAccessRequestEmail(
+  universityName: string,
+  eventId: string,
+  eventName: string
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const { data, error } = await resend.emails.send({
+      from: process.env.RESEND_FROM_EMAIL || "Events Team <onboarding@resend.dev>",
+      to: ["Mahmoud@sitconnect.com", "ahmed@sitconnect.net"],
+      subject: `New University Access Request: ${universityName}`,
+      html: `
+        <div style="font-family: sans-serif; padding: 20px;">
+          <h1 style="color: #E30A17;">University Access Request</h1>
+          <div style="background: #f9fafb; padding: 20px; border-radius: 8px; border: 1px solid #e5e7eb;">
+            <p><strong>University:</strong> ${universityName}</p>
+            <p><strong>Event:</strong> ${eventName} (ID: ${eventId})</p>
+            <p><strong>Status:</strong> REQUESTED</p>
+          </div>
+          <br />
+          <p>Please log in to the admin panel to review and approve this request.</p>
+        </div>
+      `
+    });
+
+    if (error) {
+      console.error("Resend error:", error);
+      throw new Error(error.message);
+    }
+
+    return { success: true };
+  } catch (error) {
+    console.error("Failed to send university access request email:", error);
+    return { success: false, error: error instanceof Error ? error.message : "Unknown error" };
+  }
+}

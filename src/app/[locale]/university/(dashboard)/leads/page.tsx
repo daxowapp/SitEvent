@@ -20,7 +20,8 @@ export default async function UniversityLeadsPage() {
             event: {
                 universities: {
                     some: {
-                        universityId: universityId
+                        universityId: universityId,
+                        status: { in: ["ACCEPTED", "INVITED"] }
                     }
                 }
             }

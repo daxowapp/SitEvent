@@ -8,8 +8,6 @@ import {
     CartesianGrid,
     Cell,
     Legend,
-    Line,
-    LineChart,
     Pie,
     PieChart,
     ResponsiveContainer,
@@ -18,8 +16,7 @@ import {
     YAxis,
 } from "recharts"
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 
 // --- Growth Chart ---
 interface GrowthChartProps {
@@ -114,7 +111,7 @@ export function SourcesChart({ data }: SourcesChartProps) {
                     cx="50%"
                     cy="50%"
                     labelLine={false}
-                    label={({ name, percent }: any) => `${name} ${(percent * 100).toFixed(0)}%`}
+                    label={({ name, percent }: { name?: string; percent: number }) => `${name || ''} ${(percent * 100).toFixed(0)}%`}
                     outerRadius={100}
                     fill="#8884d8"
                     dataKey="value"
@@ -139,6 +136,7 @@ interface OverviewStatsProps {
 }
 
 export function OverviewStats({ totalRegistrations, checkInCount, conversionRate, topSource }: OverviewStatsProps) {
+
     return (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
             <Card>
@@ -187,4 +185,64 @@ export function OverviewStats({ totalRegistrations, checkInCount, conversionRate
             </Card>
         </div>
     )
+}
+// --- Gender Chart ---
+interface GenderChartProps {
+    data: { name: string; count: number }[];
+}
+
+export function GenderChart({ data }: GenderChartProps) {
+    return (
+        <ResponsiveContainer width="100%" height={300}>
+            <PieChart>
+                <Pie
+                    data={data}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={60}
+                    outerRadius={100}
+                    fill="#8884d8"
+                    dataKey="count"
+                    paddingAngle={5}
+                    label
+                >
+                    {data.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.name === 'Male' ? '#3b82f6' : entry.name === 'Female' ? '#ec4899' : '#9ca3af'} />
+                    ))}
+                </Pie>
+                <Tooltip />
+                <Legend />
+            </PieChart>
+        </ResponsiveContainer>
+    );
+}
+
+// --- Horizontal Bar Chart (Categories / Majors) ---
+interface HorizontalBarChartProps {
+    data: { name: string; count: number }[];
+    color?: string;
+}
+
+export function HorizontalBarChart({ data, color = "#8884d8" }: HorizontalBarChartProps) {
+    return (
+        <ResponsiveContainer width="100%" height={300}>
+            <BarChart data={data} layout="vertical" margin={{ left: 10, right: 10, top: 10, bottom: 10 }}>
+                <XAxis type="number" hide />
+                <YAxis 
+                    dataKey="name" 
+                    type="category" 
+                    stroke="#888888" 
+                    fontSize={11} 
+                    tickLine={false} 
+                    axisLine={false} 
+                    width={90}
+                />
+                <Tooltip 
+                    cursor={{ fill: 'transparent' }}
+                    contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
+                />
+                <Bar dataKey="count" fill={color} radius={[0, 4, 4, 0]} name="Students" barSize={32} />
+            </BarChart>
+        </ResponsiveContainer>
+    );
 }

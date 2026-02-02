@@ -10,7 +10,7 @@ import { requireManagerOrAbove } from "@/lib/role-check";
 export default async function AdminDashboardPage() {
     await requireManagerOrAbove();
     const data = await getDashboardData();
-    const { stats, trendData, statusCounts, recentActivity, actionOverview, geoData } = data;
+    const { stats, trendData, statusCounts, recentActivity, actionOverview, geoData, aiStats } = data;
 
     // Time-based greeting
     const hour = new Date().getHours();
@@ -124,6 +124,35 @@ export default async function AdminDashboardPage() {
                             Event Status
                         </h3>
                         <EventStatusChart data={statusCounts} />
+                    </div>
+                </div>
+            </div>
+            
+            {/* Audience Insights */}
+            <div className="grid grid-cols-12 gap-6 mb-6">
+                {/* Major Categories */}
+                <div className="col-span-12 lg:col-span-6">
+                     <div className="rounded-2xl bg-white border border-slate-200 p-6 h-full shadow-sm">
+                        <h3 className="text-lg font-semibold text-slate-900 font-['Outfit'] flex items-center gap-2 mb-6">
+                            <BarChart3 className="w-5 h-5 text-indigo-600" />
+                            Interest Categories
+                        </h3>
+                        <div className="flex justify-center">
+                             <EventStatusChart data={aiStats.categories} />
+                        </div>
+                    </div>
+                </div>
+
+                {/* Gender Distribution */}
+                <div className="col-span-12 lg:col-span-6">
+                     <div className="rounded-2xl bg-white border border-slate-200 p-6 h-full shadow-sm">
+                        <h3 className="text-lg font-semibold text-slate-900 font-['Outfit'] flex items-center gap-2 mb-6">
+                            <Users className="w-5 h-5 text-pink-600" />
+                            Gender Distribution
+                        </h3>
+                        <div className="flex justify-center">
+                             <EventStatusChart data={aiStats.gender} />
+                        </div>
                     </div>
                 </div>
             </div>

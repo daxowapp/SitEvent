@@ -215,6 +215,9 @@ model Registrant {
   nationality      String?
   levelOfStudy     String?
   interestedMajor  String?
+  standardizedMajor String? // AI-normalized major (e.g. Dentistry)
+  majorCategory    String?  // AI-broad category (e.g. Health)
+  gender           String?  // AI-inferred gender
   consentAccepted  Boolean
   consentTimestamp DateTime
   utmSource        String?

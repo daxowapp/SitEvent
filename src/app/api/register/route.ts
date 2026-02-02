@@ -253,6 +253,26 @@ export async function POST(request: NextRequest) {
             }).catch(console.error);
         });
 
+        // AI Data Enrichment (Awaited for consistency)
+        try {
+            const { enrichRegistrantData } = await import("@/lib/ai");
+            const enriched = await enrichRegistrantData(data.fullName, data.interestedMajor || null);
+            
+            if (enriched.gender || enriched.standardizedMajor) {
+                await prisma.registrant.update({
+                    where: { id: registrant.id },
+                    data: {
+                        gender: enriched.gender,
+                        standardizedMajor: enriched.standardizedMajor,
+                        majorCategory: enriched.majorCategory
+                    }
+                });
+            }
+        } catch (e) {
+            console.error("AI Enrichment error:", e);
+            // Continue execution, don't fail registration
+        }
+
         return NextResponse.json({
             success: true,
             registrationId: registration.id,

@@ -93,11 +93,9 @@ export function DataTableFacetedFilter<TData, TValue>({
                                 return (
                                     <CommandItem
                                         key={option.value}
-                                        value={option.label}
+                                        value={option.value}
+                                        keywords={[option.label, option.value]}
                                         onSelect={() => {
-                                            // Toggle behavior for strictly single select? 
-                                            // Or treating as radio? 
-                                            // Current requirement is replacement for Select, so behave like radio that can be deselected
                                             if (isSelected) {
                                                 onSelect(null)
                                             } else {
@@ -105,6 +103,7 @@ export function DataTableFacetedFilter<TData, TValue>({
                                             }
                                         }}
                                     >
+
                                         <div
                                             className={cn(
                                                 "mr-2 flex h-4 w-4 items-center justify-center rounded-sm border border-primary",

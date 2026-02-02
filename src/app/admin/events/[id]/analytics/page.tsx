@@ -89,12 +89,61 @@ export default async function EventAnalyticsPage({ params }: PageProps) {
     // Find top source
     const topSource = sources.length > 0 ? sources[0].name : "None";
 
+    // 4. Fetch AI Enrichment Data
+    // Gender Distribution
+    const genderGroups = await prisma.registrant.groupBy({
+        by: ['gender'],
+        where: {
+            registrations: { some: { eventId: id } }
+        },
+        _count: { gender: true }
+    });
+    const genders = genderGroups.map(g => ({
+        name: g.gender || "Unknown",
+        count: g._count.gender
+    }));
+
+    // Top Majors (Standardized)
+    const majorGroups = await prisma.registrant.groupBy({
+        by: ['standardizedMajor'],
+        where: {
+            registrations: { some: { eventId: id } },
+            standardizedMajor: { not: null }
+        },
+        _count: { standardizedMajor: true },
+        orderBy: { _count: { standardizedMajor: 'desc' } },
+        take: 5
+    });
+    const topMajors = majorGroups.map(g => ({
+        name: g.standardizedMajor || "Unknown",
+        count: g._count.standardizedMajor
+    }));
+
+    // Interest Categories
+    const categoryGroups = await prisma.registrant.groupBy({
+        by: ['majorCategory'],
+        where: {
+            registrations: { some: { eventId: id } },
+            majorCategory: { not: null }
+        },
+        _count: { majorCategory: true },
+        orderBy: { _count: { majorCategory: 'desc' } },
+        take: 6
+    });
+    const categories = categoryGroups.map(g => ({
+        name: g.majorCategory || "Uncategorized",
+        count: g._count.majorCategory
+    }));
+
     const analyticsData = {
         totalRegistrations,
         checkInCount,
         dailyGrowth,
         sources,
-        topSource
+        topSource,
+        genders,
+        topMajors,
+        categories
     };
 
     return (

@@ -93,6 +93,31 @@ export async function getDashboardData() {
         createdAt: r.createdAt
     }));
 
+    // 7. AI Groups
+    // Top Majors
+    const topMajors = await prisma.registrant.groupBy({
+        by: ['standardizedMajor'],
+        _count: { standardizedMajor: true },
+        where: { standardizedMajor: { not: null } },
+        orderBy: { _count: { standardizedMajor: 'desc' } },
+        take: 5
+    });
+
+    // Category Distribution
+    const majorCategories = await prisma.registrant.groupBy({
+        by: ['majorCategory'],
+        _count: { majorCategory: true },
+        where: { majorCategory: { not: null } },
+        orderBy: { _count: { majorCategory: 'desc' } }
+    });
+
+    // Gender Distribution
+    const genderDist = await prisma.registrant.groupBy({
+        by: ['gender'],
+        _count: { gender: true },
+        where: { gender: { not: null } }
+    });
+
     return {
         trendData,
         statusCounts: statusCounts.map(s => ({ name: s.status, value: s._count.status })),
@@ -107,6 +132,11 @@ export async function getDashboardData() {
             registrationsLastHour,
             pendingApprovals: pendingUniversityRequests,
         },
-        geoData
+        geoData,
+        aiStats: {
+            topMajors: topMajors.map(m => ({ name: m.standardizedMajor || "Unknown", value: m._count.standardizedMajor })),
+            categories: majorCategories.map(c => ({ name: c.majorCategory || "Unknown", value: c._count.majorCategory })),
+            gender: genderDist.map(g => ({ name: g.gender || "Unknown", value: g._count.gender }))
+        }
     };
 }

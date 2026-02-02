@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.2.3] - 2026-02-02
+
+### Added
+
+- **AI Enrichment**: Implemented `ai-enrichment.ts` to automatically standardize major names, categorize interests, and deduce gender from names upon registration.
+- **University Analytics**: Added AI-powered charts for Gender Distribution, Top Majors, and Interest Categories.
+- **Backfill Script**: Added `scripts/backfill-ai-leads.ts` to enrich historical lead data.
+
+### Changed
+
+- **University Leads UI**: Completely redesigned `/university/leads` with a premium card-based layout, improved typography, and badges.
+- **Leads Management**: Added client-side pagination (10 items/page), unified search/filter toolbar, and column width optimizations.
+- **Admin Event Analytics**: Updated `/admin/events/[id]/analytics` to include the new AI-driven charts, ensuring consistency with the University dashboard.
+
 ## [0.2.2] - 2026-01-29
 
 ### Security
@@ -245,5 +259,3 @@ All notable changes to this project will be documented in this file.
 
 - Environment variables template (`.env.example`)
 - Prisma scripts: generate, migrate, seed, push, studio
-2026-02-02 - Feature - Added Lead Import API and n8n Workflow
-2026-02-02 - Feature - Added Admin CSV Import for Registrations

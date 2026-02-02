@@ -84,6 +84,8 @@ export function RegistrationsTable({
                             <TableHead>Event</TableHead>
                             <TableHead>Full Name</TableHead>
                             <TableHead>Email</TableHead>
+                            <TableHead>Gender</TableHead>
+                            <TableHead>Interest</TableHead>
                             <TableHead>Source / Medium</TableHead>
                             <TableHead>Campaign</TableHead>
                             <TableHead>Date</TableHead>
@@ -99,6 +101,29 @@ export function RegistrationsTable({
                                 </TableCell>
                                 <TableCell>{reg.registrant.fullName}</TableCell>
                                 <TableCell>{reg.registrant.email}</TableCell>
+                                <TableCell>
+                                    <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${
+                                        reg.registrant.gender === 'Female' 
+                                            ? 'bg-pink-50 text-pink-700' 
+                                            : reg.registrant.gender === 'Male'
+                                            ? 'bg-blue-50 text-blue-700'
+                                            : 'bg-gray-100 text-gray-600'
+                                    }`}>
+                                        {reg.registrant.gender || '-'}
+                                    </span>
+                                </TableCell>
+                                <TableCell>
+                                    <div className="flex flex-col max-w-[200px]">
+                                        <span className="text-sm font-medium truncate" title={reg.registrant.interestedMajor || ""}>
+                                            {reg.registrant.interestedMajor || "Undecided"}
+                                        </span>
+                                        {reg.registrant.majorCategory && (
+                                            <span className="text-xs text-slate-500 mt-0.5">
+                                                {reg.registrant.majorCategory}
+                                            </span>
+                                        )}
+                                    </div>
+                                </TableCell>
                                 <TableCell>
                                     {reg.registrant.utmSource ? (
                                         <div className="flex flex-col">
