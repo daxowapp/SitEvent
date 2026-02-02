@@ -15,6 +15,7 @@ interface DisplayEvent {
     bannerImageUrl: string | null;
     startDateTime: Date;
     status: string;
+    universityCount?: number;
 }
 
 interface EventsSectionProps {
@@ -56,6 +57,7 @@ const EventsSection = ({ upcomingEvents, pastEvents }: EventsSectionProps) => {
                                 slug={event.slug}
                                 bannerImageUrl={event.bannerImageUrl}
                                 isPast={false}
+                                universityCount={event.universityCount}
                             />
                         ))
                     ) : (

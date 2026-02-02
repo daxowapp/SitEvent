@@ -28,6 +28,7 @@ All notable changes to this project will be documented in this file.
   - Fixed TypeScript type mismatch in Analytics Charts (`PieLabel`).
 - **Functionality**
   - **Dynamic University Count**: Home page now displays real-time count of active universities from database.
+  - **Event Card**: Fixed "Universities Participating" count to be dynamic (previously hardcoded to 40).
   - **Recruit Page**: Fixed broken "Download Full Calendar" button by implementing client-side ICS generation.
   - **Footer**: Updated "Organized by" text to "Powered by" with correct localization keys (EN/TR/AR).
 

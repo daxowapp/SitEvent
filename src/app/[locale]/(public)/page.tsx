@@ -17,6 +17,7 @@ interface DisplayEvent {
     bannerImageUrl: string | null;
     startDateTime: Date;
     status: string;
+    universityCount: number;
 }
 
 async function getUpcomingEvents(searchQuery?: string): Promise<DisplayEvent[]> {
@@ -44,9 +45,17 @@ async function getUpcomingEvents(searchQuery?: string): Promise<DisplayEvent[]> 
             where,
             orderBy: { startDateTime: "asc" },
             take: 6,
+            include: {
+                _count: {
+                    select: { universities: true }
+                }
+            }
         });
 
-        return events;
+        return events.map(event => ({
+            ...event,
+            universityCount: event._count.universities
+        }));
     } catch {
         console.warn("Database unavailable");
         return [];
@@ -67,8 +76,16 @@ async function getPastEvents(): Promise<DisplayEvent[]> {
             },
             orderBy: { startDateTime: "desc" },
             take: 3,
+            include: {
+                _count: {
+                    select: { universities: true }
+                }
+            }
         });
-        return events;
+        return events.map(event => ({
+            ...event,
+            universityCount: event._count.universities
+        }));
     } catch {
         return [];
     }
