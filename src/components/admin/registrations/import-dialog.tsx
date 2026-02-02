@@ -14,7 +14,6 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Loader2, Upload, FileSpreadsheet, CheckCircle2, AlertCircle, RefreshCw } from "lucide-react"
-import { read, utils } from "xlsx"
 import { toast } from "sonner"
 import { 
     Table, 
@@ -70,16 +69,17 @@ export function ImportRegistrationsDialog({ eventId, events, onSuccess }: Import
         }
     }
 
-    const parseFile = (file: File): Promise<any[]> => {
+    const parseFile = async (file: File): Promise<any[]> => {
+        const XLSX = await import("xlsx")
         return new Promise((resolve, reject) => {
             const reader = new FileReader()
             reader.onload = (e) => {
                 try {
                     const data = e.target?.result
-                    const workbook = read(data, { type: "binary" })
+                    const workbook = XLSX.read(data, { type: "binary" })
                     const sheetName = workbook.SheetNames[0]
                     const sheet = workbook.Sheets[sheetName]
-                    const jsonData = utils.sheet_to_json(sheet)
+                    const jsonData = XLSX.utils.sheet_to_json(sheet)
                     resolve(jsonData)
                 } catch (err) {
                     reject(err)

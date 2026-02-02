@@ -1,0 +1,4 @@
+Name,Email,Phone,Country,City
+Test Student 1,test1@example.com,+1234567891,Turkey,Istanbul
+Test Student 2,test2@example.com,+1234567892,Turkey,Ankara
+Duplicate Student,test3@example.com,+1234567893,USA,New York
