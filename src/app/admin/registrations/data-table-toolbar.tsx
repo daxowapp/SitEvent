@@ -5,6 +5,7 @@ import { X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { DataTableFacetedFilter } from "@/components/ui/data-table-faceted-filter"
+import { ImportRegistrationsDialog } from "@/components/admin/registrations/import-dialog"
 
 interface DataTableToolbarProps {
     searchQuery: string
@@ -87,6 +88,11 @@ export function DataTableToolbar({
                     </Button>
                 )}
             </div>
+            <ImportRegistrationsDialog 
+                eventId={eventId || undefined}
+                events={events}
+                onSuccess={() => window.location.reload()} 
+            />
         </div>
     )
 }

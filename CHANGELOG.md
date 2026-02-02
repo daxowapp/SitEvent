@@ -245,3 +245,5 @@ All notable changes to this project will be documented in this file.
 
 - Environment variables template (`.env.example`)
 - Prisma scripts: generate, migrate, seed, push, studio
+2026-02-02 - Feature - Added Lead Import API and n8n Workflow
+2026-02-02 - Feature - Added Admin CSV Import for Registrations
