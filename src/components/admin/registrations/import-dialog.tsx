@@ -14,7 +14,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Loader2, Upload, FileSpreadsheet, CheckCircle2, AlertCircle, RefreshCw } from "lucide-react"
-import * as XLSX from "xlsx"
+import { read, utils } from "xlsx"
 import { toast } from "sonner"
 import { 
     Table, 
@@ -76,10 +76,10 @@ export function ImportRegistrationsDialog({ eventId, events, onSuccess }: Import
             reader.onload = (e) => {
                 try {
                     const data = e.target?.result
-                    const workbook = XLSX.read(data, { type: "binary" })
+                    const workbook = read(data, { type: "binary" })
                     const sheetName = workbook.SheetNames[0]
                     const sheet = workbook.Sheets[sheetName]
-                    const jsonData = XLSX.utils.sheet_to_json(sheet)
+                    const jsonData = utils.sheet_to_json(sheet)
                     resolve(jsonData)
                 } catch (err) {
                     reject(err)
