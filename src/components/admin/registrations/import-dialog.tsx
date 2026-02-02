@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Loader2, Upload, FileSpreadsheet, CheckCircle2, AlertCircle, RefreshCw } from "lucide-react"
+import { Loader2, Upload, FileSpreadsheet, RefreshCw } from "lucide-react"
 import { toast } from "sonner"
 import { 
     Table, 
@@ -25,6 +25,7 @@ import {
 } from "@/components/ui/table"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Progress } from "@/components/ui/progress"
 
 interface ImportDialogProps {
     eventId?: string
@@ -51,6 +52,8 @@ export function ImportRegistrationsDialog({ eventId, events, onSuccess }: Import
     const [selectedEventId, setSelectedEventId] = useState<string>(eventId || "")
     const [parsedData, setParsedData] = useState<any[]>([])
     const [result, setResult] = useState<ImportResult | null>(null)
+    const [progress, setProgress] = useState(0)
+    const [batchStatus, setBatchStatus] = useState("")
 
     const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0]
@@ -61,6 +64,8 @@ export function ImportRegistrationsDialog({ eventId, events, onSuccess }: Import
             const data = await parseFile(file)
             setParsedData(data)
             setResult(null) // Reset previous results
+            setProgress(0)
+            setBatchStatus("")
         } catch (error) {
             toast.error("Failed to parse file")
             console.error(error)
@@ -89,7 +94,6 @@ export function ImportRegistrationsDialog({ eventId, events, onSuccess }: Import
 
         // Use XLSX for Excel files
         const importedModule = await import("xlsx")
-        console.log("Dynamic import result:", importedModule)
         const read = importedModule.read || importedModule.default?.read
         const utils = importedModule.utils || importedModule.default?.utils
         
@@ -143,28 +147,89 @@ export function ImportRegistrationsDialog({ eventId, events, onSuccess }: Import
         }
 
         setIsLoading(true)
+        setProgress(0)
+        
         try {
-            const leads = parsedData.map(mapFields).filter(l => l.email && l.fullName)
+            const allLeads = parsedData.map(mapFields).filter(l => l.email && l.fullName)
             
-            if (leads.length === 0) {
+            if (allLeads.length === 0) {
                 toast.error("No valid leads found (check column names)")
                 return
             }
 
-            const response = await fetch("/api/admin/registrations/import", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    eventId: selectedEventId,
-                    leads
-                })
-            })
+            // Batch processing settings
+            const batchSize = 5
+            const chunks = []
+            for (let i = 0; i < allLeads.length; i += batchSize) {
+                chunks.push(allLeads.slice(i, i + batchSize))
+            }
 
-            const data = await response.json()
-            if (!response.ok) throw new Error(data.error || "Import failed")
+            const accumulatedResults: ImportResult = {
+                total: allLeads.length,
+                success: 0,
+                duplicates: 0,
+                errors: 0,
+                details: []
+            }
 
-            setResult(data)
-            toast.success(`Import complete: ${data.success} imported, ${data.duplicates} duplicates`)
+            // Process chunks sequentially
+            for (let i = 0; i < chunks.length; i++) {
+                const chunk = chunks[i]
+                setBatchStatus(`Processing batch ${i + 1} of ${chunks.length}...`)
+                
+                try {
+                    const response = await fetch("/api/admin/registrations/import", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                            eventId: selectedEventId,
+                            leads: chunk
+                        })
+                    })
+
+                    const data = await response.json()
+                    
+                    if (!response.ok) {
+                        // Handle batch failure - make fake error results for this chunk
+                        const errors = chunk.map(l => ({
+                            email: l.email,
+                            status: "error" as const,
+                            message: data.error || "Batch failed"
+                        }))
+                        
+                        accumulatedResults.errors += chunk.length
+                        accumulatedResults.details.push(...errors)
+                    } else {
+                        // Merge results
+                        accumulatedResults.success += data.success
+                        accumulatedResults.duplicates += data.duplicates
+                        accumulatedResults.errors += data.errors
+                        accumulatedResults.details.push(...data.details)
+                    }
+
+                    // Update UI stats progressively
+                    setResult({...accumulatedResults})
+                    
+                    // Update progress bar
+                    setProgress(Math.round(((i + 1) / chunks.length) * 100))
+
+                    // Small delay to prevent rate limits and allow UI updates
+                    await new Promise(resolve => setTimeout(resolve, 500))
+
+                } catch (error) {
+                    console.error(`Batch ${i + 1} failed:`, error)
+                    accumulatedResults.errors += chunk.length
+                    accumulatedResults.details.push(...chunk.map(l => ({
+                        email: l.email,
+                        status: "error" as const,
+                        message: "Network error"
+                    })))
+                    setResult({...accumulatedResults})
+                }
+            }
+
+            setBatchStatus("Import complete!")
+            toast.success(`Import finished: ${accumulatedResults.success} success, ${accumulatedResults.duplicates} duplicates`)
             if (onSuccess) onSuccess()
 
         } catch (error) {
@@ -177,6 +242,8 @@ export function ImportRegistrationsDialog({ eventId, events, onSuccess }: Import
     const reset = () => {
         setParsedData([])
         setResult(null)
+        setProgress(0)
+        setBatchStatus("")
         // Keep event selection
     }
 
@@ -230,7 +297,42 @@ export function ImportRegistrationsDialog({ eventId, events, onSuccess }: Import
                          </div>
                     )}
 
-                    {parsedData.length > 0 && !result && (
+                    {/* Progress UI */}
+                    {isLoading && parsedData.length > 0 && (
+                        <div className="space-y-2 py-4">
+                            <div className="flex justify-between text-sm">
+                                <span>{batchStatus || "Preparing..."}</span>
+                                <span>{progress}%</span>
+                            </div>
+                            <Progress value={progress} />
+                        </div>
+                    )}
+
+                    {/* Live Stats during processing or final result */}
+                    {(result || (isLoading && parsedData.length > 0)) && (
+                        <div className="space-y-6">
+                            <div className="grid grid-cols-4 gap-4">
+                                <div className="p-4 border rounded-lg bg-green-50">
+                                    <div className="text-sm text-green-600 font-medium">Success</div>
+                                    <div className="text-2xl font-bold text-green-700">{result?.success || 0}</div>
+                                </div>
+                                <div className="p-4 border rounded-lg bg-yellow-50">
+                                    <div className="text-sm text-yellow-600 font-medium">Duplicates</div>
+                                    <div className="text-2xl font-bold text-yellow-700">{result?.duplicates || 0}</div>
+                                </div>
+                                <div className="p-4 border rounded-lg bg-red-50">
+                                    <div className="text-sm text-red-600 font-medium">Errors</div>
+                                    <div className="text-2xl font-bold text-red-700">{result?.errors || 0}</div>
+                                </div>
+                                <div className="p-4 border rounded-lg">
+                                    <div className="text-sm text-muted-foreground font-medium">Total</div>
+                                    <div className="text-2xl font-bold">{result?.total || parsedData.length}</div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {parsedData.length > 0 && !result && !isLoading && (
                         <div className="space-y-4">
                             <div className="flex items-center justify-between">
                                 <h4 className="text-sm font-medium text-muted-foreground">
@@ -270,27 +372,8 @@ export function ImportRegistrationsDialog({ eventId, events, onSuccess }: Import
                         </div>
                     )}
 
-                    {result && (
-                        <div className="space-y-6">
-                            <div className="grid grid-cols-4 gap-4">
-                                <div className="p-4 border rounded-lg bg-green-50">
-                                    <div className="text-sm text-green-600 font-medium">Success</div>
-                                    <div className="text-2xl font-bold text-green-700">{result.success}</div>
-                                </div>
-                                <div className="p-4 border rounded-lg bg-yellow-50">
-                                    <div className="text-sm text-yellow-600 font-medium">Duplicates</div>
-                                    <div className="text-2xl font-bold text-yellow-700">{result.duplicates}</div>
-                                </div>
-                                <div className="p-4 border rounded-lg bg-red-50">
-                                    <div className="text-sm text-red-600 font-medium">Errors</div>
-                                    <div className="text-2xl font-bold text-red-700">{result.errors}</div>
-                                </div>
-                                <div className="p-4 border rounded-lg">
-                                    <div className="text-sm text-muted-foreground font-medium">Total</div>
-                                    <div className="text-2xl font-bold">{result.total}</div>
-                                </div>
-                            </div>
-
+                    {result && !isLoading && (
+                        <div className="space-y-6 mt-6">
                             <Tabs defaultValue="duplicates" className="w-full">
                                 <TabsList className="grid w-full grid-cols-2">
                                     <TabsTrigger value="duplicates">Duplicates ({result.duplicates})</TabsTrigger>
@@ -326,16 +409,18 @@ export function ImportRegistrationsDialog({ eventId, events, onSuccess }: Import
                 </div>
 
                 <DialogFooter>
-                    {result ? (
+                    {result && !isLoading ? (
                          <Button onClick={reset}>Import More</Button>
                     ) : (
-                        <>
-                            <Button variant="ghost" onClick={() => setOpen(false)} disabled={isLoading}>Cancel</Button>
-                            <Button onClick={handleImport} disabled={!parsedData.length || isLoading}>
-                                {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                                Import {parsedData.length > 0 ? `(${parsedData.length})` : ""}
-                            </Button>
-                        </>
+                        !isLoading && (
+                            <>
+                                <Button variant="ghost" onClick={() => setOpen(false)} disabled={isLoading}>Cancel</Button>
+                                <Button onClick={handleImport} disabled={!parsedData.length || isLoading}>
+                                    {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                    Import {parsedData.length > 0 ? `(${parsedData.length})` : ""}
+                                </Button>
+                            </>
+                        )
                     )}
                 </DialogFooter>
             </DialogContent>

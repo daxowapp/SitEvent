@@ -9,6 +9,10 @@ All notable changes to this project will be documented in this file.
 - **AI Enrichment**: Implemented `ai-enrichment.ts` to automatically standardize major names, categorize interests, and deduce gender from names upon registration.
 - **University Analytics**: Added AI-powered charts for Gender Distribution, Top Majors, and Interest Categories.
 - **Backfill Script**: Added `scripts/backfill-ai-leads.ts` to enrich historical lead data.
+- **Import Enhancements**:
+  - Implemented client-side batching (5 records/batch) to prevent server timeouts.
+  - Added real-time progress bar and "Batch X of Y" status updates.
+  - Added detailed summary report with Success, Duplicate, and Error counts.
 
 ### Changed
 
