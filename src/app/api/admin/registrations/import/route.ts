@@ -58,6 +58,7 @@ export async function POST(request: NextRequest) {
         const results = {
             total: leads.length,
             success: 0,
+            updated: 0,
             duplicates: 0,
             errors: 0,
             details: [] as Record<string, unknown>[],
@@ -112,11 +113,11 @@ export async function POST(request: NextRequest) {
                 });
 
                 if (existingRegistration) {
-                    results.duplicates++;
+                    results.updated++;
                     results.details.push({
                         email: lead.email,
-                        status: "duplicate",
-                        message: "Already registered (Details Updated)",
+                        status: "updated",
+                        message: "Lead details updated",
                         qrToken: existingRegistration.qrToken // Returning QR for report
                     });
                     continue; // Skip email sending

@@ -37,11 +37,12 @@ interface ImportDialogProps {
 interface ImportResult {
     total: number
     success: number
+    updated: number
     duplicates: number
     errors: number
     details: {
         email: string
-        status: "success" | "duplicate" | "error"
+        status: "success" | "duplicate" | "error" | "updated"
         message?: string
         qrToken?: string
     }[]
@@ -204,6 +205,7 @@ export function ImportRegistrationsDialog({ eventId, events, onSuccess }: Import
             const accumulatedResults: ImportResult = {
                 total: mappedData.length,
                 success: 0,
+                updated: 0,
                 duplicates: 0,
                 errors: 0,
                 details: []
@@ -236,6 +238,7 @@ export function ImportRegistrationsDialog({ eventId, events, onSuccess }: Import
                         accumulatedResults.details.push(...errors)
                     } else {
                         accumulatedResults.success += data.success
+                        accumulatedResults.updated += data.updated
                         accumulatedResults.duplicates += data.duplicates
                         accumulatedResults.errors += data.errors
                         accumulatedResults.details.push(...data.details)
@@ -436,6 +439,10 @@ export function ImportRegistrationsDialog({ eventId, events, onSuccess }: Import
                                             <div className="text-sm text-green-600 font-medium">Success</div>
                                             <div className="text-2xl font-bold text-green-700">{result?.success || 0}</div>
                                         </div>
+                                        <div className="p-4 border rounded-lg bg-blue-50">
+                                            <div className="text-sm text-blue-600 font-medium">Updated</div>
+                                            <div className="text-2xl font-bold text-blue-700">{result?.updated || 0}</div>
+                                        </div>
                                         <div className="p-4 border rounded-lg bg-yellow-50">
                                             <div className="text-sm text-yellow-600 font-medium">Duplicates</div>
                                             <div className="text-2xl font-bold text-yellow-700">{result?.duplicates || 0}</div>
@@ -444,18 +451,26 @@ export function ImportRegistrationsDialog({ eventId, events, onSuccess }: Import
                                             <div className="text-sm text-red-600 font-medium">Errors</div>
                                             <div className="text-2xl font-bold text-red-700">{result?.errors || 0}</div>
                                         </div>
-                                        <div className="p-4 border rounded-lg">
-                                            <div className="text-sm text-muted-foreground font-medium">Total</div>
-                                            <div className="text-2xl font-bold">{result?.total || 0}</div>
-                                        </div>
                                     </div>
 
                                     {result && (
-                                        <Tabs defaultValue="duplicates" className="w-full">
-                                            <TabsList className="grid w-full grid-cols-2">
+                                        <Tabs defaultValue="updated" className="w-full">
+                                            <TabsList className="grid w-full grid-cols-3">
+                                                <TabsTrigger value="updated">Updated</TabsTrigger>
                                                 <TabsTrigger value="duplicates">Duplicates</TabsTrigger>
                                                 <TabsTrigger value="errors">Errors</TabsTrigger>
                                             </TabsList>
+                                            <TabsContent value="updated">
+                                                <ScrollArea className="h-[200px] rounded-md border p-2">
+                                                    {result.details.filter(d => d.status === "updated").map((d, i) => (
+                                                        <div key={i} className="flex items-center justify-between py-2 border-b last:border-0 text-sm">
+                                                            <span>{d.email}</span>
+                                                            <span className="text-muted-foreground text-xs">{d.message || "Updated"}</span>
+                                                        </div>
+                                                    ))}
+                                                    {result.updated === 0 && <p className="text-sm text-muted-foreground text-center py-4">No updated records.</p>}
+                                                </ScrollArea>
+                                            </TabsContent>
                                             <TabsContent value="duplicates">
                                                 <ScrollArea className="h-[200px] rounded-md border p-2">
                                                     {result.details.filter(d => d.status === "duplicate").map((d, i) => (
