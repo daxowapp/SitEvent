@@ -28,7 +28,7 @@ export async function POST(request: NextRequest) {
     try {
         // 1. Admin Auth Check
         const session = await auth();
-        if (!session?.user || (session.user as any).type !== "ADMIN") {
+        if (!session?.user || (session.user as { type?: string }).type !== "ADMIN") {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
 
@@ -60,7 +60,7 @@ export async function POST(request: NextRequest) {
             success: 0,
             duplicates: 0,
             errors: 0,
-            details: [] as any[],
+            details: [] as Record<string, unknown>[],
         };
 
         const dateLocales = { en: enUS, tr: tr, ar: ar };
@@ -88,6 +88,17 @@ export async function POST(request: NextRequest) {
                             utmSource: lead.source,
                         },
                     });
+                } else {
+                    // Update existing registrant details
+                    registrant = await prisma.registrant.update({
+                        where: { id: registrant.id },
+                        data: {
+                            fullName: lead.fullName,
+                            phone: lead.phone,
+                            country: lead.country,
+                            city: lead.city,
+                        }
+                    });
                 }
 
                 // B. Check Registration
@@ -105,7 +116,7 @@ export async function POST(request: NextRequest) {
                     results.details.push({
                         email: lead.email,
                         status: "duplicate",
-                        message: "Already registered",
+                        message: "Already registered (Details Updated)",
                         qrToken: existingRegistration.qrToken // Returning QR for report
                     });
                     continue; // Skip email sending

@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Loader2, Upload, FileSpreadsheet, RefreshCw } from "lucide-react"
+import { Loader2, Upload, FileSpreadsheet, ArrowRight, ArrowLeft } from "lucide-react"
 import { toast } from "sonner"
 import { 
     Table, 
@@ -26,6 +26,7 @@ import {
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Progress } from "@/components/ui/progress"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
 interface ImportDialogProps {
     eventId?: string
@@ -46,11 +47,28 @@ interface ImportResult {
     }[]
 }
 
+const SYSTEM_FIELDS = [
+    { key: "fullName", label: "Full Name", required: true },
+    { key: "email", label: "Email", required: true },
+    { key: "phone", label: "Phone", required: false },
+    { key: "country", label: "Country", required: false },
+    { key: "city", label: "City", required: false },
+    { key: "language", label: "Language", required: false },
+]
+
 export function ImportRegistrationsDialog({ eventId, events, onSuccess }: ImportDialogProps) {
     const [open, setOpen] = useState(false)
     const [isLoading, setIsLoading] = useState(false)
     const [selectedEventId, setSelectedEventId] = useState<string>(eventId || "")
-    const [parsedData, setParsedData] = useState<any[]>([])
+    const [step, setStep] = useState<"upload" | "mapping" | "preview" | "importing" | "result">("upload")
+    
+    // Data State
+    const [rawFile, setRawFile] = useState<any[]>([])
+    const [headers, setHeaders] = useState<string[]>([])
+    const [columnMapping, setColumnMapping] = useState<Record<string, string>>({})
+    const [mappedData, setMappedData] = useState<any[]>([])
+    
+    // Result State
     const [result, setResult] = useState<ImportResult | null>(null)
     const [progress, setProgress] = useState(0)
     const [batchStatus, setBatchStatus] = useState("")
@@ -62,10 +80,23 @@ export function ImportRegistrationsDialog({ eventId, events, onSuccess }: Import
         setIsLoading(true)
         try {
             const data = await parseFile(file)
-            setParsedData(data)
-            setResult(null) // Reset previous results
-            setProgress(0)
-            setBatchStatus("")
+            if (data.length === 0) throw new Error("File is empty")
+            
+            setRawFile(data)
+            const fileHeaders = Object.keys(data[0])
+            setHeaders(fileHeaders)
+            
+            // Initial Auto-Mapping
+            const initialMapping: Record<string, string> = {}
+            SYSTEM_FIELDS.forEach(field => {
+                const match = fileHeaders.find(h => 
+                    h.toLowerCase().includes(field.label.toLowerCase()) || 
+                    h.toLowerCase().includes(field.key.toLowerCase())
+                )
+                if (match) initialMapping[field.key] = match
+            })
+            setColumnMapping(initialMapping)
+            setStep("mapping")
         } catch (error) {
             toast.error("Failed to parse file")
             console.error(error)
@@ -74,7 +105,7 @@ export function ImportRegistrationsDialog({ eventId, events, onSuccess }: Import
         }
     }
 
-    const parseFile = async (file: File): Promise<any[]> => {
+    const parseFile = async (file: File): Promise<Record<string, unknown>[]> => {
         // Use Papaparse for CSV files
         if (file.type === "text/csv" || file.name.endsWith(".csv")) {
             const Papa = (await import("papaparse")).default
@@ -83,7 +114,7 @@ export function ImportRegistrationsDialog({ eventId, events, onSuccess }: Import
                     header: true,
                     skipEmptyLines: true,
                     complete: (results) => {
-                        resolve(results.data)
+                        resolve(results.data as Record<string, unknown>[])
                     },
                     error: (error) => {
                         reject(error)
@@ -110,7 +141,7 @@ export function ImportRegistrationsDialog({ eventId, events, onSuccess }: Import
                     const sheetName = workbook.SheetNames[0]
                     const sheet = workbook.Sheets[sheetName]
                     const jsonData = utils.sheet_to_json(sheet)
-                    resolve(jsonData)
+                    resolve(jsonData as Record<string, unknown>[])
                 } catch (err) {
                     reject(err)
                 }
@@ -120,19 +151,31 @@ export function ImportRegistrationsDialog({ eventId, events, onSuccess }: Import
         })
     }
 
-    const mapFields = (row: any) => {
-        // Try to fuzzy match common column names
-        const findKey = (keys: string[]) => Object.keys(row).find(k => keys.some(key => k.toLowerCase().includes(key)))
-        
-        return {
-            fullName: row[findKey(["name", "full name", "student name"]) || ""] || row["Name"] || "",
-            email: row[findKey(["email", "e-mail", "mail"]) || ""] || row["Email"] || "",
-            phone: String(row[findKey(["phone", "mobile", "cell"]) || ""] || row["Phone"] || ""),
-            country: row[findKey(["country", "nation"]) || ""] || "Unknown",
-            city: row[findKey(["city", "town"]) || ""] || "Unknown",
-            language: row[findKey(["lang", "language"]) || ""]?.toLowerCase() || "en",
-            source: "Import"
+    const processMapping = () => {
+        const processed = rawFile.map(row => {
+            const newRow: any = { source: "Import" }
+            Object.entries(columnMapping).forEach(([systemKey, csvHeader]) => {
+                if (csvHeader && row[csvHeader] !== undefined) {
+                    newRow[systemKey] = row[csvHeader]
+                }
+            })
+            
+            // Clean up missing required fields logic if needed here, 
+            // but we filter later.
+            // Ensure strings
+            if (newRow.phone) newRow.phone = String(newRow.phone)
+            if (newRow.language) newRow.language = String(newRow.language).toLowerCase()
+                
+            return newRow
+        }).filter(l => l.email && l.fullName) // Basic validation
+
+        if (processed.length === 0) {
+            toast.error("No valid leads found with current mapping")
+            return
         }
+
+        setMappedData(processed)
+        setStep("preview")
     }
 
     const handleImport = async () => {
@@ -141,31 +184,25 @@ export function ImportRegistrationsDialog({ eventId, events, onSuccess }: Import
             return
         }
 
-        if (parsedData.length === 0) {
+        if (mappedData.length === 0) {
             toast.error("No data to import")
             return
         }
 
         setIsLoading(true)
+        setStep("importing")
         setProgress(0)
         
         try {
-            const allLeads = parsedData.map(mapFields).filter(l => l.email && l.fullName)
-            
-            if (allLeads.length === 0) {
-                toast.error("No valid leads found (check column names)")
-                return
-            }
-
             // Batch processing settings
             const batchSize = 5
             const chunks = []
-            for (let i = 0; i < allLeads.length; i += batchSize) {
-                chunks.push(allLeads.slice(i, i + batchSize))
+            for (let i = 0; i < mappedData.length; i += batchSize) {
+                chunks.push(mappedData.slice(i, i + batchSize))
             }
 
             const accumulatedResults: ImportResult = {
-                total: allLeads.length,
+                total: mappedData.length,
                 success: 0,
                 duplicates: 0,
                 errors: 0,
@@ -190,30 +227,24 @@ export function ImportRegistrationsDialog({ eventId, events, onSuccess }: Import
                     const data = await response.json()
                     
                     if (!response.ok) {
-                        // Handle batch failure - make fake error results for this chunk
                         const errors = chunk.map(l => ({
                             email: l.email,
                             status: "error" as const,
                             message: data.error || "Batch failed"
                         }))
-                        
                         accumulatedResults.errors += chunk.length
                         accumulatedResults.details.push(...errors)
                     } else {
-                        // Merge results
                         accumulatedResults.success += data.success
                         accumulatedResults.duplicates += data.duplicates
                         accumulatedResults.errors += data.errors
                         accumulatedResults.details.push(...data.details)
                     }
 
-                    // Update UI stats progressively
                     setResult({...accumulatedResults})
-                    
-                    // Update progress bar
                     setProgress(Math.round(((i + 1) / chunks.length) * 100))
 
-                    // Small delay to prevent rate limits and allow UI updates
+                    // Rate limit friendly delay
                     await new Promise(resolve => setTimeout(resolve, 500))
 
                 } catch (error) {
@@ -228,199 +259,269 @@ export function ImportRegistrationsDialog({ eventId, events, onSuccess }: Import
                 }
             }
 
+            setStep("result")
             setBatchStatus("Import complete!")
-            toast.success(`Import finished: ${accumulatedResults.success} success, ${accumulatedResults.duplicates} duplicates`)
+            toast.success(`Import finished: ${accumulatedResults.success} success`)
             if (onSuccess) onSuccess()
 
         } catch (error) {
             toast.error(error instanceof Error ? error.message : "Import failed")
+            setStep("preview") // Go back on critical failure
         } finally {
             setIsLoading(false)
         }
     }
 
     const reset = () => {
-        setParsedData([])
+        setRawFile([])
+        setMappedData([])
         setResult(null)
         setProgress(0)
         setBatchStatus("")
-        // Keep event selection
+        setStep("upload")
+        setColumnMapping({})
+        setHeaders([])
     }
 
     return (
-        <Dialog open={open} onOpenChange={setOpen}>
+        <Dialog open={open} onOpenChange={(val) => {
+            if (!val) reset()
+            setOpen(val)
+        }}>
             <DialogTrigger asChild>
                 <Button variant="outline" className="h-8">
                     <Upload className="mr-2 h-4 w-4" />
                     Import
                 </Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-[700px] h-[80vh] flex flex-col">
+            <DialogContent className="sm:max-w-[800px] h-[85vh] flex flex-col">
                 <DialogHeader>
                     <DialogTitle>Import Registrations</DialogTitle>
                     <DialogDescription>
-                        Upload an Excel or CSV file to import leads. Supported columns: Name, Email, Phone, Country, City.
+                        {step === "upload" && "Upload an Excel or CSV file to get started."}
+                        {step === "mapping" && "Map columns from your file to system fields."}
+                        {step === "preview" && "Review data before importing."}
+                        {step === "importing" && "Processing your import..."}
+                        {step === "result" && "Import Verification Report"}
                     </DialogDescription>
                 </DialogHeader>
 
-                <div className="flex-1 overflow-y-auto py-4">
-                    {!parsedData.length && (
-                         <div className="flex flex-col items-center justify-center p-8 border-2 border-dashed rounded-lg space-y-4">
-                             <div className="bg-muted p-4 rounded-full">
-                                <FileSpreadsheet className="h-8 w-8 text-muted-foreground" />
+                <div className="flex-1 overflow-y-auto py-4 px-1">
+                    {step === "upload" && (
+                         <div className="flex flex-col items-center justify-center p-12 border-2 border-dashed rounded-lg space-y-6">
+                             <div className="bg-muted p-6 rounded-full">
+                                <FileSpreadsheet className="h-10 w-10 text-muted-foreground" />
                              </div>
-                             <div className="text-center">
-                                 <p className="text-sm font-medium">Click to upload or drag and drop</p>
-                                 <p className="text-xs text-muted-foreground">XLSX, CSV (max 5MB)</p>
+                             <div className="text-center space-y-2">
+                                 <p className="text-lg font-medium">Click to upload or drag and drop</p>
+                                 <p className="text-sm text-muted-foreground">XLSX, CSV (max 5MB)</p>
                              </div>
                              <Input 
                                 type="file" 
                                 accept=".xlsx,.xls,.csv" 
                                 onChange={handleFileChange}
-                                className="max-w-xs"
+                                className="max-w-xs cursor-pointer"
                              />
                              {!eventId && (
-                                 <div className="w-full max-w-xs space-y-2 text-left">
+                                 <div className="w-full max-w-xs space-y-2 text-left pt-4 border-t">
                                      <Label>Select Event</Label>
-                                     <select 
-                                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                                        value={selectedEventId}
-                                        onChange={(e) => setSelectedEventId(e.target.value)}
-                                     >
-                                        <option value="">Select an event...</option>
-                                        {events.map(evt => (
-                                            <option key={evt.id} value={evt.id}>{evt.title}</option>
-                                        ))}
-                                     </select>
+                                     <Select value={selectedEventId} onValueChange={setSelectedEventId}>
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Select an event..." />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {events.map(evt => (
+                                                <SelectItem key={evt.id} value={evt.id}>{evt.title}</SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                     </Select>
                                  </div>
                              )}
                          </div>
                     )}
 
-                    {/* Progress UI */}
-                    {isLoading && parsedData.length > 0 && (
-                        <div className="space-y-2 py-4">
-                            <div className="flex justify-between text-sm">
-                                <span>{batchStatus || "Preparing..."}</span>
-                                <span>{progress}%</span>
-                            </div>
-                            <Progress value={progress} />
-                        </div>
-                    )}
-
-                    {/* Live Stats during processing or final result */}
-                    {(result || (isLoading && parsedData.length > 0)) && (
+                    {step === "mapping" && (
                         <div className="space-y-6">
-                            <div className="grid grid-cols-4 gap-4">
-                                <div className="p-4 border rounded-lg bg-green-50">
-                                    <div className="text-sm text-green-600 font-medium">Success</div>
-                                    <div className="text-2xl font-bold text-green-700">{result?.success || 0}</div>
-                                </div>
-                                <div className="p-4 border rounded-lg bg-yellow-50">
-                                    <div className="text-sm text-yellow-600 font-medium">Duplicates</div>
-                                    <div className="text-2xl font-bold text-yellow-700">{result?.duplicates || 0}</div>
-                                </div>
-                                <div className="p-4 border rounded-lg bg-red-50">
-                                    <div className="text-sm text-red-600 font-medium">Errors</div>
-                                    <div className="text-2xl font-bold text-red-700">{result?.errors || 0}</div>
-                                </div>
-                                <div className="p-4 border rounded-lg">
-                                    <div className="text-sm text-muted-foreground font-medium">Total</div>
-                                    <div className="text-2xl font-bold">{result?.total || parsedData.length}</div>
-                                </div>
-                            </div>
-                        </div>
-                    )}
-
-                    {parsedData.length > 0 && !result && !isLoading && (
-                        <div className="space-y-4">
-                            <div className="flex items-center justify-between">
-                                <h4 className="text-sm font-medium text-muted-foreground">
-                                    Preview ({parsedData.length} records)
-                                </h4>
-                                <Button variant="ghost" size="sm" onClick={reset}>
-                                    <RefreshCw className="mr-2 h-3 w-3" />
-                                    Reset
-                                </Button>
-                            </div>
-                            <ScrollArea className="h-[300px] rounded-md border">
-                                <Table>
-                                    <TableHeader>
-                                        <TableRow>
-                                            <TableHead>Name</TableHead>
-                                            <TableHead>Email</TableHead>
-                                            <TableHead>Phone</TableHead>
-                                        </TableRow>
-                                    </TableHeader>
-                                    <TableBody>
-                                        {parsedData.slice(0, 50).map((row, i) => {
-                                            const mapped = mapFields(row)
-                                            return (
-                                                <TableRow key={i}>
-                                                    <TableCell>{mapped.fullName || <span className="text-red-500">Missing</span>}</TableCell>
-                                                    <TableCell>{mapped.email || <span className="text-red-500">Missing</span>}</TableCell>
-                                                    <TableCell>{mapped.phone}</TableCell>
-                                                </TableRow>
-                                            )
-                                        })}
-                                    </TableBody>
-                                </Table>
-                            </ScrollArea>
-                            {parsedData.length > 50 && (
-                                <p className="text-xs text-center text-muted-foreground">Showing first 50 rows...</p>
-                            )}
-                        </div>
-                    )}
-
-                    {result && !isLoading && (
-                        <div className="space-y-6 mt-6">
-                            <Tabs defaultValue="duplicates" className="w-full">
-                                <TabsList className="grid w-full grid-cols-2">
-                                    <TabsTrigger value="duplicates">Duplicates ({result.duplicates})</TabsTrigger>
-                                    <TabsTrigger value="errors">Errors ({result.errors})</TabsTrigger>
-                                </TabsList>
-                                <TabsContent value="duplicates">
-                                    <ScrollArea className="h-[200px] rounded-md border p-2">
-                                        {result.details.filter(d => d.status === "duplicate").map((d, i) => (
-                                            <div key={i} className="flex items-center justify-between py-2 border-b last:border-0 text-sm">
-                                                <span>{d.email}</span>
-                                                <span className="text-muted-foreground text-xs flex items-center">
-                                                    QR: {d.qrToken || "N/A"}
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <h4 className="font-medium mb-4">System Fields</h4>
+                                    <div className="space-y-4">
+                                        {SYSTEM_FIELDS.map(field => (
+                                            <div key={field.key} className="h-10 flex items-center">
+                                                <span className="text-sm">
+                                                    {field.label} {field.required && <span className="text-red-500">*</span>}
                                                 </span>
                                             </div>
                                         ))}
-                                        {result.duplicates === 0 && <p className="text-sm text-muted-foreground text-center py-4">No duplicates found.</p>}
-                                    </ScrollArea>
-                                </TabsContent>
-                                <TabsContent value="errors">
-                                     <ScrollArea className="h-[200px] rounded-md border p-2">
-                                        {result.details.filter(d => d.status === "error").map((d, i) => (
-                                            <div key={i} className="flex flex-col py-2 border-b last:border-0 text-sm">
-                                                <span className="font-medium">{d.email}</span>
-                                                <span className="text-red-500 text-xs">{d.message}</span>
+                                    </div>
+                                </div>
+                                <div>
+                                    <h4 className="font-medium mb-4">CSV Column</h4>
+                                    <div className="space-y-4">
+                                        {SYSTEM_FIELDS.map(field => (
+                                            <div key={field.key}>
+                                                <Select 
+                                                    value={columnMapping[field.key] || "ignore"} 
+                                                    onValueChange={(val) => setColumnMapping(prev => ({ ...prev, [field.key]: val }))}
+                                                >
+                                                    <SelectTrigger className={!columnMapping[field.key] ? "border-red-300" : ""}>
+                                                        <SelectValue placeholder="Select column..." />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        <SelectItem value="ignore">-- Ignore --</SelectItem>
+                                                        {headers.map(h => (
+                                                            <SelectItem key={h} value={h}>{h}</SelectItem>
+                                                        ))}
+                                                    </SelectContent>
+                                                </Select>
                                             </div>
                                         ))}
-                                        {result.errors === 0 && <p className="text-sm text-muted-foreground text-center py-4">No errors found.</p>}
-                                    </ScrollArea>
-                                </TabsContent>
-                            </Tabs>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {step === "preview" && (
+                        <div className="space-y-4">
+                            <div className="flex items-center justify-between">
+                                <h4 className="text-sm font-medium text-muted-foreground">
+                                    Preview ({mappedData.length} valid records)
+                                </h4>
+                            </div>
+                            <ScrollArea className="h-[400px] rounded-md border">
+                                <Table>
+                                    <TableHeader>
+                                        <TableRow>
+                                            <TableHead>Full Name</TableHead>
+                                            <TableHead>Email</TableHead>
+                                            <TableHead>Phone</TableHead>
+                                            <TableHead>City</TableHead>
+                                        </TableRow>
+                                    </TableHeader>
+                                    <TableBody>
+                                        {mappedData.slice(0, 50).map((row, i) => (
+                                            <TableRow key={i}>
+                                                <TableCell>{row.fullName}</TableCell>
+                                                <TableCell>{row.email}</TableCell>
+                                                <TableCell>{row.phone}</TableCell>
+                                                <TableCell>{row.city}</TableCell>
+                                            </TableRow>
+                                        ))}
+                                    </TableBody>
+                                </Table>
+                            </ScrollArea>
+                            <p className="text-xs text-muted-foreground">
+                                * Rows with missing Name or Email are automatically filtered out.
+                            </p>
+                        </div>
+                    )}
+
+                    {(step === "importing" || step === "result") && (
+                        <div className="space-y-6 py-4">
+                            {step === "importing" && (
+                                <div className="space-y-2">
+                                    <div className="flex justify-between text-sm">
+                                        <span>{batchStatus}</span>
+                                        <span>{progress}%</span>
+                                    </div>
+                                    <Progress value={progress} />
+                                </div>
+                            )}
+
+                            {(result || step === "result") && (
+                                <>
+                                    <div className="grid grid-cols-4 gap-4">
+                                        <div className="p-4 border rounded-lg bg-green-50">
+                                            <div className="text-sm text-green-600 font-medium">Success</div>
+                                            <div className="text-2xl font-bold text-green-700">{result?.success || 0}</div>
+                                        </div>
+                                        <div className="p-4 border rounded-lg bg-yellow-50">
+                                            <div className="text-sm text-yellow-600 font-medium">Duplicates</div>
+                                            <div className="text-2xl font-bold text-yellow-700">{result?.duplicates || 0}</div>
+                                        </div>
+                                        <div className="p-4 border rounded-lg bg-red-50">
+                                            <div className="text-sm text-red-600 font-medium">Errors</div>
+                                            <div className="text-2xl font-bold text-red-700">{result?.errors || 0}</div>
+                                        </div>
+                                        <div className="p-4 border rounded-lg">
+                                            <div className="text-sm text-muted-foreground font-medium">Total</div>
+                                            <div className="text-2xl font-bold">{result?.total || 0}</div>
+                                        </div>
+                                    </div>
+
+                                    {result && (
+                                        <Tabs defaultValue="duplicates" className="w-full">
+                                            <TabsList className="grid w-full grid-cols-2">
+                                                <TabsTrigger value="duplicates">Duplicates</TabsTrigger>
+                                                <TabsTrigger value="errors">Errors</TabsTrigger>
+                                            </TabsList>
+                                            <TabsContent value="duplicates">
+                                                <ScrollArea className="h-[200px] rounded-md border p-2">
+                                                    {result.details.filter(d => d.status === "duplicate").map((d, i) => (
+                                                        <div key={i} className="flex items-center justify-between py-2 border-b last:border-0 text-sm">
+                                                            <span>{d.email}</span>
+                                                            <span className="text-muted-foreground text-xs">QR: {d.qrToken || "N/A"}</span>
+                                                        </div>
+                                                    ))}
+                                                    {result.duplicates === 0 && <p className="text-sm text-muted-foreground text-center py-4">No duplicates.</p>}
+                                                </ScrollArea>
+                                            </TabsContent>
+                                            <TabsContent value="errors">
+                                                <ScrollArea className="h-[200px] rounded-md border p-2">
+                                                    {result.details.filter(d => d.status === "error").map((d, i) => (
+                                                        <div key={i} className="flex flex-col py-2 border-b last:border-0 text-sm">
+                                                            <span className="font-medium">{d.email}</span>
+                                                            <span className="text-red-500 text-xs">{d.message}</span>
+                                                        </div>
+                                                    ))}
+                                                    {result.errors === 0 && <p className="text-sm text-muted-foreground text-center py-4">No errors.</p>}
+                                                </ScrollArea>
+                                            </TabsContent>
+                                        </Tabs>
+                                    )}
+                                </>
+                            )}
                         </div>
                     )}
                 </div>
 
-                <DialogFooter>
-                    {result && !isLoading ? (
-                         <Button onClick={reset}>Import More</Button>
-                    ) : (
-                        !isLoading && (
-                            <>
-                                <Button variant="ghost" onClick={() => setOpen(false)} disabled={isLoading}>Cancel</Button>
-                                <Button onClick={handleImport} disabled={!parsedData.length || isLoading}>
-                                    {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                                    Import {parsedData.length > 0 ? `(${parsedData.length})` : ""}
-                                </Button>
-                            </>
-                        )
+                <DialogFooter className="pt-2 border-t">
+                    {step === "upload" && (
+                        <Button variant="ghost" onClick={() => setOpen(false)}>Cancel</Button>
+                    )}
+
+                    {step === "mapping" && (
+                        <>
+                            <Button variant="outline" onClick={() => setStep("upload")}>
+                                <ArrowLeft className="mr-2 h-4 w-4" /> Back
+                            </Button>
+                            <Button onClick={processMapping} disabled={!columnMapping["fullName"] || !columnMapping["email"]}>
+                                Continue <ArrowRight className="ml-2 h-4 w-4" />
+                            </Button>
+                        </>
+                    )}
+
+                    {step === "preview" && (
+                        <>
+                            <Button variant="outline" onClick={() => setStep("mapping")}>
+                                <ArrowLeft className="mr-2 h-4 w-4" /> Back
+                            </Button>
+                            <Button onClick={handleImport} disabled={isLoading}>
+                                {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                Start Import
+                            </Button>
+                        </>
+                    )}
+
+                    {step === "result" && (
+                        <Button onClick={reset}>Import More</Button>
+                    )}
+                    
+                    {step === "importing" && (
+                         <Button disabled>
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Processing...
+                        </Button>
                     )}
                 </DialogFooter>
             </DialogContent>

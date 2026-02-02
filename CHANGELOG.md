@@ -31,6 +31,7 @@ All notable changes to this project will be documented in this file.
   - **Event Card**: Fixed "Universities Participating" count to be dynamic (previously hardcoded to 40).
   - **Recruit Page**: Fixed broken "Download Full Calendar" button by implementing client-side ICS generation.
   - **Footer**: Updated "Organized by" text to "Powered by" with correct localization keys (EN/TR/AR).
+  - **Import Workflow**: Implemented Dynamic Field Mapping UI and Smart Upsert logic to update existing leads instead of creating duplicates.
 
 ## [0.2.2] - 2026-01-29
 
