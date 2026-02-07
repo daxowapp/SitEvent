@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { getLiveStats } from "./actions";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -33,7 +33,7 @@ interface CheckInResult {
     };
 }
 
-export default function ScannerPage() {
+function ScannerContent() {
     const searchParams = useSearchParams();
     const initialEventId = searchParams.get("eventId");
 
@@ -372,5 +372,17 @@ export default function ScannerPage() {
                 </div>
             )}
         </div>
+    );
+}
+
+export default function ScannerPage() {
+    return (
+        <Suspense fallback={
+            <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center">
+                <div className="animate-spin h-8 w-8 border-4 border-red-500 border-t-transparent rounded-full"></div>
+            </div>
+        }>
+            <ScannerContent />
+        </Suspense>
     );
 }
