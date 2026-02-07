@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Card } from "@/components/ui/card";
-import { Download, Search, Sparkles, BookOpen, Mail, Phone } from "lucide-react";
+import { Download, Search, Sparkles, BookOpen, Mail, Phone, Filter } from "lucide-react";
 import { format } from "date-fns";
 import {
     Select,
@@ -43,21 +43,23 @@ export function GlobalLeadsTable({ data }: GlobalLeadsTableProps) {
 
     // Extract unique values
     const uniqueEvents = Array.from(new Set(data.map(item => item.event.title))).sort();
-    const uniqueMajors = Array.from(new Set(data.map(item => item.registrant.interestedMajor).filter((m): m is string => Boolean(m)))).sort();
+    // Use majorCategory (AI-categorized) for the filter
+    const uniqueCategories = Array.from(new Set(data.map(item => item.registrant.majorCategory).filter((m): m is string => Boolean(m) && m !== "Uncategorized"))).sort();
 
     // Derived state for filtering
     const filteredData = data.filter(item => {
         const term = search.toLowerCase();
         const r = item.registrant;
         const eventTitle = item.event.title;
-        const major = r.interestedMajor;
+        const category = r.majorCategory;
 
         const matchesSearch = r.fullName.toLowerCase().includes(term) ||
             r.email.toLowerCase().includes(term) ||
-            (r.interestedMajor && r.interestedMajor.toLowerCase().includes(term));
+            (r.interestedMajor && r.interestedMajor.toLowerCase().includes(term)) ||
+            (r.majorCategory && r.majorCategory.toLowerCase().includes(term));
 
         const matchesEvent = selectedEvent === "all" || eventTitle === selectedEvent;
-        const matchesMajor = selectedMajor === "all" || major === selectedMajor;
+        const matchesMajor = selectedMajor === "all" || category === selectedMajor;
 
         return matchesSearch && matchesEvent && matchesMajor;
     });
@@ -141,11 +143,12 @@ export function GlobalLeadsTable({ data }: GlobalLeadsTableProps) {
 
                     <Select value={selectedMajor} onValueChange={setSelectedMajor}>
                         <SelectTrigger className="w-[200px] bg-white">
-                            <SelectValue placeholder="All Majors" />
+                            <Filter className="h-3.5 w-3.5 mr-2 text-gray-400" />
+                            <SelectValue placeholder="All Categories" />
                         </SelectTrigger>
                         <SelectContent>
-                            <SelectItem value="all">All Majors</SelectItem>
-                            {uniqueMajors.map((m: unknown) => (
+                            <SelectItem value="all">All Major Categories</SelectItem>
+                            {uniqueCategories.map((m: unknown) => (
                                 <SelectItem key={String(m)} value={String(m)}>{String(m)}</SelectItem>
                             ))}
                         </SelectContent>

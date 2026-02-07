@@ -2,6 +2,59 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.2.7] - 2026-02-08
+
+### Added
+
+- **Student Favorites Feature**: Universities can now mark high-potential students as favorites:
+  - Search students by name, email, or phone from event detail page
+  - Add 1-5 star ratings and notes to favorites
+  - Dedicated "Favorites" tab with full list management
+  - Export favorites to CSV for follow-up
+  - Find Student button in event hero section (amber gradient)
+- **Global Search**: Implemented macOS Spotlight-style search (Cmd+K)
+  - Search students across all events
+  - Student detail panel with quick-add favorites (rating, notes)
+  - Keyboard navigation and shortcuts
+  - Keyboard navigation with arrow keys
+  - Located in sidebar for quick access
+  - Shows event name with each result
+- **API Endpoints**: Added `/api/university/favorites`, `/api/university/favorites/[id]`, `/api/university/students/search`
+- **Database**: Added FavoriteStudent model with eventId, universityId, registrationId, rating, and notes
+
+## [0.2.6] - 2026-02-08
+
+### Changed
+
+- **Event Detail Page Redesign**: Complete visual overhaul of the university event detail page:
+  - New animated gradient hero section with status badges and booth information
+  - Performance card showing student collection metrics with animated trend indicators
+  - Modernized tab navigation with staggered animations
+  - Enhanced Event Details section with icon cards for date, time, venue, and address
+  - City Guide integration with attractions, restaurants, and transportation info
+  - Framer Motion animations throughout for a premium feel
+- **Sidebar Logo Update**: Replaced Sparkles icon with actual Sit Connect logo image
+- **My Events Page**: Added dedicated page showing only active/accepted events with clean card design
+
+## [0.2.5] - 2026-02-08
+
+### Changed
+
+- **University Dashboard Redesign**: Completely overhauled dashboard with impressive new visual design:
+  - Added floating particle animation background for depth
+  - New gradient mesh hero section with "University Command Center" badge
+  - Bento-style stats grid with colorful gradient cards (blue, red, purple)
+  - Quick stats badges in hero showing leads and events at a glance
+  - Enhanced event cards with animated status indicators and hover effects
+- **Sidebar Cleanup**: Removed "My Events" navigation item (was redirecting to dashboard)
+- **University Leads Filter**: Updated "Top Majors" filter to use AI-categorized `majorCategory` field instead of raw `interestedMajor` for more meaningful filtering.
+- **Analytics Charts**: Major Categories chart now uses AI-generated categories for better data insights.
+
+### Fixed
+
+- Fixed TypeScript errors in `dashboard-client.tsx`, `analytics-client.tsx`, and `sidebar.tsx` related to Framer Motion variant types.
+- Cleaned up unused variables and imports in dashboard components.
+
 ## [0.2.4] - 2026-02-07
 
 ### Added

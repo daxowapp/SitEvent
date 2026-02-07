@@ -148,6 +148,7 @@ model Event {
   messageLogs   MessageLog[]
   reminderRules ReminderRule[]
   sessions      EventSession[]
+  favorites     FavoriteStudent[]
 }
 
 model EventSession {
@@ -184,6 +185,7 @@ model University {
   
   users        UniversityUser[]
   events       EventParticipating[]
+  favorites    FavoriteStudent[]
   
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
@@ -258,12 +260,32 @@ model Registration {
   createdAt    DateTime           @default(now())
   updatedAt    DateTime           @updatedAt
 
-  event       Event        @relation(fields: [eventId], references: [id], onDelete: Cascade)
-  registrant  Registrant   @relation(fields: [registrantId], references: [id], onDelete: Cascade)
+  event       Event              @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  registrant  Registrant         @relation(fields: [registrantId], references: [id], onDelete: Cascade)
   checkIn     CheckIn?
   messageLogs MessageLog[]
+  favorites   FavoriteStudent[]
 
   @@unique([eventId, registrantId])
+}
+
+// University favorites - mark high-potential students at events
+model FavoriteStudent {
+  id             String   @id @default(cuid())
+  eventId        String
+  universityId   String
+  registrationId String
+  note           String?  @db.Text
+  rating         Int      @default(0) // 0-5 star rating
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  event        Event        @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  university   University   @relation(fields: [universityId], references: [id], onDelete: Cascade)
+  registration Registration @relation(fields: [registrationId], references: [id], onDelete: Cascade)
+
+  @@unique([eventId, universityId, registrationId])
+  @@index([eventId, universityId])
 }
 
 model CheckIn {
