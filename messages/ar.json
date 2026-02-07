@@ -460,7 +460,12 @@
                 "nameRequired": "الاسم مطلوب",
                 "emailInvalid": "بريد إلكتروني غير صحيح",
                 "phoneRequired": "رقم الهاتف مطلوب",
-                "levelRequired": "المرحلة الدراسية مطلوبة"
+                "levelRequired": "المرحلة الدراسية مطلوبة",
+                "attention": "انتباه مطلوب",
+                "defaultError": "يرجى التحقق من الأخطاء في النموذج",
+                "fixIt": "حسناً، سأصلحه",
+                "checkForm": "يرجى التحقق من النموذج",
+                "namePlaceholder": "الاسم الكامل (يفضل بالإنجليزية)"
             },
             "steps": {
                 "personal": "البيانات الشخصية",
