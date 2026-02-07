@@ -27,7 +27,7 @@ async function getEvents() {
         orderBy: { startDateTime: "desc" },
         include: {
             _count: {
-                select: { registrations: true }
+                select: { registrations: true, universities: true }
             }
         }
     });
@@ -61,6 +61,7 @@ export default async function AdminEventsPage() {
                                 <TableHead>Location</TableHead>
                                 <TableHead>Date</TableHead>
                                 <TableHead>Registrations</TableHead>
+                                <TableHead>Universities</TableHead>
                                 <TableHead>Status</TableHead>
                                 <TableHead className="text-right">Actions</TableHead>
                             </TableRow>
@@ -77,6 +78,9 @@ export default async function AdminEventsPage() {
                                     </TableCell>
                                     <TableCell>
                                         {event._count?.registrations || 0}
+                                    </TableCell>
+                                    <TableCell>
+                                        <Badge variant="outline">{event._count?.universities || 0}</Badge>
                                     </TableCell>
                                     <TableCell>
                                         <Badge
