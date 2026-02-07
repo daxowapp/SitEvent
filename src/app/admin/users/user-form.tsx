@@ -30,6 +30,7 @@ const userSchema = z.object({
     email: z.string().email("Invalid email address"),
     role: z.nativeEnum(AdminRole),
     password: z.string().min(6, "Password must be at least 6 characters").optional().or(z.literal("")),
+    accessCode: z.string().optional().or(z.literal("")),
 });
 
 type UserFormValues = z.infer<typeof userSchema>;
@@ -40,6 +41,7 @@ interface UserFormProps {
         name: string;
         email: string;
         role: AdminRole;
+        accessCode?: string | null;
     };
     onSuccess: () => void;
 }
@@ -54,6 +56,7 @@ export function UserForm({ user, onSuccess }: UserFormProps) {
             email: user?.email || "",
             role: user?.role || AdminRole.EVENT_STAFF,
             password: "",
+            accessCode: user?.accessCode || "",
         },
     });
 
@@ -153,6 +156,21 @@ export function UserForm({ user, onSuccess }: UserFormProps) {
                             <FormControl>
                                 <Input type="password" {...field} />
                             </FormControl>
+                            <FormMessage />
+                        </FormItem>
+                    )}
+                />
+
+                <FormField
+                    control={form.control}
+                    name="accessCode"
+                    render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Access Code (PIN for Usher Login)</FormLabel>
+                            <FormControl>
+                                <Input placeholder="e.g. 123456" {...field} />
+                            </FormControl>
+                            <p className="text-xs text-muted-foreground">Used for ushers to login via PIN at the scanner page</p>
                             <FormMessage />
                         </FormItem>
                     )}

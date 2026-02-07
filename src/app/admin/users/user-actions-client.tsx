@@ -30,6 +30,7 @@ interface UserActionsProps {
         email: string;
         role: AdminRole;
         isActive: boolean;
+        accessCode?: string | null;
     };
 }
 

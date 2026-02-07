@@ -10,6 +10,7 @@ export async function createAdminUser(data: {
     email: string;
     role: AdminRole;
     password?: string;
+    accessCode?: string;
 }) {
     try {
         const passwordHash = data.password ? await bcrypt.hash(data.password, 10) : null;
@@ -20,6 +21,7 @@ export async function createAdminUser(data: {
                 email: data.email,
                 role: data.role,
                 passwordHash,
+                accessCode: data.accessCode || null,
             },
         });
 
@@ -39,6 +41,7 @@ export async function updateAdminUser(
         role?: AdminRole;
         isActive?: boolean;
         password?: string;
+        accessCode?: string;
     }
 ) {
     try {
