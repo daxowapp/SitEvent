@@ -88,7 +88,7 @@ export function EventProgramTimeline({ sessions, timezone }: EventProgramTimelin
                             <CardContent className="p-4 sm:p-5">
                                 <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-2">
                                     <div>
-                                        <h3={cn("font-bold text-lg mb-1", isFinished && "text-gray-500 line-through decoration-gray-300")}>
+                                        <h3 className={cn("font-bold text-lg mb-1", isFinished && "text-gray-500 line-through decoration-gray-300")}>
                                             {session.title}
                                         </h3>
                                         {session.description && (
