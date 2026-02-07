@@ -3,7 +3,7 @@
 
 import { useState } from "react";
 import { signIn } from "next-auth/react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Loader2, ArrowRight, KeyRound } from "lucide-react";
 import { toast } from "sonner";
 import Link from "next/link";
@@ -11,6 +11,8 @@ import Image from "next/image";
 
 export default function UsherLoginPage() {
     const router = useRouter();
+    const searchParams = useSearchParams();
+    const callbackUrl = searchParams.get("callbackUrl") || "/admin/scan";
     const [pin, setPin] = useState("");
     const [loading, setLoading] = useState(false);
 
@@ -34,7 +36,7 @@ export default function UsherLoginPage() {
                 setPin("");
             } else {
                 toast.success("Welcome back!");
-                router.push("/admin/scan"); // Redirect directly to scanner
+                router.push(callbackUrl); 
                 router.refresh();
             }
         } catch (error) {

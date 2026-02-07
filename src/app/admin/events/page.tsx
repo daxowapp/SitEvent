@@ -12,6 +12,8 @@ import {
 } from "@/components/ui/table";
 import { format } from "date-fns";
 import { DuplicateEventButton } from "@/components/admin/DuplicateEventButton";
+import { CopyKioskLinkButton } from "@/components/admin/copy-kiosk-link-button";
+import { CopyScannerLinkButton } from "@/components/admin/copy-scanner-link-button";
 import { requireManagerOrAbove } from "@/lib/role-check";
 
 export const metadata = {
@@ -102,6 +104,12 @@ export default async function AdminEventsPage() {
                                             <Button variant="ghost" size="sm" asChild>
                                                 <Link href={`/admin/events/${event.id}/analytics`}>Analytics</Link>
                                             </Button>
+                                            <CopyKioskLinkButton 
+                                                slug={event.slug} 
+                                                city={event.city} 
+                                                country={event.country} 
+                                            />
+                                            <CopyScannerLinkButton eventId={event.id} />
                                             <DuplicateEventButton eventId={event.id} />
                                         </div>
                                     </TableCell>

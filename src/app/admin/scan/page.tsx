@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import { useSearchParams } from "next/navigation";
 import { getLiveStats } from "./actions";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -33,8 +34,11 @@ interface CheckInResult {
 }
 
 export default function ScannerPage() {
+    const searchParams = useSearchParams();
+    const initialEventId = searchParams.get("eventId");
+
     const [events, setEvents] = useState<Event[]>([]);
-    const [selectedEventId, setSelectedEventId] = useState<string>("");
+    const [selectedEventId, setSelectedEventId] = useState<string>(initialEventId || "");
     const [isScanning, setIsScanning] = useState(false);
     const [manualToken, setManualToken] = useState("");
     const [searchQuery, setSearchQuery] = useState("");
