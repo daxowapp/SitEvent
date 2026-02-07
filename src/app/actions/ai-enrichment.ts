@@ -49,3 +49,53 @@ export async function enrichLeadAction(registrantId: string) {
         return { success: false, error: error.message || "Enrichment failed" };
     }
 }
+
+export async function enrichBulkLeadsAction(registrantIds: string[]) {
+    console.log("SERVER ACTION: enrichBulkLeadsAction called with IDs:", registrantIds.length);
+    const results = {
+        success: 0,
+        failed: 0,
+        errors: [] as string[]
+    };
+
+    try {
+        // Fetch all registrants
+        const registrants = await prisma.registrant.findMany({
+            where: { id: { in: registrantIds } }
+        });
+
+        // Process sequentially to be nice to the AI rate limits (optional: can run in parallel chunks)
+        for (const registrant of registrants) {
+            try {
+                const enriched = await enrichRegistrantData(registrant.fullName, registrant.interestedMajor);
+                
+                if (enriched) {
+                    await prisma.registrant.update({
+                        where: { id: registrant.id },
+                        data: {
+                            standardizedMajor: enriched.standardizedMajor || "Undecided",
+                            majorCategory: enriched.majorCategory || "Uncategorized",
+                            gender: enriched.gender || "Unknown",
+                        }
+                    });
+                    results.success++;
+                } else {
+                    results.failed++;
+                }
+            } catch (err: any) {
+                console.error(`Failed to enrich ${registrant.email}:`, err);
+                results.failed++;
+                results.errors.push(err.message);
+            }
+        }
+
+        revalidatePath("/university/leads");
+        revalidatePath("/admin/registrations");
+        
+        return { success: true, data: results };
+
+    } catch (error: any) {
+        console.error("Bulk enrichment failed:", error);
+        return { success: false, error: error.message || "Bulk enrichment failed" };
+    }
+}

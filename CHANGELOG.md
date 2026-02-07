@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.2.4] - 2026-02-07
+
+### Added
+
+- **Event Program Feature**:
+  - Implemented comprehensive session management system for events.
+  - Added new `EventSession` database model.
+  - Created Admin UI for managing event schedules (Create, Edit, Delete sessions).
+  - Integrated "Event Program" display into public event detail pages with timeline view.
+
 ## [0.2.3] - 2026-02-02
 
 ### Added

@@ -62,6 +62,28 @@ Highlights:
             { university: { id: "u2", name: "MIT", logoUrl: null }, boothNumber: "B2" },
             { university: { id: "u3", name: "University of Toronto", logoUrl: null }, boothNumber: "C3" },
         ],
+        sessions: [
+            {
+                id: "s1",
+                title: "Opening Ceremony",
+                description: "Welcome speech and introduction to the fair.",
+                startTime: new Date("2026-03-15T10:00:00"),
+                endTime: new Date("2026-03-15T10:30:00"),
+                location: "Main Hall",
+                speaker: "Dr. John Doe",
+                order: 0
+            },
+            {
+                id: "s2",
+                title: "Study in UK",
+                description: "Everything you need to know about studying in the United Kingdom.",
+                startTime: new Date("2026-03-15T11:00:00"),
+                endTime: new Date("2026-03-15T12:00:00"),
+                location: "Seminar Room A",
+                speaker: "Jane Smith",
+                order: 1
+            }
+        ],
         _count: { registrations: 124 }
     },
 ];
@@ -74,6 +96,11 @@ async function getEvent(slug: string) {
                 universities: {
                     include: {
                         university: true,
+                    },
+                },
+                sessions: {
+                    orderBy: {
+                        startTime: 'asc',
                     },
                 },
                 _count: {
@@ -241,6 +268,49 @@ export default async function EventPage({ params }: EventPageProps) {
                                 <div className="prose prose-lg text-muted-foreground leading-loose max-w-none">
                                     {displayDescription.split("\n").map((paragraph: string, i: number) => (
                                         <p key={i} className="mb-4">{paragraph}</p>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Event Program */}
+                        {(event as any).sessions && (event as any).sessions.length > 0 && (
+                            <div className="bg-card rounded-3xl p-8 md:p-10 card-elevated border border-border/50 shadow-xl space-y-8 animate-fade-up" style={{ animationDelay: "0.45s" }}>
+                                <div className="flex items-center gap-4 border-b border-border/50 pb-6">
+                                    <div className="w-12 h-12 rounded-2xl bg-primary/5 flex items-center justify-center text-primary shadow-inner">
+                                        <Calendar className="w-6 h-6" />
+                                    </div>
+                                    <h2 className="font-display text-3xl font-bold text-card-foreground">
+                                        Event Program
+                                    </h2>
+                                </div>
+                                <div className="space-y-6">
+                                    {(event as any).sessions.map((session: any) => (
+                                        <div key={session.id} className="flex gap-6 relative pl-8 border-l-2 border-primary/20 last:border-0 pb-6 last:pb-0">
+                                            <div className="absolute -left-[9px] top-0 w-4 h-4 rounded-full bg-primary ring-4 ring-background" />
+                                            <div className="flex-1 space-y-2">
+                                                <div className="flex flex-wrap items-center gap-2 mb-1">
+                                                    <Badge variant="outline" className="text-primary border-primary/20 bg-primary/5">
+                                                        {format(new Date(session.startTime), "HH:mm")} - {format(new Date(session.endTime), "HH:mm")}
+                                                    </Badge>
+                                                    {session.location && (
+                                                        <Badge variant="secondary" className="text-muted-foreground">
+                                                            📍 {session.location}
+                                                        </Badge>
+                                                    )}
+                                                </div>
+                                                <h3 className="text-xl font-bold text-card-foreground">{session.title}</h3>
+                                                {session.description && (
+                                                    <p className="text-muted-foreground leading-relaxed">{session.description}</p>
+                                                )}
+                                                {session.speaker && (
+                                                    <div className="flex items-center gap-2 pt-2 text-sm font-medium text-foreground/80">
+                                                        <div className="w-6 h-6 rounded-full bg-secondary flex items-center justify-center text-xs">🎤</div>
+                                                        <span>{session.speaker}</span>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
                                     ))}
                                 </div>
                             </div>

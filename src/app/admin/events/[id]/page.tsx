@@ -39,6 +39,11 @@ async function getEvent(id: string) {
                     include: {
                         university: true
                     }
+                },
+                sessions: {
+                    orderBy: {
+                        startTime: 'asc'
+                    }
                 }
             }
         });
@@ -157,6 +162,9 @@ async function getAllUniversities() {
     });
 }
 
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { EventSessionsList } from "@/components/admin/events/sessions/session-list";
+
 export default async function EditEventPage({ params }: { params: Promise<{ id: string }> }) {
     await requireManagerOrAbove();
     const { id } = await params;
@@ -171,7 +179,6 @@ export default async function EditEventPage({ params }: { params: Promise<{ id: 
     }
 
     // Format times in the EVENT'S timezone for the form inputs
-    // input type="datetime-local" expects "yyyy-MM-ddThh:mm"
     const tz = event.timezone || "UTC";
 
     // We use strict format for datetime-local: YYYY-MM-DDThh:mm
@@ -188,7 +195,7 @@ export default async function EditEventPage({ params }: { params: Promise<{ id: 
     };
 
     return (
-        <div className="max-w-3xl mx-auto space-y-6">
+        <div className="max-w-4xl mx-auto space-y-6">
             <div>
                 <h1 className="text-2xl font-bold">Edit Event</h1>
                 <p className="text-muted-foreground">
@@ -196,47 +203,72 @@ export default async function EditEventPage({ params }: { params: Promise<{ id: 
                 </p>
             </div>
 
-            <Card>
-                <CardHeader>
-                    <CardTitle>Event Details</CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <EventForm
-                        initialData={initialData as any}
-                        onSubmit={updateEvent.bind(null, id)}
-                        countries={countries}
+            <Tabs defaultValue="details" className="w-full">
+                <TabsList className="grid w-full grid-cols-3">
+                    <TabsTrigger value="details">Details</TabsTrigger>
+                    <TabsTrigger value="program">Program</TabsTrigger>
+                    <TabsTrigger value="universities">Universities</TabsTrigger>
+                </TabsList>
+
+                <TabsContent value="details" className="space-y-6">
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Event Details</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <EventForm
+                                initialData={initialData as any}
+                                onSubmit={updateEvent.bind(null, id)}
+                                countries={countries}
+                            />
+                        </CardContent>
+                    </Card>
+
+                    {/* Danger Zone */}
+                    <Card className="border-destructive/50">
+                        <CardHeader>
+                            <CardTitle className="text-destructive">Danger Zone</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <p className="font-medium">Delete this event</p>
+                                    <p className="text-sm text-muted-foreground">
+                                        Once deleted, this event and all its data cannot be recovered.
+                                    </p>
+                                </div>
+                                <DeleteEventButton
+                                    eventId={id}
+                                    eventTitle={event.title}
+                                    onDelete={deleteEvent.bind(null, id)}
+                                />
+                            </div>
+                        </CardContent>
+                    </Card>
+                </TabsContent>
+
+                <TabsContent value="program">
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Event Program</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <EventSessionsList 
+                                eventId={id} 
+                                sessions={(event as any).sessions || []} 
+                            />
+                        </CardContent>
+                    </Card>
+                </TabsContent>
+
+                <TabsContent value="universities">
+                     <EventUniversityManager
+                        eventId={id}
+                        participatingUniversities={event.universities as any}
+                        allUniversities={allUniversities}
                     />
-                </CardContent>
-            </Card>
-
-            {/* University Management */}
-            <EventUniversityManager
-                eventId={id}
-                participatingUniversities={event.universities as any}
-                allUniversities={allUniversities}
-            />
-
-            {/* Danger Zone */}
-            <Card className="border-destructive/50">
-                <CardHeader>
-                    <CardTitle className="text-destructive">Danger Zone</CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <div className="flex items-center justify-between">
-                        <div>
-                            <p className="font-medium">Delete this event</p>
-                            <p className="text-sm text-muted-foreground">
-                                Once deleted, this event and all its data cannot be recovered.
-                            </p>
-                        </div>
-                        <DeleteEventButton
-                            eventId={id}
-                            eventTitle={event.title}
-                            onDelete={deleteEvent.bind(null, id)}
-                        />
-                    </div>
-                </CardContent>
-            </Card>
+                </TabsContent>
+            </Tabs>
         </div>
     );
 }
