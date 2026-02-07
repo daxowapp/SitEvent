@@ -145,6 +145,17 @@ export async function removeUniversityFromEvent(universityId: string, eventId: s
 
     revalidatePath('/admin/universities');
     revalidatePath(`/admin/universities/${universityId}`);
+    revalidatePath(`/admin/events/${eventId}`);
+}
+
+// Remove ALL universities from event
+export async function removeAllUniversitiesFromEvent(eventId: string) {
+    await prisma.eventParticipating.deleteMany({
+        where: { eventId }
+    });
+
+    revalidatePath(`/admin/events/${eventId}`);
+    revalidatePath('/admin/universities');
 }
 
 // Get available events for assignment (not already assigned to this university)

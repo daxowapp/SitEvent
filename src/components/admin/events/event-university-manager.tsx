@@ -10,9 +10,9 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, Trash2, Building2, MapPin } from "lucide-react";
+import { Plus, Trash2, Building2, MapPin, AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
-import { assignUniversityToEvent, removeUniversityFromEvent } from "@/app/admin/universities/actions";
+import { assignUniversityToEvent, removeUniversityFromEvent, removeAllUniversitiesFromEvent } from "@/app/admin/universities/actions";
 
 interface University {
     id: string;
@@ -43,6 +43,8 @@ export function EventUniversityManager({
     const [selectedUniversityId, setSelectedUniversityId] = useState("");
     const [boothNumber, setBoothNumber] = useState("");
     const [isDialogOpen, setIsDialogOpen] = useState(false);
+    const [isDeleteAllDialogOpen, setIsDeleteAllDialogOpen] = useState(false);
+    const [isDeleting, setIsDeleting] = useState(false);
 
     // Filter out universities already participating
     const availableUniversities = allUniversities.filter(
@@ -83,6 +85,21 @@ export function EventUniversityManager({
         }
     };
 
+    const handleRemoveAllUniversities = async () => {
+        setIsDeleting(true);
+        try {
+            await removeAllUniversitiesFromEvent(eventId);
+            toast.success(`Removed all ${participatingUniversities.length} universities from event`);
+            setIsDeleteAllDialogOpen(false);
+            router.refresh();
+        } catch (error) {
+            console.error("Failed to remove all universities:", error);
+            toast.error("Failed to remove universities");
+        } finally {
+            setIsDeleting(false);
+        }
+    };
+
     return (
         <Card>
             <CardHeader className="flex flex-row items-center justify-between">
@@ -92,6 +109,39 @@ export function EventUniversityManager({
                         Manage universities attending this event
                     </p>
                 </div>
+                <div className="flex gap-2">
+                    {participatingUniversities.length > 0 && (
+                        <Dialog open={isDeleteAllDialogOpen} onOpenChange={setIsDeleteAllDialogOpen}>
+                            <DialogTrigger asChild>
+                                <Button variant="outline" className="text-destructive border-destructive/50 hover:bg-destructive/10">
+                                    <Trash2 className="w-4 h-4 mr-2" />
+                                    Delete All
+                                </Button>
+                            </DialogTrigger>
+                            <DialogContent>
+                                <DialogHeader>
+                                    <DialogTitle className="flex items-center gap-2 text-destructive">
+                                        <AlertTriangle className="w-5 h-5" />
+                                        Remove All Universities?
+                                    </DialogTitle>
+                                    <DialogDescription>
+                                        This will remove <strong>{participatingUniversities.length}</strong> universities from this event.
+                                        This action cannot be undone.
+                                    </DialogDescription>
+                                </DialogHeader>
+                                <DialogFooter>
+                                    <Button variant="outline" onClick={() => setIsDeleteAllDialogOpen(false)}>Cancel</Button>
+                                    <Button 
+                                        variant="destructive" 
+                                        onClick={handleRemoveAllUniversities}
+                                        disabled={isDeleting}
+                                    >
+                                        {isDeleting ? "Removing..." : "Yes, Remove All"}
+                                    </Button>
+                                </DialogFooter>
+                            </DialogContent>
+                        </Dialog>
+                    )}
                 <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                     <DialogTrigger asChild>
                         <Button>
@@ -142,6 +192,7 @@ export function EventUniversityManager({
                         </DialogFooter>
                     </DialogContent>
                 </Dialog>
+                </div>
             </CardHeader>
             <CardContent>
                 {participatingUniversities.length === 0 ? (
