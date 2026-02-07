@@ -17,6 +17,7 @@ import { toast } from "sonner";
 import { ImageUpload } from "@/components/ui/image-upload";
 import { MultiImageUpload } from "@/components/ui/multi-image-upload";
 import { TranslatableInput, TranslatableTextarea } from "@/components/ui/translatable-input";
+import { duplicateEvent } from "@/app/actions/events";
 
 type Translations = Partial<Record<'en' | 'tr' | 'ar', string>>;
 
