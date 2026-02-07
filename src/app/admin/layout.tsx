@@ -39,17 +39,9 @@ export default async function AdminLayout({
 
     const role = session.user.role as AdminRole;
 
-    // Get current path to check if staff/usher is accessing restricted pages
-    const headersList = await headers();
-    const pathname = headersList.get("x-pathname") || headersList.get("x-invoke-path") || "";
-    
-    // EVENT_STAFF and USHER can only access /admin/scan
-    if (role === AdminRole.EVENT_STAFF || role === AdminRole.USHER) {
-        // Allow only scan page for staff/usher
-        if (!pathname.includes("/admin/scan") && pathname !== "/admin/scan") {
-            redirect("/admin/scan");
-        }
-    }
+    // Note: Role-based page restrictions for EVENT_STAFF and USHER
+    // should be handled in middleware or individual page components,
+    // not here, as x-pathname headers are not reliable in Next.js 16+
 
     return (
         <html lang="en" className={`${inter.variable}`}>
