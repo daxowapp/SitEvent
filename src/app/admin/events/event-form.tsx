@@ -14,7 +14,6 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
-import { format } from "date-fns";
 import { ImageUpload } from "@/components/ui/image-upload";
 import { MultiImageUpload } from "@/components/ui/multi-image-upload";
 import { TranslatableInput, TranslatableTextarea } from "@/components/ui/translatable-input";
@@ -77,6 +76,7 @@ interface EventFormProps {
     initialData?: Partial<EventFormData>;
     onSubmit: (data: EventFormData) => Promise<void>;
     countries?: Country[];
+    eventId?: string;
 }
 
 const TIMEZONES = [
@@ -89,7 +89,7 @@ const TIMEZONES = [
     "America/New_York",
 ];
 
-export function EventForm({ initialData, onSubmit, countries = [] }: EventFormProps) {
+export function EventForm({ initialData, onSubmit, countries = [], eventId }: EventFormProps) {
     const router = useRouter();
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [cities, setCities] = useState<City[]>([]);
@@ -136,15 +136,6 @@ export function EventForm({ initialData, onSubmit, countries = [] }: EventFormPr
             .replace(/^-|-$/g, "");
     };
 
-    const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const title = e.target.value;
-        setFormData((prev) => ({
-            ...prev,
-            title,
-            slug: prev.slug || generateSlug(title),
-        }));
-    };
-
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         setIsSubmitting(true);
@@ -160,6 +151,27 @@ export function EventForm({ initialData, onSubmit, countries = [] }: EventFormPr
             toast.error(error instanceof Error ? error.message : "Failed to save event");
             setIsSubmitting(false);
         }
+    };
+
+    const handleDuplicate = async () => {
+         if (!eventId) return; 
+         
+         if (!confirm("Are you sure you want to duplicate this event?")) return;
+
+         setIsSubmitting(true);
+         try {
+             const result = await duplicateEvent(eventId);
+             if (result.success && result.eventId) {
+                 toast.success("Event duplicated successfully!");
+                 router.push(`/admin/events/${result.eventId}`);
+             } else {
+                 throw new Error(result.error || "Failed to duplicate");
+             }
+         } catch (error) {
+             console.error("Duplicate error:", error);
+             toast.error("Failed to duplicate event");
+             setIsSubmitting(false);
+         }
     };
 
     return (

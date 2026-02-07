@@ -313,30 +313,7 @@
         "yourQRCode": "رمز QR الخاص بك",
         "showAtEntrance": "أظهر رمز QR هذا عند مدخل الفعالية"
     },
-    "email": {
-        "confirmation": {
-            "subject": "تأكيد التسجيل - {eventName}",
-            "greeting": "مرحباً {name}!",
-            "body": "شكراً لتسجيلك في معرض {eventName}. نحن متحمسون لاستضافتك!",
-            "eventDetails": "تفاصيل المعرض",
-            "qrInstructions": "يرجى إظهار رمز QR أدناه عند مدخل المعرض لتسجيل الحضور.",
-            "seeYou": "نراك في المعرض!",
-            "dateLabel": "التاريخ",
-            "venueLabel": "المكان",
-            "openPass": "افتح بطاقة الدخول كاملة",
-            "proTipTitle": "نصيحة:",
-            "proTipBody": "احضر قبل 15 دقيقة لتجنب الازدحام. جهز رمز QR على هاتفك (أو مطبوعاً) لتسجيل الدخول السريع.",
-            "youreIn": "تم تسجيلك!",
-            "registrationConfirmed": "تم تأكيد تسجيلك بنجاح.",
-            "yourEntryPass": "بطاقة الدخول الخاصة بك"
-        },
-        "reminder": {
-            "subject": "تذكير: معرض {eventName} قادم!",
-            "greeting": "مرحباً {name}!",
-            "body": "هذا تذكير ودي بأن معرض {eventName} سيقام قريباً.",
-            "dontForget": "لا تنسَ إحضار رمز QR الخاص بك لتسجيل الحضور."
-        }
-    },
+
     "success": {
         "title": "تم التسجيل بنجاح!",
         "subtitle": "شكراً لتسجيلك، <highlight>{name}</highlight>.",
@@ -417,6 +394,97 @@
                     "desc": "احجز موقعك واستعد."
                 }
             }
+        }
+    },
+    "email": {
+        "confirmation": {
+            "subject": "تأكيد التسجيل - {eventName}",
+            "greeting": "مرحباً {name}!",
+            "body": "شكراً لتسجيلك في {eventName}. نحن متحمسون لاستضافتك!",
+            "eventDetails": "تفاصيل الفعالية",
+            "qrInstructions": "يرجى إظهار رمز QR أدناه عند المدخل لتسجيل الدخول.",
+            "seeYou": "نراك في الفعالية!",
+            "dateLabel": "التاريخ",
+            "venueLabel": "المكان",
+            "openPass": "فتح بطاقة الدخول",
+            "proTipTitle": "نصيحة:",
+            "proTipBody": "احضر قبل 15 دقيقة لتجنب الازدحام. جهز رمز QR على هاتفك (أو مطبوعاً) للدخول السريع.",
+            "youreIn": "تم التسجيل!",
+            "registrationConfirmed": "تم تأكيد تسجيلك.",
+            "yourEntryPass": "بطاقة الدخول"
+        },
+        "reminder": {
+            "subject": "تذكير: {eventName} اقترب موعده!",
+            "greeting": "مرحباً {name}!",
+            "body": "تذكير ودي بأن {eventName} سيقام قريباً.",
+            "dontForget": "لا تنس إحضار رمز QR الخاص بك."
+        }
+    },
+    "kiosk": {
+        "attract": {
+            "welcomeTo": "مرحباً بكم في",
+            "officialKiosk": "منصة التسجيل الرسمية",
+            "tapToStart": "المس الشاشة للبدء",
+            "footer": "تسجيل آمن  •  رمز QR فوري"
+        },
+        "menu": {
+            "back": "رجوع",
+            "newRegistration": "تسجيل جديد",
+            "newRegistrationDesc": "ليس لدي تذكرة بعد",
+            "lostTicket": "فقدت تذكرتي",
+            "lostTicketDesc": "طباعة الشارة / رمز QR"
+        },
+        "form": {
+            "title": "تسجيل سريع",
+            "fullName": "الاسم الكامل",
+            "fullNamePlaceholder": "الاسم الثلاثي",
+            "email": "البريد الإلكتروني",
+            "emailPlaceholder": "example@email.com",
+            "phone": "رقم الجوال",
+            "phonePlaceholder": "05xxxxxxxx",
+            "levelOfStudy": "المرحلة الدراسية",
+            "selectLevel": "اختر المرحلة",
+            "interestedMajor": "التخصص المهتم به",
+            "majorPlaceholder": "مثال: هندسة، طب...",
+            "submit": "تسجيل والحصول على الرمز",
+            "submitting": "جاري التسجيل...",
+            "success": "أهلاً بك! تم التسجيل بنجاح",
+            "alreadyRegistered": "أنت مسجل بالفعل. جاري سحب تذكرتك...",
+             "levels": {
+                "HIGH_SCHOOL": "ثانوية عامة",
+                "BACHELOR": "بكالوريوس",
+                "MASTER": "ماجستير",
+                "PHD": "دكتوراه"
+            },
+            "validation": {
+                "nameRequired": "الاسم مطلوب",
+                "emailInvalid": "بريد إلكتروني غير صحيح",
+                "phoneRequired": "رقم الهاتف مطلوب",
+                "levelRequired": "المرحلة الدراسية مطلوبة"
+            },
+            "steps": {
+                "personal": "البيانات الشخصية",
+                "contact": "التواصل",
+                "education": "التعليم",
+                "next": "التالي",
+                "back": "السابق"
+            },
+            "majors": {
+                "MEDICINE": "طب / صيدلة",
+                "ENGINEERING": "هندسة",
+                "BUSINESS": "إدارة أعمال",
+                "LANGUAGES": "لغات / ترجمة",
+                "CS": "حاسبات ومعلومات",
+                "OTHER": "تخصص آخر"
+            }
+        },
+        "success": {
+            "title": "أنت جاهز تماماً!",
+            "subtitle": "امسح هذا الرمز عند البوابة. أرسلنا نسخة أيضاً إلى بريدك الإلكتروني.",
+            "welcomeBack": "أهلاً بك مجدداً!",
+            "existingTicket": "وجدنا تسجيلك المسبق. ها هي تذكرتك.",
+            "doneNext": "تم / الطالب التالي",
+            "resetting": "ستعود الشاشة للبداية خلال 10 ثوان..."
         }
     }
 }

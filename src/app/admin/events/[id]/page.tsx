@@ -165,6 +165,8 @@ async function getAllUniversities() {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { EventSessionsList } from "@/components/admin/events/sessions/session-list";
 
+import { DuplicateEventButton } from "../duplicate-event-button";
+
 export default async function EditEventPage({ params }: { params: Promise<{ id: string }> }) {
     await requireManagerOrAbove();
     const { id } = await params;
@@ -196,11 +198,14 @@ export default async function EditEventPage({ params }: { params: Promise<{ id: 
 
     return (
         <div className="max-w-4xl mx-auto space-y-6">
-            <div>
-                <h1 className="text-2xl font-bold">Edit Event</h1>
-                <p className="text-muted-foreground">
-                    Update event details and settings
-                </p>
+            <div className="flex items-center justify-between">
+                <div>
+                    <h1 className="text-2xl font-bold">Edit Event</h1>
+                    <p className="text-muted-foreground">
+                        Update event details and settings
+                    </p>
+                </div>
+                <DuplicateEventButton eventId={id} />
             </div>
 
             <Tabs defaultValue="details" className="w-full">
@@ -220,6 +225,7 @@ export default async function EditEventPage({ params }: { params: Promise<{ id: 
                                 initialData={initialData as any}
                                 onSubmit={updateEvent.bind(null, id)}
                                 countries={countries}
+                                eventId={id}
                             />
                         </CardContent>
                     </Card>

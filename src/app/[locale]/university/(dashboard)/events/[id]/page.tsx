@@ -9,6 +9,7 @@ import { Calendar, MapPin, CloudSun, DollarSign, Coffee, Landmark } from "lucide
 import { format } from "date-fns";
 import { StudentDataTable } from "./student-table";
 import { RegisterEventButton } from "@/components/university/register-event-button";
+import { EventProgramTimeline } from "@/components/university/event-program-timeline";
 
 interface Attraction {
     name: string;
@@ -48,9 +49,13 @@ export default async function UniversityEventPage({ params }: { params: Promise<
             universities: {
                 where: { universityId: session.user.universityId }
             },
-            cityRef: {
                 include: {
                     country: true
+                }
+            },
+            sessions: {
+                orderBy: {
+                    startTime: 'asc'
                 }
             }
         }
@@ -95,7 +100,15 @@ export default async function UniversityEventPage({ params }: { params: Promise<
                         </div>
                     </div>
                     {isAccepted && (
-                        <Badge className="bg-gray-100 text-gray-800 hover:bg-gray-200 border-gray-200">Booth: {participation.boothNumber || "Assigned at Venue"}</Badge>
+                        <div className="flex gap-2">
+                            <Badge className="bg-gray-100 text-gray-800 hover:bg-gray-200 border-gray-200">Booth: {participation.boothNumber || "Assigned at Venue"}</Badge>
+                            <Button asChild variant="outline" className="gap-2">
+                                <a href={`/en/kiosk/${event.slug}`} target="_blank" rel="noopener noreferrer">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-presentation"><path d="M2 3h20"/><path d="M21 3v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V3"/><path d="M7 21h10"/></svg>
+                                    Open Kiosk
+                                </a>
+                            </Button>
+                        </div>
                     )}
                     {isPending && (
                         <Badge className="bg-yellow-100 text-yellow-800 hover:bg-yellow-200 border-yellow-200">Pending Approval</Badge>
@@ -109,6 +122,7 @@ export default async function UniversityEventPage({ params }: { params: Promise<
             <Tabs defaultValue={isAccepted ? "overview" : "city"} className="w-full">
                 <TabsList className="mb-4">
                     <TabsTrigger value="overview">Overview</TabsTrigger>
+                    {isAccepted && <TabsTrigger value="program">Program</TabsTrigger>}
                     {isAccepted && <TabsTrigger value="students">Student Data ({registrations.length})</TabsTrigger>}
                     <TabsTrigger value="city">City Guide</TabsTrigger>
                 </TabsList>
@@ -182,6 +196,26 @@ export default async function UniversityEventPage({ params }: { params: Promise<
                         </CardContent>
                     </Card>
                 </TabsContent>
+
+                {/* PROGRAM TAB */}
+                {isAccepted && (
+                    <TabsContent value="program">
+                       <Card>
+                           <CardHeader>
+                               <CardTitle>Event Program</CardTitle>
+                               <CardDescription>
+                                   Schedule in {event.timezone} ({locationString} Time)
+                               </CardDescription>
+                           </CardHeader>
+                           <CardContent>
+                               <EventProgramTimeline 
+                                   sessions={event.sessions} 
+                                   timezone={event.timezone || "UTC"} 
+                               />
+                           </CardContent>
+                       </Card>
+                    </TabsContent>
+                )}
 
                 {/* STUDENTS TAB */}
                 {isAccepted && (

@@ -18,28 +18,17 @@ export const metadata = {
     title: "Events",
 };
 
-async function getEvents() {
-    if (!(process.env.DATABASE_URL && !process.env.DATABASE_URL.includes('[project-ref]'))) {
-        return [
-            { id: "1", title: "Istanbul Fair", slug: "istanbul-fair", country: "Turkey", city: "Istanbul", status: "PUBLISHED", startDateTime: new Date() },
-        ];
-    }
+import { prisma } from "@/lib/db";
 
-    try {
-        const { prisma } = await import("@/lib/db");
-        return await prisma.event.findMany({
-            orderBy: { startDateTime: "desc" },
-            include: {
-                _count: {
-                    select: { registrations: true }
-                }
+async function getEvents() {
+    return prisma.event.findMany({
+        orderBy: { startDateTime: "desc" },
+        include: {
+            _count: {
+                select: { registrations: true }
             }
-        });
-    } catch {
-        return [
-            { id: "1", title: "Istanbul Fair", slug: "istanbul-fair", country: "Turkey", city: "Istanbul", status: "PUBLISHED", startDateTime: new Date(), _count: { registrations: 0 } },
-        ];
-    }
+        }
+    });
 }
 
 export default async function AdminEventsPage() {

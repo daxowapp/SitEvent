@@ -155,6 +155,12 @@ export default async function UsersPage() {
                                 Scanner access only - can check in attendees at events.
                             </p>
                         </div>
+                        <div className="flex items-start gap-3">
+                            <Badge variant="outline" className="bg-purple-100 text-purple-700 hover:bg-purple-200">USHER</Badge>
+                            <p className="text-muted-foreground">
+                                Can check in attendees at events using the scanner app.
+                            </p>
+                        </div>
                     </div>
                 </CardContent>
             </Card>

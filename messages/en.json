@@ -1,4 +1,15 @@
 {
+  "kiosk": {
+    "form": {
+      "validation": {
+        "attention": "Attention Required",
+        "defaultError": "Please check the form for errors.",
+        "fixIt": "Got it, I'll fix it",
+        "checkForm": "Please check the form",
+        "namePlaceholder": "Full Name (English preferred)"
+      }
+    }
+  },
     "common": {
         "siteName": "EduFairs",
         "tagline": "Connecting Students with Global Education",

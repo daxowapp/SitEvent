@@ -268,6 +268,7 @@
         "yourQRCode": "QR Kodunuz",
         "showAtEntrance": "Bu QR kodunu etkinlik girişinde gösterin"
     },
+
     "email": {
         "confirmation": {
             "subject": "Kayıt Onaylandı - {eventName}",
@@ -275,7 +276,15 @@
             "body": "{eventName} etkinliğine kaydolduğunuz için teşekkürler. Sizi aramızda görmekten heyecan duyuyoruz!",
             "eventDetails": "Etkinlik Detayları",
             "qrInstructions": "Lütfen giriş yapmak için aşağıdaki QR kodunu etkinlik girişinde gösterin.",
-            "seeYou": "Etkinlikte görüşmek üzere!"
+            "seeYou": "Etkinlikte görüşmek üzere!",
+            "dateLabel": "Tarih",
+            "venueLabel": "Mekan",
+            "openPass": "Giriş Kartını Aç",
+            "proTipTitle": "İpucu:",
+            "proTipBody": "Sıra beklememek için 15 dakika erken gelin. Hızlı giriş için QR kodunuzu telefonunuzda (veya çıktısını alarak) hazır bulundurun.",
+            "youreIn": "Kaydınız Alındı!",
+            "registrationConfirmed": "Kaydınız başarıyla onaylandı.",
+            "yourEntryPass": "Giriş Kartınız"
         },
         "reminder": {
             "subject": "Hatırlatma: {eventName} yaklaşıyor!",

@@ -136,6 +136,7 @@ export function UserForm({ user, onSuccess }: UserFormProps) {
                                     <SelectItem value={AdminRole.SUPER_ADMIN}>Super Admin</SelectItem>
                                     <SelectItem value={AdminRole.EVENT_MANAGER}>Event Manager</SelectItem>
                                     <SelectItem value={AdminRole.EVENT_STAFF}>Event Staff</SelectItem>
+                                    <SelectItem value={AdminRole.USHER}>Usher (Scanner Only)</SelectItem>
                                 </SelectContent>
                             </Select>
                             <FormMessage />

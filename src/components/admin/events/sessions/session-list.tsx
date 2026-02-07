@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { format } from "date-fns";
-import { Pencil, Trash2, Plus } from "lucide-react";
+import { Pencil, Trash2, Plus, Copy } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
     Table,
@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import { duplicateSession } from "@/app/actions/events";
 
 interface Session {
     id: string;
@@ -101,6 +102,25 @@ export function EventSessionsList({ eventId, sessions: initialSessions }: EventS
             router.refresh();
         } catch (error) {
             toast.error("Failed to delete session");
+        }
+    };
+
+    const handleDuplicate = async (sessionId: string) => {
+        if (!confirm("Are you sure you want to duplicate this session?")) return;
+        try {
+            const result = await duplicateSession(sessionId, eventId);
+            if (result.success && result.session) {
+                const newSession = result.session;
+                // Add to local state to update UI immediately
+                setSessions([...sessions, { ...newSession, startTime: new Date(newSession.startTime), endTime: new Date(newSession.endTime) }]);
+                toast.success("Session duplicated successfully");
+                router.refresh();
+            } else {
+                 throw new Error(result.error || "Failed to duplicate");
+            }
+        } catch (error) {
+            console.error("Duplicate error:", error);
+            toast.error("Failed to duplicate session");
         }
     };
 
@@ -194,6 +214,14 @@ export function EventSessionsList({ eventId, sessions: initialSessions }: EventS
                                                     onClick={() => handleDelete(session.id)}
                                                 >
                                                     <Trash2 className="w-4 h-4" />
+                                                </Button>
+                                                <Button
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    title="Duplicate Session"
+                                                    onClick={() => handleDuplicate(session.id)}
+                                                >
+                                                    <Copy className="w-4 h-4" />
                                                 </Button>
                                             </div>
                                         </TableCell>

@@ -64,7 +64,7 @@ export async function sendConfirmationEmail(
             <!-- Header -->
             <div style="background: linear-gradient(135deg, #E30A17 0%, #B30000 100%); padding: 32px 24px; text-align: center;">
               <h1 style="color: white; margin: 0; font-size: 24px; font-weight: 700;">Sit Connect</h1>
-              <p style="color: rgba(255,255,255,0.9); margin-top: 8px; font-size: 16px;">${t.youreIn} 🎉</p>
+              <p style="color: #000000; margin-top: 8px; font-size: 16px;">${t.youreIn} 🎉</p>
             </div>
             
             <div style="padding: 32px 24px;">
