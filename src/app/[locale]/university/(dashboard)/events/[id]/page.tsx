@@ -49,6 +49,7 @@ export default async function UniversityEventPage({ params }: { params: Promise<
             universities: {
                 where: { universityId: session.user.universityId }
             },
+            cityRef: {
                 include: {
                     country: true
                 }
