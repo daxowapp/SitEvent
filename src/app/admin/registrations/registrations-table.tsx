@@ -70,6 +70,8 @@ export function RegistrationsTable({
                 setSource={(val) => updateParam("source", val)}
                 events={events}
                 sources={sources}
+                sort={searchParams.get("sort") || "desc"}
+                setSort={(val) => updateParam("sort", val)}
             />
 
             <div className="rounded-md border bg-white relative">

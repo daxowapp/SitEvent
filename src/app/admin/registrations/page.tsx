@@ -17,6 +17,7 @@ interface PageProps {
         eventId?: string;
         status?: string;
         source?: string;
+        sort?: string;
     }>;
 }
 
@@ -63,7 +64,7 @@ export default async function RegistrationsPage({ searchParams }: PageProps) {
                 event: { select: { title: true } },
                 checkIn: true,
             },
-            orderBy: { createdAt: "desc" },
+            orderBy: { createdAt: (params.sort) === "asc" ? "asc" : "desc" },
             take: limit,
             skip,
         }),

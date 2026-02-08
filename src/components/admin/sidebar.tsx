@@ -15,6 +15,7 @@ import {
     MessageSquare as MessageSquareIcon,
     ShieldCheck as ShieldCheckIcon,
     LayoutDashboard,
+    BarChart3,
     Calendar as CalendarIcon,
     Globe,
     MapPin,
@@ -23,6 +24,7 @@ import {
 
 const navItems = [
     { name: "Dashboard", href: "/admin", icon: LayoutDashboard, roles: ["SUPER_ADMIN", "EVENT_MANAGER"] },
+    { name: "Analytics", href: "/admin/analytics", icon: BarChart3, roles: ["SUPER_ADMIN", "EVENT_MANAGER"] },
     { name: "Events", href: "/admin/events", icon: CalendarIcon, roles: ["SUPER_ADMIN", "EVENT_MANAGER"] },
     { name: "Registrations", href: "/admin/registrations", icon: UsersIcon, roles: ["SUPER_ADMIN", "EVENT_MANAGER"] },
     { name: "Scan QR", href: "/admin/scan", icon: CameraIcon, roles: ["SUPER_ADMIN", "EVENT_MANAGER", "EVENT_STAFF", "USHER"] },

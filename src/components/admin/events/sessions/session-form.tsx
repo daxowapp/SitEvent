@@ -73,7 +73,17 @@ export function SessionForm({ defaultValues, onSubmit, onCancel }: SessionFormPr
             });
             return;
         }
-        onSubmit(data);
+
+        // Convert the local datetime-local string to a full Date object
+        // The browser interpreting "YYYY-MM-DDTHH:mm" without "Z" creates a local date
+        const startTime = new Date(data.startTime);
+        const endTime = new Date(data.endTime);
+
+        onSubmit({
+            ...data,
+            startTime: startTime.toISOString(),
+            endTime: endTime.toISOString()
+        });
     };
 
     return (

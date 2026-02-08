@@ -18,6 +18,8 @@ interface DataTableToolbarProps {
     setSource: (value: string | null) => void
     events: { id: string; title: string }[]
     sources: string[]
+    sort: string
+    setSort: (value: string) => void
 }
 
 export function DataTableToolbar({
@@ -30,7 +32,9 @@ export function DataTableToolbar({
     source,
     setSource,
     events,
-    sources
+    sources,
+    sort,
+    setSort
 }: DataTableToolbarProps) {
     const isFiltered = !!searchQuery || !!eventId || !!status || !!source
 
@@ -39,6 +43,7 @@ export function DataTableToolbar({
         setEventId(null)
         setStatus(null)
         setSource(null)
+        setSort("desc")
     }
 
     return (
@@ -50,6 +55,17 @@ export function DataTableToolbar({
                     onChange={(event) => setSearchQuery(event.target.value)}
                     className="h-8 w-[150px] lg:w-[250px]"
                 />
+                
+                <DataTableFacetedFilter
+                    title="Sort Date"
+                    options={[
+                        { label: "Newest First", value: "desc" },
+                        { label: "Oldest First", value: "asc" },
+                    ]}
+                    value={sort}
+                    onSelect={(val) => setSort(val || "desc")}
+                />
+
                 {events && events.length > 0 && (
                     <DataTableFacetedFilter
                         title="Event"

@@ -187,7 +187,7 @@ export function EventSessionsList({ eventId, sessions: initialSessions }: EventS
                                         </TableCell>
                                         <TableCell>
                                             <div className="font-medium">{session.title}</div>
-                                            {session.description && (
+                                            {session.description && session.description.toLowerCase() !== session.title.toLowerCase() && (
                                                 <div className="text-xs text-muted-foreground truncate max-w-[200px]">
                                                     {session.description}
                                                 </div>
