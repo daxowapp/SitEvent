@@ -2,16 +2,16 @@
 
 import { useState } from "react";
 import { signIn } from "next-auth/react";
-import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Loader2, ArrowRight, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import Link from "next/link";
+import Image from "next/image";
+import { motion } from "framer-motion";
 
 export default function LoginForm() {
-    const router = useRouter();
     const [isLoading, setIsLoading] = useState(false);
 
     async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -37,7 +37,7 @@ export default function LoginForm() {
                 // Force a hard refresh/navigation to ensure session is picked up
                 window.location.href = "/university/dashboard";
             }
-        } catch (error) {
+        } catch {
             toast.error("Something went wrong");
             setIsLoading(false);
         }
@@ -53,18 +53,63 @@ export default function LoginForm() {
             </div>
 
             <div className="w-full max-w-lg p-8 relative z-10">
-                <div className="mb-10 text-center">
-                    <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-red-50 border border-red-100 mb-6 animate-fade-in-up">
+                <motion.div 
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5 }}
+                    className="mb-10 text-center"
+                >
+                    <motion.div 
+                        initial={{ scale: 0.8, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
+                        className="w-32 h-32 mx-auto mb-8 bg-white rounded-3xl shadow-xl shadow-red-100 flex items-center justify-center p-6 border border-red-50"
+                    >
+                        <Image 
+                            src="/logo-red.svg" 
+                            alt="Sit Connect Logo" 
+                            width={128} 
+                            height={128} 
+                            className="w-full h-full object-contain"
+                        />
+                    </motion.div>
+
+                    <motion.div 
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.3 }}
+                        className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-red-50 border border-red-100 mb-6"
+                    >
                         <Sparkles className="w-4 h-4 text-red-600" />
                         <span className="text-sm font-bold tracking-wide text-red-700 uppercase">
                             University Portal
                         </span>
-                    </div>
-                    <h1 className="font-display text-4xl font-bold mb-3 tracking-tight text-slate-900">Welcome Back</h1>
-                    <p className="text-slate-500">Manage your events and access student data</p>
-                </div>
+                    </motion.div>
+                    
+                    <motion.h1 
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ delay: 0.4 }}
+                        className="font-display text-4xl font-bold mb-3 tracking-tight text-slate-900"
+                    >
+                        Welcome Back
+                    </motion.h1>
+                    <motion.p 
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ delay: 0.5 }}
+                        className="text-slate-500"
+                    >
+                        Manage your events and access student data
+                    </motion.p>
+                </motion.div>
 
-                <div className="bg-white border border-slate-200 rounded-3xl p-8 shadow-xl shadow-red-100/50">
+                <motion.div 
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.6, duration: 0.5 }}
+                    className="bg-white border border-slate-200 rounded-3xl p-8 shadow-xl shadow-red-100/50"
+                >
                     <form onSubmit={handleSubmit} className="space-y-6">
                         <div className="space-y-2">
                             <Label htmlFor="email" className="text-slate-700 font-medium">University Email</Label>
@@ -108,16 +153,21 @@ export default function LoginForm() {
                             )}
                         </Button>
                     </form>
-                </div>
+                </motion.div>
 
-                <div className="mt-8 text-center">
+                <motion.div 
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.8 }}
+                    className="mt-8 text-center"
+                >
                     <p className="text-slate-500 text-sm">
-                        Don't have an account?{" "}
+                        Don&apos;t have an account?{" "}
                         <Link href="/recruit" className="text-red-600 font-bold hover:underline">
                             Apply for Partnership
                         </Link>
                     </p>
-                </div>
+                </motion.div>
             </div>
         </div>
     );
