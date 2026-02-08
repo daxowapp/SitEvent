@@ -72,22 +72,28 @@ async function getPercentageChange(current: number, previous: number) {
 
 export async function getAnalyticsData(range: DateRange): Promise<AnalyticsData> {
     const { start, end, previousStart, previousEnd } = getDateRange(range);
+    
+    // Helper to construct date filter. If range is 'all', we don't filter by date for totals.
+    const dateFilter = range === 'all' ? {} : { createdAt: { gte: start, lte: end } };
+    const prevDateFilter = range === 'all' ? {} : { createdAt: { gte: previousStart, lte: previousEnd } }; // 'all' prev doesn't make much sense, but keeping logic consistent-ish or 0
 
     // 1. KPI: Total Registrations
     const registrations = await prisma.registration.count({
-        where: { createdAt: { gte: start, lte: end } }
+        where: dateFilter
     });
-    const prevRegistrations = await prisma.registration.count({
-        where: { createdAt: { gte: previousStart, lte: previousEnd } }
+    // For 'all', previous period is effectively 0 or same? 
+    // Usually 'all' comparison is moot. Let's set prev to 0 if all.
+    const prevRegistrations = range === 'all' ? 0 : await prisma.registration.count({
+        where: prevDateFilter
     });
     const registrationChange = await getPercentageChange(registrations, prevRegistrations);
 
     // 2. KPI: Total Events (Created in period)
     const events = await prisma.event.count({
-        where: { createdAt: { gte: start, lte: end } }
+        where: dateFilter
     });
-    const prevEvents = await prisma.event.count({
-        where: { createdAt: { gte: previousStart, lte: previousEnd } }
+    const prevEvents = range === 'all' ? 0 : await prisma.event.count({
+        where: prevDateFilter
     });
     const eventChange = await getPercentageChange(events, prevEvents);
 
@@ -109,25 +115,16 @@ export async function getAnalyticsData(range: DateRange): Promise<AnalyticsData>
     let trendData: { date: string; count: number }[] = [];
     
     if (range === '1y' || range === 'all') {
-         // Monthly grouping logic would go here, simplified to daily for now to reuse logic or just last 30 intervals
-          // Actually, let's just do daily for now, recharts handles many points okay-ish.
-          // Optimization: Group by month if range is large.
-          const rawTrend = await prisma.registration.groupBy({
-            by: ['createdAt'],
-            where: { createdAt: { gte: start, lte: end } },
-            _count: { id: true },
-          });
-          // This returns discrete timestamps, we need to bucket them.
-          // Fallback to fetching all and mapping in JS for flexibility
+          // Monthly grouping logic
+          // Fetch all and map in JS for flexibility
           const allRegs = await prisma.registration.findMany({
-            where: { createdAt: { gte: start, lte: end } },
-            select: { createdAt: true }
+            where: dateFilter,
+            select: { createdAt: true },
+            orderBy: { createdAt: 'asc' }
           });
           
           if (range === '1y') {
-             // Group by month
              const months: Record<string, number> = {};
-             // Initialize last 12 months
              for(let i=11; i>=0; i--) {
                 const d = subMonths(new Date(), i);
                 months[format(d, 'MMM yyyy')] = 0;
@@ -139,22 +136,27 @@ export async function getAnalyticsData(range: DateRange): Promise<AnalyticsData>
              trendData = Object.entries(months).map(([date, count]) => ({ date, count }));
 
           } else {
-             // 'all' - maybe just last 12 months too? or by year? 
-             // Let's treat 'all' like '1y' for chart purposes or max 2 years.
+             // 'all' - dynamic grouping
               const months: Record<string, number> = {};
               allRegs.forEach(r => {
                  const key = format(r.createdAt, 'MMM yyyy');
                  if (!months[key]) months[key] = 0;
                  months[key]++;
              });
-             trendData = Object.entries(months).map(([date, count]) => ({ date, count }));
+             // Sort by date? Object.entries might not be sorted.
+             // Relying on JS engine key order or sorting the source map keys
+             trendData = Object.keys(months).map(date => ({ date, count: months[date] }));
+             // Need to sort trendData by date if we want it chronological? 
+             // Providing simple list for now.
+             // Ideally we shouldn't rely on string sort for 'MMM yyyy'.
+             // But existing code handles basic trends.
           }
 
     } else {
         // Daily
         const daysInterval = eachDayOfInterval({ start, end: new Date() }); // up to now
         const allRegs = await prisma.registration.findMany({
-            where: { createdAt: { gte: start, lte: end } },
+            where: dateFilter,
             select: { createdAt: true }
         });
         
@@ -168,16 +170,19 @@ export async function getAnalyticsData(range: DateRange): Promise<AnalyticsData>
     // 6. Chart: Events by Status
     const statusCounts = await prisma.event.groupBy({
         by: ['status'],
-        where: { createdAt: { gte: start, lte: end } },
+        where: dateFilter,
         _count: { status: true },
     });
 
     // 7. Chart: Top Major Interests
+    // For relations, we need to adapt the where clause
+    const relationFilter = range === 'all' ? {} : { some: { createdAt: { gte: start, lte: end } } };
+
     const topMajors = await prisma.registrant.groupBy({
         by: ['standardizedMajor'],
         where: { 
             standardizedMajor: { not: null },
-            registrations: { some: { createdAt: { gte: start, lte: end } } } // Filter by registration date
+            registrations: relationFilter
         },
         _count: { standardizedMajor: true },
         orderBy: { _count: { standardizedMajor: 'desc' } },
@@ -189,7 +194,7 @@ export async function getAnalyticsData(range: DateRange): Promise<AnalyticsData>
         by: ['majorCategory'],
         where: { 
              majorCategory: { not: null },
-             registrations: { some: { createdAt: { gte: start, lte: end } } }
+             registrations: relationFilter
         },
         _count: { majorCategory: true },
         orderBy: { _count: { majorCategory: 'desc' } }
@@ -200,9 +205,7 @@ export async function getAnalyticsData(range: DateRange): Promise<AnalyticsData>
         by: ['gender'],
         where: { 
              gender: { not: null },
-             registrations: { some: { createdAt: { gte: start, lte: end } } } // Filter by registration date?
-             // Technical note: Registrant creation date might differ from Registration date. 
-             // But usually they are created together. Let's use Registration relation for accuracy in period.
+             registrations: relationFilter
         },
         _count: { gender: true },
     });
@@ -211,7 +214,7 @@ export async function getAnalyticsData(range: DateRange): Promise<AnalyticsData>
     const geoRaw = await prisma.registrant.groupBy({
         by: ['country'],
         where: {
-            registrations: { some: { createdAt: { gte: start, lte: end } } }
+            registrations: relationFilter
         },
         _count: { id: true },
         orderBy: { _count: { id: 'desc' } },
@@ -219,11 +222,19 @@ export async function getAnalyticsData(range: DateRange): Promise<AnalyticsData>
     });
 
     // 11. KPI: Total Check-ins
+    // Check-in date might be different from registration date.
+    // Usually analytics for "Last 7 Days" implies "Events/Actions happening in last 7 days"? 
+    // OR "Registrations created in last 7 days"?
+    // The previous implementation used checkInAt for CheckIn counts.
+    // If range is 'all', we want ALL check-ins.
+    const checkInDateFilter = range === 'all' ? {} : { checkedInAt: { gte: start, lte: end } };
+    const prevCheckInDateFilter = range === 'all' ? {} : { checkedInAt: { gte: previousStart, lte: previousEnd } };
+
     const checkIns = await prisma.checkIn.count({
-        where: { checkedInAt: { gte: start, lte: end } }
+        where: checkInDateFilter
     });
-    const prevCheckIns = await prisma.checkIn.count({
-        where: { checkedInAt: { gte: previousStart, lte: previousEnd } }
+    const prevCheckIns = range === 'all' ? 0 : await prisma.checkIn.count({
+        where: prevCheckInDateFilter
     });
     const checkInChange = await getPercentageChange(checkIns, prevCheckIns);
 
@@ -240,18 +251,18 @@ export async function getAnalyticsData(range: DateRange): Promise<AnalyticsData>
             startDateTime: true,
             _count: {
                 select: {
-                    registrations: { where: { createdAt: { gte: start, lte: end } } } 
+                    registrations: { where: dateFilter } 
                 }
             },
             registrations: {
-                where: { createdAt: { gte: start, lte: end } },
+                where: dateFilter,
                 select: {
                     checkIn: { select: { id: true } }
                 }
             }
         },
         where: {
-            registrations: { some: { createdAt: { gte: start, lte: end } } }
+            registrations: { some: dateFilter }
         },
         orderBy: {
             registrations: {
@@ -277,7 +288,7 @@ export async function getAnalyticsData(range: DateRange): Promise<AnalyticsData>
         by: ['utmSource'],
         where: { 
              utmSource: { not: null },
-             registrations: { some: { createdAt: { gte: start, lte: end } } }
+             registrations: relationFilter
         },
         _count: { utmSource: true },
         orderBy: { _count: { utmSource: 'desc' } },
