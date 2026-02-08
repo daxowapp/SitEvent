@@ -48,10 +48,11 @@ interface KPIStatsProps {
         conversionRate: { value: number; change: number }; 
         totalCheckIns: { value: number; change: number };
         attendanceRate: { value: number; change: number };
-    }
+    };
+    dateLabel: string;
 }
 
-export function KPIStats({ data }: KPIStatsProps) {
+export function KPIStats({ data, dateLabel }: KPIStatsProps) {
     return (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             <KPICard
@@ -59,14 +60,14 @@ export function KPIStats({ data }: KPIStatsProps) {
                 value={data.totalRegistrations.value}
                 change={data.totalRegistrations.change}
                 icon={Users}
-                description="Total students registered in period"
+                description={`Registrations in ${dateLabel}`}
             />
             <KPICard
                 title="Total Check-ins"
                 value={data.totalCheckIns.value}
                 change={data.totalCheckIns.change}
                 icon={CheckCircle2}
-                description="Confirmed attendees"
+                description={`Check-ins in ${dateLabel}`}
             />
              <KPICard
                 title="Attendance Rate"

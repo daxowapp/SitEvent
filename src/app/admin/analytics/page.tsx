@@ -7,6 +7,8 @@ import { DateRangeFilter } from "@/components/admin/analytics/date-range-filter"
 import { Loader2 } from "lucide-react";
 import { requireManagerOrAbove } from "@/lib/role-check";
 
+export const dynamic = 'force-dynamic';
+
 export default async function AnalyticsPage(props: { searchParams: Promise<{ range?: string }> }) {
     await requireManagerOrAbove();
     
@@ -15,6 +17,14 @@ export default async function AnalyticsPage(props: { searchParams: Promise<{ ran
     const range = (params.range as DateRange) || "7d";
     
     const data = await getAnalyticsData(range);
+
+    const rangeLabel = {
+        '7d': 'Last 7 Days',
+        '30d': 'Last 30 Days',
+        '90d': 'Last 90 Days',
+        '1y': 'Last Year',
+        'all': 'All Time'
+    }[range];
 
     return (
         <div className="min-h-screen bg-slate-50/50 p-8 space-y-8">
@@ -38,7 +48,7 @@ export default async function AnalyticsPage(props: { searchParams: Promise<{ ran
                      <Loader2 className="w-8 h-8 animate-spin text-purple-600" />
                 </div>
             }>
-                <KPIStats data={data.kpis} />
+                <KPIStats data={data.kpis} dateLabel={rangeLabel} />
                 <AnalyticsCharts data={data.charts} />
                 <EventsPerformance data={data.charts.eventsPerformance} />
             </Suspense>
