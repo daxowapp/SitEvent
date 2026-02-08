@@ -249,6 +249,7 @@
             "bachelor": "Bachelor's Degree",
             "master": "Master's Degree",
             "phd": "PhD",
+            "language": "Language Course",
             "other": "Other"
         },
         "placeholders": {

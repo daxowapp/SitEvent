@@ -497,7 +497,7 @@ export default async function EventPage({ params }: EventPageProps) {
                         className="flex items-center justify-center w-full bg-red-600 hover:bg-red-700 text-white font-bold py-4 rounded-xl shadow-2xl border-2 border-white/20 backdrop-blur-md"
                     >
                         <span className="mr-2 text-xl">👉</span>
-                        Looking for Cairo Event? Click Here
+                        {locale === 'ar' ? "لحضور معرض القاهره اضغط هنا" : "Looking for Cairo Event? Click Here"}
                     </a>
                 </div>
             )}
