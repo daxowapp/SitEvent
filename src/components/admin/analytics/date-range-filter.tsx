@@ -26,7 +26,7 @@ export function DateRangeFilter({ className }: DateRangeFilterProps) {
     ];
 
     const handleRangeChange = (range: DateRange) => {
-        const params = new URLSearchParams(searchParams);
+        const params = new URLSearchParams(searchParams.toString());
         params.set("range", range);
         router.push(`${pathname}?${params.toString()}`);
     };
