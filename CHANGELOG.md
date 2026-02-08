@@ -339,3 +339,5 @@ All notable changes to this project will be documented in this file.
 
 - Environment variables template (`.env.example`)
 - Prisma scripts: generate, migrate, seed, push, studio
+
+2026-02-08 - Cross-Event Check-in & Mobile Redirect - Enabled scanning cross-event QR codes with auto-registration, and added mobile redirect button for Alex26 event.

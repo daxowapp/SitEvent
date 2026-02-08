@@ -488,6 +488,19 @@ export default async function EventPage({ params }: EventPageProps) {
                 customHeadScript={(event as any).customHeadScript}
                 customBodyScript={(event as any).customBodyScript}
             />
+
+            {/* Mobile Redirect for Cairo Event (Specific fix for Alex26) */}
+            {event.slug === 'Alex26' && (
+                <div className="fixed bottom-4 left-4 right-4 z-50 md:hidden animate-bounce-in-up">
+                    <a
+                        href={`/${locale}/events/Cairo26?utm_source=Whatsapp&utm_medium=Whatsapp&utm_campaign=Whatsapp&utm_id=Whatsapp`}
+                        className="flex items-center justify-center w-full bg-red-600 hover:bg-red-700 text-white font-bold py-4 rounded-xl shadow-2xl border-2 border-white/20 backdrop-blur-md"
+                    >
+                        <span className="mr-2 text-xl">👉</span>
+                        Looking for Cairo Event? Click Here
+                    </a>
+                </div>
+            )}
         </div>
     );
 }

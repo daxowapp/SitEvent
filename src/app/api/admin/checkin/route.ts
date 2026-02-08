@@ -18,7 +18,7 @@ export async function POST(request: NextRequest) {
         }
 
         const body = await request.json();
-        const { eventId, token, search } = body;
+const { eventId, token, search } = body;
 
         if (!eventId) {
             return NextResponse.json(
@@ -54,6 +54,7 @@ export async function POST(request: NextRequest) {
             // Only attempt DB if configured
             if (process.env.DATABASE_URL && !process.env.DATABASE_URL.includes('[project-ref]')) {
                 if (token) {
+                    // 1. Try finding in the CURRENT event first
                     registration = await prisma.registration.findFirst({
                         where: {
                             eventId,
@@ -64,6 +65,61 @@ export async function POST(request: NextRequest) {
                             checkIn: true,
                         },
                     });
+
+                    // 2. If not found, try finding ANY matching token (Cross-Event Scan)
+                    if (!registration) {
+                        const otherEventRegistration = await prisma.registration.findUnique({
+                            where: { qrToken: token },
+                            include: {
+                                registrant: true,
+                                event: true, // To know which event they came from
+                            }
+                        });
+
+
+                        if (otherEventRegistration) {
+                            console.log(`[Cross-Event Scan] Found student ${otherEventRegistration.registrant.email} from event: ${otherEventRegistration.event.title}`);
+
+                            // Check if this student ALREADY has a registration for the TARGET event
+                            // (maybe they registered but are using the wrong QR code?)
+                            const existingTargetRegistration = await prisma.registration.findUnique({
+                                where: {
+                                    eventId_registrantId: {
+                                        eventId: eventId,
+                                        registrantId: otherEventRegistration.registrantId
+                                    }
+                                },
+                                include: {
+                                    registrant: true,
+                                    checkIn: true
+                                }
+                            });
+
+                            if (existingTargetRegistration) {
+                                // CASE A: They are already registered for this event, just used wrong QR.
+                                // Use their CORRECT registration for this event.
+                                registration = existingTargetRegistration;
+                            } else {
+                                // CASE B: They are NOT registered for this event.
+                                // AUTO-REGISTER them now.
+                                console.log(`[Cross-Event Auto-Register] Registering ${otherEventRegistration.registrant.email} for event ${eventId}`);
+
+                                registration = await prisma.registration.create({
+                                    data: {
+                                        eventId: eventId,
+                                        registrantId: otherEventRegistration.registrantId,
+                                        // Generate a NEW unique token for this specific event registration
+                                        // Note: We don't reuse the old token to keep them distinct per event
+                                    },
+                                    include: {
+                                        registrant: true,
+                                        checkIn: true
+                                    }
+                                });
+                            }
+                        }
+                    }
+
                 } else if (search) {
                     registration = await prisma.registration.findFirst({
                         where: {
