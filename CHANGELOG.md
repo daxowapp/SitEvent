@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.2.12] - 2026-02-09
+
+### Added
+
+- **Top Navigation Bar**: Implemented a sticky top navbar for the University Portal (Desktop).
+  - Moved **Language Switcher** to the navbar for better accessibility and logical placement.
+  - Added glassmorphism effect for a modern look.
+
 ## [0.2.11] - 2026-02-09
 
 ### Changed

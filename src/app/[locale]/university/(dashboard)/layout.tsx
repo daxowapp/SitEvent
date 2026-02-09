@@ -22,11 +22,13 @@ export default async function UniversityLayout({
             
             <UniversitySidebar user={session.user} />
             
-            <main className="flex-1 md:ml-72 p-6 md:p-10 pt-20 md:pt-10 relative z-10 min-h-screen">
-                <div className="max-w-7xl mx-auto relative">
-                    <div className="absolute -top-2 right-0 hidden md:block z-50">
-                        <LanguageSwitcher />
-                    </div>
+            <main className="flex-1 md:ml-72 relative z-10 min-h-screen flex flex-col">
+                {/* Desktop Top Navbar */}
+                <header className="hidden md:flex h-16 items-center justify-end px-10 sticky top-0 z-40 bg-slate-50/80 backdrop-blur-md border-b border-gray-200/50">
+                    <LanguageSwitcher />
+                </header>
+
+                <div className="flex-1 p-6 md:p-10 pt-20 md:pt-6 max-w-7xl mx-auto w-full">
                     {children}
                 </div>
             </main>
