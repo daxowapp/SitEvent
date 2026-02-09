@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.2.11] - 2026-02-09
+
+### Changed
+
+- **Design Tweaks**: Refined University Portal design based on user feedback.
+  - **Sidebar Logo**: Removed "Sit Connect" and "University Portal" text, keeping only the icon for a cleaner look.
+  - **Language Switcher**: Relocated to the top-right header area for both Desktop and Mobile views.
+
 ## [0.2.10] - 2026-02-09
 
 ### Fixed

@@ -2,6 +2,8 @@ import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { UniversitySidebar } from "./sidebar";
 
+import { LanguageSwitcher } from "@/components/public/language-switcher";
+
 export default async function UniversityLayout({
     children,
 }: {
@@ -21,7 +23,10 @@ export default async function UniversityLayout({
             <UniversitySidebar user={session.user} />
             
             <main className="flex-1 md:ml-72 p-6 md:p-10 pt-20 md:pt-10 relative z-10 min-h-screen">
-                <div className="max-w-7xl mx-auto">
+                <div className="max-w-7xl mx-auto relative">
+                    <div className="absolute -top-2 right-0 hidden md:block z-50">
+                        <LanguageSwitcher />
+                    </div>
                     {children}
                 </div>
             </main>

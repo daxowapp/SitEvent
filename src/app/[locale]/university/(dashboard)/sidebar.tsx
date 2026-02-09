@@ -108,15 +108,6 @@ function SidebarContent({ user }: { user: User }) {
                         className="w-full h-full object-contain"
                     />
                 </motion.div>
-                <div className="flex-1">
-                    <motion.span 
-                        className="font-display font-bold text-lg tracking-wide block bg-gradient-to-r from-white to-white/80 bg-clip-text text-transparent"
-                    >
-                        Sit Connect
-                    </motion.span>
-                    <span className="text-[10px] uppercase tracking-[0.2em] text-white/40 font-medium">{t('universityPortal')}</span>
-                </div>
-                <LanguageSwitcher />
             </motion.div>
 
             {/* Global Search */}
@@ -262,9 +253,10 @@ export function UniversitySidebar({ user }: { user: User }) {
                             className="w-full h-full object-contain"
                         />
                     </motion.div>
-                    <span className="font-display">Sit Connect</span>
                 </div>
-                <div className="w-10" />
+                <div className="flex items-center gap-2">
+                    <LanguageSwitcher className="text-white hover:bg-white/10" />
+                </div>
             </div>
 
             {/* Desktop Sidebar */}
