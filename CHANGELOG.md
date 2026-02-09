@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.2.10] - 2026-02-09
+
+### Fixed
+
+- **Deployment Build Fix**: Resolved TypeScript type mismatch in `StudentDataTable` where nullable database fields (`levelOfStudy`, `interestedMajor`) conflicted with strict component interface.
+
 ## [0.2.9] - 2026-02-09
 
 ### Added

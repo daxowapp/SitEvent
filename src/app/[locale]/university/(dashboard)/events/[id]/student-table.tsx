@@ -11,10 +11,10 @@ interface Registrant {
     fullName: string;
     email: string;
     phone: string;
-    country: string;
-    city: string;
-    levelOfStudy: string;
-    interestedMajor: string;
+    country: string | null;
+    city: string | null;
+    levelOfStudy: string | null;
+    interestedMajor: string | null;
 }
 
 interface StudentData {
