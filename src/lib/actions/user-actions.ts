@@ -14,6 +14,9 @@ export async function createAdminUser(data: {
 }) {
     try {
         const passwordHash = data.password ? await bcrypt.hash(data.password, 10) : null;
+        
+        // Clean access code: trim and convert empty to null
+        const accessCode = data.accessCode?.trim() || null;
 
         await prisma.adminUser.create({
             data: {
@@ -21,7 +24,7 @@ export async function createAdminUser(data: {
                 email: data.email,
                 role: data.role,
                 passwordHash,
-                accessCode: data.accessCode || null,
+                accessCode,
             },
         });
 
@@ -29,6 +32,12 @@ export async function createAdminUser(data: {
         return { success: true };
     } catch (error: any) {
         console.error("Error creating admin user:", error);
+        if (error.code === "P2002" && error.meta?.target?.includes("accessCode")) {
+            return { success: false, error: "Access Code already exists. Please choose a different one." };
+        }
+        if (error.code === "P2002" && error.meta?.target?.includes("email")) {
+            return { success: false, error: "Email already exists." };
+        }
         return { success: false, error: error.message || "Failed to create user" };
     }
 }
@@ -51,6 +60,10 @@ export async function updateAdminUser(
         if (data.password) {
             updateData.passwordHash = await bcrypt.hash(data.password, 10);
         }
+        
+        if (typeof data.accessCode !== 'undefined') {
+            updateData.accessCode = data.accessCode?.trim() || null;
+        }
 
         await prisma.adminUser.update({
             where: { id },
@@ -61,6 +74,12 @@ export async function updateAdminUser(
         return { success: true };
     } catch (error: any) {
         console.error("Error updating admin user:", error);
+        if (error.code === "P2002" && error.meta?.target?.includes("accessCode")) {
+            return { success: false, error: "Access Code already exists. Please choose a different one." };
+        }
+        if (error.code === "P2002" && error.meta?.target?.includes("email")) {
+            return { success: false, error: "Email already exists." };
+        }
         return { success: false, error: error.message || "Failed to update user" };
     }
 }

@@ -295,7 +295,7 @@ export default async function EventPage({ params }: EventPageProps) {
                                             <div className="flex-1 space-y-2">
                                                 <div className="flex flex-wrap items-center gap-2 mb-1">
                                                     <Badge variant="outline" className="text-primary border-primary/20 bg-primary/5">
-                                                        {formatInTimeZone(new Date(session.startTime), timeZone, "HH:mm")} - {formatInTimeZone(new Date(session.endTime), timeZone, "HH:mm")}
+                                                        {formatInTimeZone(new Date(session.startTime), timeZone, "MMM d, HH:mm")} - {formatInTimeZone(new Date(session.endTime), timeZone, "HH:mm")}
                                                     </Badge>
                                                     {session.location && (
                                                         <Badge variant="secondary" className="text-muted-foreground">
