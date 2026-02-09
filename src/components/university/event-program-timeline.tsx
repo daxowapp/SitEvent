@@ -24,13 +24,55 @@ interface EventProgramTimelineProps {
 type SessionStatus = "upcoming" | "live" | "finished";
 
 export function EventProgramTimeline({ sessions, timezone }: EventProgramTimelineProps) {
-    // ... (existing code)
+    // Current time in UTC (for comparison with session times which are also UTC objects)
+    const [now, setNow] = useState(new Date());
+
+    useEffect(() => {
+        // Update 'now' every minute to refresh status
+        const interval = setInterval(() => {
+            setNow(new Date());
+        }, 60000);
+        return () => clearInterval(interval);
+    }, []);
+
+    const getStatus = (start: Date, end: Date): SessionStatus => {
+        if (now < start) return "upcoming";
+        if (now >= start && now <= end) return "live";
+        return "finished";
+    };
+
+    // Sort sessions just in case
+    const sortedSessions = [...sessions].sort((a, b) => new Date(a.startTime).getTime() - new Date(b.startTime).getTime());
+
+    if (sessions.length === 0) {
+        return (
+            <div className="text-center py-12 text-muted-foreground bg-gray-50 rounded-lg border border-dashed">
+                <p>No program schedule available yet.</p>
+            </div>
+        );
+    }
+
+    // Group sessions by date
+    const groupedSessions = sortedSessions.reduce((groups, session) => {
+        const dateKey = formatInTimeZone(session.startTime, timezone, "yyyy-MM-dd");
+        if (!groups[dateKey]) {
+            groups[dateKey] = [];
+        }
+        groups[dateKey].push(session);
+        return groups;
+    }, {} as Record<string, Session[]>);
 
     return (
         <div className="space-y-8">
             {Object.entries(groupedSessions).map(([date, groupSessions]) => (
                 <div key={date}>
-                    {/* ... */}
+                    <div className="sticky top-0 z-10 bg-background/95 backdrop-blur-sm py-3 mb-2 border-b border-border/50">
+                        <h3 className="text-lg font-bold text-primary flex items-center gap-2">
+                            <Calendar className="w-5 h-5" />
+                            {formatInTimeZone(groupSessions[0].startTime, timezone, "EEEE, MMMM d, yyyy")}
+                        </h3>
+                    </div>
+
                     <div className="relative border-l-2 border-gray-200 ml-4 space-y-8 py-4">
                         {groupSessions.map((session) => {
                             // ...
