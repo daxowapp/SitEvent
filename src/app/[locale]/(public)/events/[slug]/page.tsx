@@ -2,7 +2,7 @@ export const dynamic = "force-dynamic";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { prisma } from "@/lib/db";
-import { format } from "date-fns";
+import { formatInTimeZone } from "date-fns-tz";
 import { RegistrationForm } from "./registration-form";
 import { TrackingScripts } from "@/components/tracking-scripts";
 import { ImageCarousel } from "@/components/public/image-carousel";
@@ -35,6 +35,7 @@ const MOCK_EVENTS = [
         ],
         startDateTime: new Date("2026-03-15T10:00:00"),
         endDateTime: new Date("2026-03-15T18:00:00"),
+        timezone: "Europe/Istanbul",
         status: "PUBLISHED",
         description: `Join us for the premier education fair in Istanbul. Meet representatives from top universities worldwide and explore scholarship opportunities.
 
@@ -119,7 +120,7 @@ async function getEvent(slug: string) {
     return MOCK_EVENTS.find(e => e.slug === slug) || null;
 }
 
-// Helper to get translated content
+// Helper to get localized content
 function getLocalizedContent(
     translations: any,
     fallback: string | null,
@@ -141,6 +142,9 @@ export default async function EventPage({ params }: EventPageProps) {
     // Get localized content
     const displayTitle = getLocalizedContent((event as any).titleTranslations, event.title, locale);
     const displayDescription = getLocalizedContent((event as any).descriptionTranslations, event.description, locale);
+    
+    // Timezone safe formatting
+    const timeZone = event.timezone || "UTC";
 
     const now = new Date();
     const isPast = new Date(event.startDateTime) < now;
@@ -224,7 +228,7 @@ export default async function EventPage({ params }: EventPageProps) {
                         <div className="flex flex-wrap justify-center gap-8 text-white/90 pt-4 text-lg md:text-xl animate-fade-up font-light" style={{ animationDelay: "0.2s" }}>
                             <div className="flex items-center gap-3 bg-white/5 backdrop-blur-sm px-5 py-2 rounded-full border border-white/10">
                                 <Calendar className="w-5 h-5 text-accent-foreground" />
-                                <span>{format(new Date(event.startDateTime), "MMMM d, yyyy")}</span>
+                                <span>{formatInTimeZone(new Date(event.startDateTime), timeZone, "MMMM d, yyyy")}</span>
                             </div>
                             <div className="flex items-center gap-3 bg-white/5 backdrop-blur-sm px-5 py-2 rounded-full border border-white/10">
                                 <MapPin className="w-5 h-5 text-accent-foreground" />
@@ -281,7 +285,7 @@ export default async function EventPage({ params }: EventPageProps) {
                                         <Calendar className="w-6 h-6" />
                                     </div>
                                     <h2 className="font-display text-3xl font-bold text-card-foreground">
-                                        Event Program
+                                        Event Program ({(event.timezone ? event.timezone.replace('_', ' ') : 'UTC')})
                                     </h2>
                                 </div>
                                 <div className="space-y-6">
@@ -291,7 +295,7 @@ export default async function EventPage({ params }: EventPageProps) {
                                             <div className="flex-1 space-y-2">
                                                 <div className="flex flex-wrap items-center gap-2 mb-1">
                                                     <Badge variant="outline" className="text-primary border-primary/20 bg-primary/5">
-                                                        {format(new Date(session.startTime), "HH:mm")} - {format(new Date(session.endTime), "HH:mm")}
+                                                        {formatInTimeZone(new Date(session.startTime), timeZone, "HH:mm")} - {formatInTimeZone(new Date(session.endTime), timeZone, "HH:mm")}
                                                     </Badge>
                                                     {session.location && (
                                                         <Badge variant="secondary" className="text-muted-foreground">
@@ -446,8 +450,8 @@ export default async function EventPage({ params }: EventPageProps) {
                                         </div>
                                         <div>
                                             <p className="font-bold text-card-foreground text-lg">{t('dateTime')}</p>
-                                            <p className="text-muted-foreground mt-1">{format(new Date(event.startDateTime), "MMMM d, yyyy")}</p>
-                                            <p className="text-muted-foreground/80 text-sm">{format(new Date(event.startDateTime), "h:mm a")} - {format(new Date(event.endDateTime), "h:mm a")}</p>
+                                            <p className="text-muted-foreground mt-1">{formatInTimeZone(new Date(event.startDateTime), timeZone, "MMMM d, yyyy")}</p>
+                                            <p className="text-muted-foreground/80 text-sm">{formatInTimeZone(new Date(event.startDateTime), timeZone, "h:mm a")} - {formatInTimeZone(new Date(event.endDateTime), timeZone, "h:mm a")} ({event.timezone ? event.timezone.replace('_', ' ') : 'UTC'})</p>
                                         </div>
                                     </div>
 
