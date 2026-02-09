@@ -6,7 +6,22 @@ import { cn } from "@/lib/utils";
 import { MapPin, User, CheckCircle2, Radio, Calendar } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 
-// ... (interface definitions)
+interface Session {
+    id: string;
+    title: string;
+    description: string | null;
+    startTime: Date;
+    endTime: Date;
+    location: string | null;
+    speaker: string | null;
+}
+
+interface EventProgramTimelineProps {
+    sessions: Session[];
+    timezone: string;
+}
+
+type SessionStatus = "upcoming" | "live" | "finished";
 
 export function EventProgramTimeline({ sessions, timezone }: EventProgramTimelineProps) {
     // ... (existing code)
