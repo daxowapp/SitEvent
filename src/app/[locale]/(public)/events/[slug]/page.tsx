@@ -289,30 +289,50 @@ export default async function EventPage({ params }: EventPageProps) {
                                     </h2>
                                 </div>
                                 <div className="space-y-6">
-                                    {(event as any).sessions.map((session: any) => (
-                                        <div key={session.id} className="flex gap-6 relative pl-8 border-l-2 border-primary/20 last:border-0 pb-6 last:pb-0">
-                                            <div className="absolute -left-[9px] top-0 w-4 h-4 rounded-full bg-primary ring-4 ring-background" />
-                                            <div className="flex-1 space-y-2">
-                                                <div className="flex flex-wrap items-center gap-2 mb-1">
-                                                    <Badge variant="outline" className="text-primary border-primary/20 bg-primary/5">
-                                                        {formatInTimeZone(new Date(session.startTime), timeZone, "MMM d, HH:mm")} - {formatInTimeZone(new Date(session.endTime), timeZone, "HH:mm")}
-                                                    </Badge>
-                                                    {session.location && (
-                                                        <Badge variant="secondary" className="text-muted-foreground">
-                                                            📍 {session.location}
-                                                        </Badge>
-                                                    )}
-                                                </div>
-                                                <h3 className="text-xl font-bold text-card-foreground">{session.title}</h3>
-                                                {session.description && (
-                                                    <p className="text-muted-foreground leading-relaxed">{session.description}</p>
-                                                )}
-                                                {session.speaker && (
-                                                    <div className="flex items-center gap-2 pt-2 text-sm font-medium text-foreground/80">
-                                                        <div className="w-6 h-6 rounded-full bg-secondary flex items-center justify-center text-xs">🎤</div>
-                                                        <span>{session.speaker}</span>
+                                    {Object.entries((event as any).sessions.reduce((groups: any, session: any) => {
+                                        const dateKey = formatInTimeZone(new Date(session.startTime), timeZone, "yyyy-MM-dd");
+                                        if (!groups[dateKey]) {
+                                            groups[dateKey] = [];
+                                        }
+                                        groups[dateKey].push(session);
+                                        return groups;
+                                    }, {})).map(([date, sessions]: [string, any]) => (
+                                        <div key={date} className="space-y-6">
+                                            <div className="sticky top-0 z-10 bg-card/95 backdrop-blur-sm py-2 -mx-2 px-2 border-b border-border/50">
+                                                <h3 className="font-display text-lg font-bold text-primary flex items-center gap-2">
+                                                    <Calendar className="w-4 h-4" />
+                                                    {formatInTimeZone(new Date(sessions[0].startTime), timeZone, "EEEE, MMMM d, yyyy")}
+                                                </h3>
+                                            </div>
+                                            
+                                            <div className="space-y-6 pl-4 border-l-2 border-primary/10 ml-2">
+                                                {sessions.map((session: any) => (
+                                                    <div key={session.id} className="relative pl-6">
+                                                        <div className="absolute -left-[9px] top-1.5 w-4 h-4 rounded-full bg-primary ring-4 ring-background" />
+                                                        <div className="flex-1 space-y-2">
+                                                            <div className="flex flex-wrap items-center gap-2 mb-1">
+                                                                <Badge variant="outline" className="text-primary border-primary/20 bg-primary/5">
+                                                                    {formatInTimeZone(new Date(session.startTime), timeZone, "HH:mm")} - {formatInTimeZone(new Date(session.endTime), timeZone, "HH:mm")}
+                                                                </Badge>
+                                                                {session.location && (
+                                                                    <Badge variant="secondary" className="text-muted-foreground">
+                                                                        📍 {session.location}
+                                                                    </Badge>
+                                                                )}
+                                                            </div>
+                                                            <h3 className="text-xl font-bold text-card-foreground">{session.title}</h3>
+                                                            {session.description && (
+                                                                <p className="text-muted-foreground leading-relaxed">{session.description}</p>
+                                                            )}
+                                                            {session.speaker && (
+                                                                <div className="flex items-center gap-2 pt-2 text-sm font-medium text-foreground/80">
+                                                                    <div className="w-6 h-6 rounded-full bg-secondary flex items-center justify-center text-xs">🎤</div>
+                                                                    <span>{session.speaker}</span>
+                                                                </div>
+                                                            )}
+                                                        </div>
                                                     </div>
-                                                )}
+                                                ))}
                                             </div>
                                         </div>
                                     ))}

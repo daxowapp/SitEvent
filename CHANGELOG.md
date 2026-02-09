@@ -392,5 +392,8 @@ All notable changes to this project will be documented in this file.
 
 2026-02-08 - Bug Fixes - Localized mobile redirect button and fixed missing translation for language study level.
 2026-02-10 - Time Discrepancy Fix - Ensure public event page displays times in the event's timezone.
+
 - **Program Visibility**: Added date display to event program sessions for better clarity.
-- **Admin User Fix**: Resolved unique constraint error on  during user creation by handling empty strings correctly.
+- **Admin User Fix**: Resolved unique constraint error on `accessCode` during user creation by handling empty strings correctly.
+- **Program Grouping**: Grouped event sessions by date with sticky headers for clear multi-day scheduling.
+- **Program UI**: Grouped sessions by date with sticky headers for clear multi-day scheduling.
