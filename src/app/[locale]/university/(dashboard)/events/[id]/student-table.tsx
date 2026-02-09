@@ -5,13 +5,30 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Download, Search } from "lucide-react";
+import { useTranslations } from "next-intl";
+
+interface Registrant {
+    fullName: string;
+    email: string;
+    phone: string;
+    country: string;
+    city: string;
+    levelOfStudy: string;
+    interestedMajor: string;
+}
+
+interface StudentData {
+    id: string;
+    registrant: Registrant;
+}
 
 interface StudentDataTableProps {
-    data: any[];
+    data: StudentData[];
     fileName: string;
 }
 
 export function StudentDataTable({ data, fileName }: StudentDataTableProps) {
+    const t = useTranslations('university.studentTable');
     const [search, setSearch] = useState("");
 
     const filteredData = data.filter(item => {
@@ -24,7 +41,15 @@ export function StudentDataTable({ data, fileName }: StudentDataTableProps) {
 
     const downloadCSV = () => {
         const csvContent = [
-            ["Full Name", "Email", "Phone", "Country", "City", "Study Level", "Interested Major"],
+            [
+                t('headers.fullName'),
+                t('headers.email'),
+                t('headers.phone'),
+                t('headers.country'),
+                t('headers.city'),
+                t('headers.studyLevel'),
+                t('headers.interestedMajor')
+            ],
             ...filteredData.map(item => [
                 item.registrant.fullName,
                 item.registrant.email,
@@ -52,14 +77,14 @@ export function StudentDataTable({ data, fileName }: StudentDataTableProps) {
                 <div className="relative w-72">
                     <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
                     <Input
-                        placeholder="Search students..."
+                        placeholder={t('searchPlaceholder')}
                         className="pl-8"
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
                     />
                 </div>
                 <Button variant="outline" onClick={downloadCSV}>
-                    <Download className="mr-2 h-4 w-4" /> Download CSV
+                    <Download className="mr-2 h-4 w-4" /> {t('downloadCsv')}
                 </Button>
             </div>
 
@@ -67,18 +92,18 @@ export function StudentDataTable({ data, fileName }: StudentDataTableProps) {
                 <Table>
                     <TableHeader>
                         <TableRow className="bg-gray-50">
-                            <TableHead>Student Name</TableHead>
-                            <TableHead>Email</TableHead>
-                            <TableHead>Details</TableHead>
-                            <TableHead>Location</TableHead>
-                            <TableHead>Interest</TableHead>
+                            <TableHead>{t('headers.name')}</TableHead>
+                            <TableHead>{t('headers.email')}</TableHead>
+                            <TableHead>{t('headers.details')}</TableHead>
+                            <TableHead>{t('headers.location')}</TableHead>
+                            <TableHead>{t('headers.interest')}</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
                         {filteredData.length === 0 ? (
                             <TableRow>
                                 <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
-                                    No students found matching your search.
+                                    {t('noStudentsFound')}
                                 </TableCell>
                             </TableRow>
                         ) : (
@@ -110,7 +135,7 @@ export function StudentDataTable({ data, fileName }: StudentDataTableProps) {
                 </Table>
             </div>
             <div className="text-xs text-gray-400 text-center">
-                Showing {filteredData.length} of {data.length} students
+                {t('showingStudents', { count: filteredData.length, total: data.length })}
             </div>
         </div>
     );

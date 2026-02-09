@@ -5,6 +5,7 @@ import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip, Legend, PieC
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Users, TrendingUp, CalendarCheck, Clock, Sparkles, BarChart3, PieChartIcon } from "lucide-react";
 import { AnimatedNumber, StaggerContainer, StaggerItem, AnimatedCard } from "@/components/ui/motion";
+import { useTranslations } from "next-intl";
 
 const COLORS = ['#ef4444', '#3b82f6', '#22c55e', '#f59e0b', '#8b5cf6', '#06b6d4', '#ec4899', '#84cc16'];
 
@@ -58,6 +59,8 @@ export function AnalyticsClient({
     genders,
     recentEvents,
 }: AnalyticsClientProps) {
+    const t = useTranslations('university.analytics');
+
     return (
         <motion.div
             className="space-y-8"
@@ -75,9 +78,9 @@ export function AnalyticsClient({
                     >
                         <BarChart3 className="h-5 w-5 text-white" />
                     </motion.div>
-                    <h1 className="text-3xl font-display font-bold tracking-tight">Analytics Overview</h1>
+                    <h1 className="text-3xl font-display font-bold tracking-tight">{t('title')}</h1>
                 </div>
-                <p className="text-gray-500">Insights into your recruitment performance across all events.</p>
+                <p className="text-gray-500">{t('subtitle')}</p>
             </motion.div>
 
             {/* Stats Grid */}
@@ -97,14 +100,14 @@ export function AnalyticsClient({
                                 <Users className="h-24 w-24" />
                             </motion.div>
                             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                <CardTitle className="text-sm font-medium text-white/80">Total Student Leads</CardTitle>
+                                <CardTitle className="text-sm font-medium text-white/80">{t('totalLeads')}</CardTitle>
                                 <Users className="h-4 w-4 text-white/60" />
                             </CardHeader>
                             <CardContent>
                                 <div className="text-3xl font-bold">
                                     <AnimatedNumber value={totalLeads} duration={1.5} />
                                 </div>
-                                <p className="text-xs text-white/60 mt-1">Across {acceptedEventsCount} events</p>
+                                <p className="text-xs text-white/60 mt-1">{t('acrossEvents', { count: acceptedEventsCount })}</p>
                             </CardContent>
                         </Card>
                     </AnimatedCard>
@@ -122,14 +125,14 @@ export function AnalyticsClient({
                                 <TrendingUp className="h-24 w-24 text-blue-500" />
                             </motion.div>
                             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                <CardTitle className="text-sm font-medium text-gray-500">Avg. Leads / Event</CardTitle>
+                                <CardTitle className="text-sm font-medium text-gray-500">{t('avgLeads')}</CardTitle>
                                 <TrendingUp className="h-4 w-4 text-blue-500" />
                             </CardHeader>
                             <CardContent>
                                 <div className="text-3xl font-bold text-gray-900">
                                     <AnimatedNumber value={averageLeadsPerEvent} duration={1.2} />
                                 </div>
-                                <p className="text-xs text-gray-400 mt-1">Performance metric</p>
+                                <p className="text-xs text-gray-400 mt-1">{t('performanceMetric')}</p>
                             </CardContent>
                         </Card>
                     </AnimatedCard>
@@ -147,14 +150,14 @@ export function AnalyticsClient({
                                 <CalendarCheck className="h-24 w-24 text-emerald-500" />
                             </motion.div>
                             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                <CardTitle className="text-sm font-medium text-gray-500">Active Events</CardTitle>
+                                <CardTitle className="text-sm font-medium text-gray-500">{t('activeEvents')}</CardTitle>
                                 <CalendarCheck className="h-4 w-4 text-emerald-500" />
                             </CardHeader>
                             <CardContent>
                                 <div className="text-3xl font-bold text-gray-900">
                                     <AnimatedNumber value={acceptedEventsCount} duration={1} />
                                 </div>
-                                <p className="text-xs text-gray-400 mt-1">Participating now</p>
+                                <p className="text-xs text-gray-400 mt-1">{t('participatingNow')}</p>
                             </CardContent>
                         </Card>
                     </AnimatedCard>
@@ -172,14 +175,14 @@ export function AnalyticsClient({
                                 <Clock className="h-24 w-24 text-amber-500" />
                             </motion.div>
                             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                <CardTitle className="text-sm font-medium text-gray-500">Pending Requests</CardTitle>
+                                <CardTitle className="text-sm font-medium text-gray-500">{t('pendingRequests')}</CardTitle>
                                 <Clock className="h-4 w-4 text-amber-500" />
                             </CardHeader>
                             <CardContent>
                                 <div className="text-3xl font-bold text-gray-900">
                                     <AnimatedNumber value={pendingEventsCount} duration={0.8} />
                                 </div>
-                                <p className="text-xs text-gray-400 mt-1">Awaiting approval</p>
+                                <p className="text-xs text-gray-400 mt-1">{t('awaitingApproval')}</p>
                             </CardContent>
                         </Card>
                     </AnimatedCard>
@@ -200,8 +203,8 @@ export function AnalyticsClient({
                                     <BarChart3 className="h-4 w-4 text-red-600" />
                                 </div>
                                 <div>
-                                    <CardTitle className="text-lg">Leads Growth</CardTitle>
-                                    <CardDescription>Daily registration trends</CardDescription>
+                                    <CardTitle className="text-lg">{t('leadsGrowth')}</CardTitle>
+                                    <CardDescription>{t('dailyTrends')}</CardDescription>
                                 </div>
                             </div>
                         </CardHeader>
@@ -263,8 +266,8 @@ export function AnalyticsClient({
                                     <PieChartIcon className="h-4 w-4 text-purple-600" />
                                 </div>
                                 <div>
-                                    <CardTitle className="text-lg">Gender Distribution</CardTitle>
-                                    <CardDescription>Demographic breakdown</CardDescription>
+                                    <CardTitle className="text-lg">{t('genderDist')}</CardTitle>
+                                    <CardDescription>{t('demographics')}</CardDescription>
                                 </div>
                             </div>
                         </CardHeader>
@@ -314,8 +317,8 @@ export function AnalyticsClient({
                                     <Sparkles className="h-4 w-4 text-emerald-600" />
                                 </div>
                                 <div>
-                                    <CardTitle className="text-lg">Major Categories</CardTitle>
-                                    <CardDescription>AI-categorized fields of study</CardDescription>
+                                    <CardTitle className="text-lg">{t('majorCats')}</CardTitle>
+                                    <CardDescription>{t('aiCategorized')}</CardDescription>
                                 </div>
                             </div>
                         </CardHeader>
@@ -369,8 +372,8 @@ export function AnalyticsClient({
                                     <PieChartIcon className="h-4 w-4 text-blue-600" />
                                 </div>
                                 <div>
-                                    <CardTitle className="text-lg">Study Levels</CardTitle>
-                                    <CardDescription>Academic level distribution</CardDescription>
+                                    <CardTitle className="text-lg">{t('studyLevels')}</CardTitle>
+                                    <CardDescription>{t('academicLevels')}</CardDescription>
                                 </div>
                             </div>
                         </CardHeader>
@@ -414,12 +417,12 @@ export function AnalyticsClient({
             <motion.div variants={itemVariants}>
                 <Card className="rounded-2xl border-gray-100 shadow-sm overflow-hidden">
                     <CardHeader className="bg-gradient-to-r from-gray-50 to-white border-b border-gray-50">
-                        <CardTitle className="text-lg">Recent Event Activity</CardTitle>
+                        <CardTitle className="text-lg">{t('recentActivity')}</CardTitle>
                     </CardHeader>
                     <CardContent className="pt-6">
                         <StaggerContainer className="space-y-4">
                             {recentEvents.length === 0 ? (
-                                <p className="text-sm text-gray-500">No recent activity.</p>
+                                <p className="text-sm text-gray-500">{t('noActivity')}</p>
                             ) : (
                                 recentEvents.map((event, index) => (
                                     <StaggerItem key={event.id}>
@@ -430,7 +433,7 @@ export function AnalyticsClient({
                                             <div className="space-y-1">
                                                 <p className="font-medium leading-none">{event.title}</p>
                                                 <p className="text-sm text-gray-500">
-                                                    Joined on {new Date(event.createdAt).toLocaleDateString()}
+                                                    {t('joinedOn', { date: new Date(event.createdAt).toLocaleDateString() })}
                                                 </p>
                                             </div>
                                             <motion.div 
@@ -439,7 +442,7 @@ export function AnalyticsClient({
                                                 animate={{ scale: 1 }}
                                                 transition={{ delay: 0.2 + index * 0.1 }}
                                             >
-                                                +{event.leadsCount} Leads
+                                                {t('leadsCount', { count: event.leadsCount })}
                                             </motion.div>
                                         </motion.div>
                                     </StaggerItem>

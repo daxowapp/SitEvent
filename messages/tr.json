@@ -35,6 +35,19 @@
         "privacyPolicy": "Gizlilik Politikası",
         "termsOfService": "Hizmet Şartları"
     },
+    "recovery": {
+        "lostTicket": "Biletinizi mi Kaybettiniz?",
+        "title": "Biletinizi Kurtarın",
+        "description": "Kayıt olurken kullandığınız e-posta adresini girin. QR kodunuzu hemen tekrar göndereceğiz.",
+        "emailLabel": "E-posta Adresi",
+        "placeholder": "siz@ornek.com",
+        "submit": "Biletimi Tekrar Gönder",
+        "sending": "Gönderiliyor...",
+        "success": "Bilet gönderildi! E-postanızı kontrol edin.",
+        "error": "Kayıt bulunamadı.",
+        "errorGeneric": "Bir şeyler ters gitti. Lütfen tekrar deneyin.",
+        "emptyEmail": "Lütfen e-postanızı girin"
+    },
     "home": {
         "hero": {
             "title": "Yakınınızdaki <span>Sit Connect</span> Eğitim Fuarlarında En İyi Üniversitelerle Tanışın",
@@ -181,7 +194,12 @@
         "registrationClosed": "Kayıt Kapalı",
         "eventEnded": "Etkinlik Sona Erdi",
         "spotsRemaining": "{count} kalan kontenjan",
-        "unlimited": "Sınırsız kontenjan"
+        "unlimited": "Sınırsız kontenjan",
+        "secureYourSpot": "Yerinizi Ayırtın",
+        "getQrCode": "Hızlı giriş QR kodunuzu alın.",
+        "eventInformation": "Etkinlik Bilgileri",
+        "dateTime": "Tarih & Saat",
+        "openInMaps": "Haritalarda Aç"
     },
     "registration": {
         "title": "Etkinliğe Kayıt Ol",
@@ -205,7 +223,18 @@
             "master": "Yüksek Lisans",
             "phd": "Doktora",
             "other": "Diğer"
-        }
+        },
+        "placeholders": {
+            "fullName": "Adınızı soyadınızı girin",
+            "email": "ornek@email.com",
+            "phone": "Telefon numarasını girin",
+            "country": "Ülkenizi seçin",
+            "city": "Şehriniz",
+            "level": "Seviye seçin (isteğe bağlı)",
+            "major": "örn. Bilgisayar Mühendisliği, Tıp..."
+        },
+        "consent": "Kişisel verilerimin işlenmesini kabul ediyorum ve <link>Gizlilik Politikası</link>'nı onaylıyorum *",
+        "registering": "Kaydediliyor..."
     },
     "footer": {
         "description": "Hırslı öğrencileri dünya çapındaki seçkin etkinlikler aracılığıyla dünya standartlarında eğitim fırsatlarıyla buluşturuyoruz.",
@@ -291,6 +320,167 @@
             "greeting": "Merhaba {name}!",
             "body": "{eventName} etkinliğinin yakında gerçekleşeceğini hatırlatmak isteriz.",
             "dontForget": "Giriş yapmak için QR kodunuzu getirmeyi unutmayın."
+        }
+    },
+    "university": {
+        "dashboard": {
+            "title": "Üniversite Komuta Merkezi",
+            "welcome": "Tekrar hoş geldiniz,",
+            "subtitle": "Etkinlik yönetimi, öğrenci işe alımı ve aday oluşturma için merkezi merkeziniz.",
+            "statLeads": "Adaylar",
+            "statEvents": "Etkinlikler",
+            "availableEvents": "Mevcut Etkinlikler",
+            "upcomingSeason": "Bu sezon yaklaşıyor",
+            "completed": "Tamamlandı",
+            "pastEvents": "Geçmiş etkinlikler",
+            "totalLeads": "Toplam Adaylar",
+            "potentialStudents": "Potansiyel öğrenciler",
+            "countries": "Ülkeler",
+            "globalReach": "Küresel erişim",
+            "yourEvents": "Etkinlikleriniz",
+            "manageEvents": "Etkinlik katılımınızı yönetin ve takip edin",
+            "activeEventsCount": "{count} aktif",
+            "noEvents": "Henüz Etkinlik Yok",
+            "exploreText": "Öğrencilerle bağlantı kurabileceğiniz fuarları bulmak için etkinlik pazarımızı keşfedin.",
+            "exploreBtn": "Etkinlikleri Keşfet",
+            "status": {
+                "active": "Aktif",
+                "pending": "Beklemede",
+                "available": "Mevcut"
+            },
+            "openDashboard": "Paneli Aç",
+            "viewDetails": "Detayları Gör"
+        },
+        "analytics": {
+            "title": "Analiz Özeti",
+            "subtitle": "Tüm etkinliklerdeki işe alım performansınız hakkında içgörüler.",
+            "totalLeads": "Toplam Öğrenci Adayı",
+            "acrossEvents": "{count} etkinlik genelinde",
+            "avgLeads": "Ort. Aday / Etkinlik",
+            "performanceMetric": "Performans metriği",
+            "activeEvents": "Aktif Etkinlikler",
+            "participatingNow": "Şu an katılımda",
+            "pendingRequests": "Bekleyen Talepler",
+            "awaitingApproval": "Onay bekleniyor",
+            "leadsGrowth": "Aday Büyümesi",
+            "dailyTrends": "Günlük kayıt trendleri",
+            "genderDist": "Cinsiyet Dağılımı",
+            "demographics": "Demografik dağılım",
+            "majorCats": "Bölüm Kategorileri",
+            "aiCategorized": "YZ ile kategorize edilmiş çalışma alanları",
+            "studyLevels": "Eğitim Seviyeleri",
+            "academicLevels": "Akademik seviye dağılımı",
+            "recentActivity": "Son Etkinlik Aktivitesi",
+            "noActivity": "Son aktivite yok.",
+            "joinedOn": "{date} tarihinde katıldı",
+            "leadsCount": "+{count} Aday"
+        },
+        "leads": {
+            "searchPlaceholder": "İsim, e-posta veya bölüme göre ara...",
+            "allEvents": "Tüm Etkinlikler",
+            "allCategories": "Tüm Kategoriler",
+            "exportCsv": "CSV İndir",
+            "table": {
+                "student": "Öğrenci",
+                "interest": "İlgi Alanı",
+                "contact": "İletişim",
+                "sourceEvent": "Kaynak Etkinlik",
+                "status": "Durum"
+            },
+            "noLeads": "Aday bulunamadı",
+            "tryAdjusting": "Filtrelerinizi veya arama terimlerinizi ayarlamayı deneyin.",
+            "international": "Uluslararası",
+            "undecided": "Kararsız",
+            "unknown": "Bilinmiyor",
+            "showing": "{total} adaydan {start}-{end} arası gösteriliyor",
+            "totalDatabase": "Toplam Veritabanı: {count}",
+            "previous": "Önceki",
+            "next": "İleri",
+            "pageInfo": "Sayfa {current} / {total}"
+        },
+        "events": {
+            "title": "Etkinliklerim",
+            "subtitle": "Katılmak için kayıt olduğunuz etkinlikler",
+            "activeEvents": "Aktif Etkinlikler",
+            "noActiveEvents": "Aktif etkinlik yok",
+            "browseMarket": "Etkinlik Pazarını İncele →",
+            "statusActive": "Aktif",
+            "booth": "Stand",
+            "students": "öğrenci",
+            "pastEvents": "Geçmiş Etkinlikler"
+        },
+        "eventDetail": {
+            "activeParticipant": "Aktif Katılımcı",
+            "pendingApproval": "Onay Bekliyor",
+            "notRegistered": "Kayıtlı Değil",
+            "yourBooth": "Standınız",
+            "tba": "Belirlenecek",
+            "openKiosk": "Kiosku Aç",
+            "findStudent": "Öğrenci Bul",
+            "tabs": {
+                "overview": "Genel Bakış",
+                "program": "Program",
+                "studentData": "Öğrenci Verileri",
+                "favorites": "Favoriler",
+                "cityGuide": "Şehir Rehberi"
+            },
+            "eventDetails": "Etkinlik Detayları",
+            "date": "Tarih",
+            "time": "Saat",
+            "venue": "Mekan",
+            "address": "Adres",
+            "performance": "Performans",
+            "studentsCollected": "Toplanan Öğrenciler",
+            "growingDaily": "Günlük artıyor",
+            "requestPending": "Talep Beklemede",
+            "pendingMessage": "Katılım talebiniz inceleniyor. Onaylandığında e-posta ile bilgilendirileceksiniz.",
+            "awaitingResponse": "Yanıt Bekleniyor",
+            "joinEvent": "Bu Etkinliğe Katıl",
+            "joinMessage": "Öğrenci adaylarına erişmek, standınızı yönetmek ve potansiyel öğrencilerle bağlantı kurmak için kaydolun.",
+            "aboutEvent": "Bu Etkinlik Hakkında",
+            "eventProgram": "Etkinlik Programı",
+            "scheduleInfo": "{timezone} ({location} Saati) Programı",
+            "favoriteStudents": "Favori Öğrenciler",
+            "favoriteStudentsDesc": "Takip etmek istediğiniz yüksek potansiyelli öğrenciler",
+            "noCityGuide": "Şehir Rehberi Mevcut Değil",
+            "cityGuidePending": "Bu şehir hakkında bilgi yakında eklenecek.",
+            "airportInfo": "Havalimanı Bilgisi",
+            "currency": "Para Birimi",
+            "attractions": "Gezilecek Yerler",
+            "viewOnMap": "Haritada Göster",
+            "cafesRestaurants": "Kafeler ve Restoranlar"
+        },
+        "studentTable": {
+            "searchPlaceholder": "Öğrenci ara...",
+            "downloadCsv": "CSV İndir",
+            "headers": {
+                "name": "Öğrenci Adı",
+                "email": "E-posta",
+                "details": "Detaylar",
+                "location": "Konum",
+                "interest": "İlgi Alanı",
+                "phone": "Telefon",
+                "country": "Ülke",
+                "city": "Şehir",
+                "studyLevel": "Eğitim Seviyesi",
+                "interestedMajor": "İlgilendiği Bölüm",
+                "fullName": "Tam Adı"
+            },
+            "noStudentsFound": "Aramanızla eşleşen öğrenci bulunamadı.",
+            "showingStudents": "Toplam {total} öğrenciden {count} tanesi gösteriliyor"
+        },
+        "sidebar": {
+            "universityPortal": "Üniversite Portalı",
+            "signedInAs": "Giriş yapan kullanıcı:",
+            "signOut": "Çıkış Yap",
+            "nav": {
+                "overview": "Genel Bakış",
+                "myEvents": "Etkinliklerim",
+                "analytics": "Analizler",
+                "globalLeads": "Tüm Öğrenciler",
+                "leadScanner": "QR Okuyucu",
+                "eventMarket": "Etkinlik Pazarı"
+            }
         }
     }
 }

@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { format } from "date-fns";
 import { Calendar, MapPin, Users, ChevronRight } from "lucide-react";
+import { getTranslations } from "next-intl/server";
 
 interface EventParticipation {
     event: {
@@ -23,6 +24,7 @@ interface EventParticipation {
 
 export default async function UniversityEventsPage() {
     const session = await auth();
+    const t = await getTranslations('university.events');
 
     if (!session || session.user.type !== "UNIVERSITY" || !session.user.universityId) {
         redirect("/university/login");
@@ -57,26 +59,26 @@ export default async function UniversityEventsPage() {
         <div className="space-y-8">
             {/* Header */}
             <div>
-                <h1 className="text-2xl font-bold text-slate-900">My Events</h1>
-                <p className="text-slate-500 mt-1">Events you&apos;re registered to participate in</p>
+                <h1 className="text-2xl font-bold text-slate-900">{t('title')}</h1>
+                <p className="text-slate-500 mt-1">{t('subtitle')}</p>
             </div>
 
             {/* Active Events */}
             <div className="space-y-4">
                 <h2 className="text-lg font-semibold text-slate-800 flex items-center gap-2">
                     <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-                    Active Events ({activeEvents.length})
+                    {t('activeEvents')} ({activeEvents.length})
                 </h2>
                 
                 {activeEvents.length === 0 ? (
                     <div className="bg-slate-50 rounded-xl p-8 text-center">
                         <Calendar className="w-12 h-12 text-slate-300 mx-auto mb-3" />
-                        <p className="text-slate-500">No active events</p>
+                        <p className="text-slate-500">{t('noActiveEvents')}</p>
                         <Link 
                             href="/university/explore" 
                             className="text-red-500 hover:text-red-600 text-sm font-medium mt-2 inline-block"
                         >
-                            Browse Event Market →
+                            {t('browseMarket')}
                         </Link>
                     </div>
                 ) : (
@@ -91,11 +93,11 @@ export default async function UniversityEventsPage() {
                                     <div className="space-y-3 flex-1">
                                         <div className="flex items-center gap-2">
                                             <span className="px-2 py-0.5 bg-green-100 text-green-700 text-xs font-medium rounded-full">
-                                                Active
+                                                {t('statusActive')}
                                             </span>
                                             {boothNumber && (
                                                 <span className="px-2 py-0.5 bg-slate-100 text-slate-600 text-xs font-medium rounded-full">
-                                                    Booth {boothNumber}
+                                                    {t('booth')} {boothNumber}
                                                 </span>
                                             )}
                                         </div>
@@ -115,7 +117,7 @@ export default async function UniversityEventsPage() {
                                             </span>
                                             <span className="flex items-center gap-1.5">
                                                 <Users className="w-4 h-4" />
-                                                {event._count.registrations} students
+                                                {event._count.registrations} {t('students')}
                                             </span>
                                         </div>
                                     </div>
@@ -132,7 +134,7 @@ export default async function UniversityEventsPage() {
             {pastEvents.length > 0 && (
                 <div className="space-y-4">
                     <h2 className="text-lg font-semibold text-slate-600">
-                        Past Events ({pastEvents.length})
+                        {t('pastEvents')} ({pastEvents.length})
                     </h2>
                     
                     <div className="grid gap-3">
@@ -150,7 +152,7 @@ export default async function UniversityEventsPage() {
                                         <div className="flex gap-3 text-sm text-slate-400">
                                             <span>{format(event.startDateTime, "MMM d, yyyy")}</span>
                                             <span>{event.city}, {event.country}</span>
-                                            <span>{event._count.registrations} students</span>
+                                            <span>{event._count.registrations} {t('students')}</span>
                                         </div>
                                     </div>
                                     <ChevronRight className="w-5 h-5 text-slate-300" />

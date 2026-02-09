@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.2.9] - 2026-02-09
+
+### Added
+
+- **University Portal Localization**: Implemented full Turkish translation for the University Portal.
+  - Added `LanguageSwitcher` to the sidebar for easy toggling between English and Turkish.
+  - Translated Dashboard, Analytics, Leads, and Events pages.
+  - Implemented locale-aware date formatting.
+
+### Fixed
+
+- **Mobile Responsiveness**: Fixed layout issues on mobile devices.
+  - Adjusted header and sidebar for mobile screens.
+  - Improved grid responsiveness for dashboard cards.
+  - Optimized tables and charts for smaller screens.
+
 ## [0.2.8] - 2026-02-09
 
 ### Fixed

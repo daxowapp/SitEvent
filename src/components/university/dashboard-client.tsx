@@ -7,6 +7,7 @@ import Link from "next/link";
 import { Calendar, MapPin, ArrowRight, Sparkles, TrendingUp, Zap, Target, Users, Globe } from "lucide-react";
 import { format } from "date-fns";
 import { AnimatedNumber, StaggerContainer, StaggerItem, AnimatedCard } from "@/components/ui/motion";
+import { useTranslations } from "next-intl";
 
 interface DashboardEvent {
     event: {
@@ -108,6 +109,8 @@ export function DashboardClient({
     dashboardEvents, 
     pastEventsCount 
 }: DashboardClientProps) {
+    const t = useTranslations('university.dashboard');
+
     return (
         <motion.div 
             className="space-y-10 relative"
@@ -163,11 +166,11 @@ export function DashboardClient({
                                 >
                                     <Sparkles className="h-4 w-4 text-red-500" />
                                 </motion.div>
-                                <span className="text-sm font-semibold text-red-700">University Command Center</span>
+                                <span className="text-sm font-semibold text-red-700">{t('title')}</span>
                             </motion.div>
                             
                             <h1 className="text-4xl md:text-6xl font-display font-bold text-gray-900 tracking-tight leading-tight">
-                                Welcome back,
+                                {t('welcome')}
                                 <br />
                                 <motion.span 
                                     className="bg-gradient-to-r from-red-600 via-red-500 to-orange-500 bg-clip-text text-transparent"
@@ -185,7 +188,7 @@ export function DashboardClient({
                                 animate={{ opacity: 1 }}
                                 transition={{ delay: 0.5 }}
                             >
-                                Your central hub for event management, student recruitment, and lead generation.
+                                {t('subtitle')}
                             </motion.p>
                         </div>
                         
@@ -200,13 +203,13 @@ export function DashboardClient({
                                 <div className="text-3xl font-bold text-gray-900">
                                     <AnimatedNumber value={totalLeads} duration={2} />
                                 </div>
-                                <div className="text-xs text-gray-500 font-medium uppercase tracking-wider mt-1">Leads</div>
+                                <div className="text-xs text-gray-500 font-medium uppercase tracking-wider mt-1">{t('statLeads')}</div>
                             </div>
                             <div className="px-5 py-4 rounded-2xl bg-gradient-to-br from-red-500 to-red-600 text-white shadow-xl shadow-red-200 text-center">
                                 <div className="text-3xl font-bold">
                                     <AnimatedNumber value={dashboardEvents.length} duration={1.5} />
                                 </div>
-                                <div className="text-xs text-white/80 font-medium uppercase tracking-wider mt-1">Events</div>
+                                <div className="text-xs text-white/80 font-medium uppercase tracking-wider mt-1">{t('statEvents')}</div>
                             </div>
                         </motion.div>
                     </div>
@@ -232,7 +235,7 @@ export function DashboardClient({
                             <CardHeader className="pb-2 relative z-10">
                                 <CardTitle className="text-sm font-medium text-white/80 flex items-center gap-2">
                                     <Calendar className="h-4 w-4" />
-                                    Available Events
+                                    {t('availableEvents')}
                                 </CardTitle>
                             </CardHeader>
                             <CardContent className="relative z-10">
@@ -241,7 +244,7 @@ export function DashboardClient({
                                 </div>
                                 <p className="text-sm text-white/70 mt-2 flex items-center gap-1.5">
                                     <TrendingUp className="h-4 w-4" />
-                                    Upcoming this season
+                                    {t('upcomingSeason')}
                                 </p>
                             </CardContent>
                         </Card>
@@ -262,14 +265,14 @@ export function DashboardClient({
                             <CardHeader className="pb-2 relative z-10">
                                 <CardTitle className="text-sm font-medium text-gray-500 flex items-center gap-2">
                                     <Target className="h-4 w-4 text-emerald-500" />
-                                    Completed
+                                    {t('completed')}
                                 </CardTitle>
                             </CardHeader>
                             <CardContent className="relative z-10">
                                 <div className="text-4xl font-display font-bold text-gray-900">
                                     <AnimatedNumber value={pastEventsCount} duration={1} />
                                 </div>
-                                <p className="text-sm text-gray-400 mt-2">Past events</p>
+                                <p className="text-sm text-gray-400 mt-2">{t('pastEvents')}</p>
                             </CardContent>
                         </Card>
                     </AnimatedCard>
@@ -305,14 +308,14 @@ export function DashboardClient({
                                     >
                                         <Zap className="h-4 w-4 text-yellow-300" />
                                     </motion.div>
-                                    Total Leads
+                                    {t('totalLeads')}
                                 </CardTitle>
                             </CardHeader>
                             <CardContent className="relative z-10">
                                 <div className="text-5xl font-display font-bold">
                                     <AnimatedNumber value={totalLeads} duration={1.5} />
                                 </div>
-                                <p className="text-sm text-white/80 mt-2">Potential students</p>
+                                <p className="text-sm text-white/80 mt-2">{t('potentialStudents')}</p>
                             </CardContent>
                         </Card>
                     </AnimatedCard>
@@ -332,7 +335,7 @@ export function DashboardClient({
                             <CardHeader className="pb-2 relative z-10">
                                 <CardTitle className="text-sm font-medium text-white/90 flex items-center gap-2">
                                     <Globe className="h-4 w-4" />
-                                    Countries
+                                    {t('countries')}
                                 </CardTitle>
                             </CardHeader>
                             <CardContent className="relative z-10">
@@ -342,7 +345,7 @@ export function DashboardClient({
                                         duration={1.2} 
                                     />
                                 </div>
-                                <p className="text-sm text-white/80 mt-2">Global reach</p>
+                                <p className="text-sm text-white/80 mt-2">{t('globalReach')}</p>
                             </CardContent>
                         </Card>
                     </AnimatedCard>
@@ -360,8 +363,8 @@ export function DashboardClient({
                             transition={{ delay: 0.5, duration: 0.4 }}
                         />
                         <div>
-                            <h2 className="text-2xl font-display font-bold text-gray-900">Your Events</h2>
-                            <p className="text-sm text-gray-500">Manage and track your event participation</p>
+                            <h2 className="text-2xl font-display font-bold text-gray-900">{t('yourEvents')}</h2>
+                            <p className="text-sm text-gray-500">{t('manageEvents')}</p>
                         </div>
                     </div>
                     <motion.span 
@@ -370,7 +373,7 @@ export function DashboardClient({
                         animate={{ opacity: 1, scale: 1 }}
                         transition={{ delay: 0.6 }}
                     >
-                        {dashboardEvents.length} active
+                        {t('activeEventsCount', { count: dashboardEvents.length })}
                     </motion.span>
                 </div>
 
@@ -388,13 +391,13 @@ export function DashboardClient({
                             >
                                 <Calendar className="w-20 h-20 text-gray-200 mx-auto mb-6" />
                             </motion.div>
-                            <h3 className="text-2xl font-bold text-gray-900 mb-3">No Events Yet</h3>
+                            <h3 className="text-2xl font-bold text-gray-900 mb-3">{t('noEvents')}</h3>
                             <p className="text-gray-500 mb-8 max-w-md mx-auto">
-                                Explore our event marketplace to find exhibitions where you can connect with students.
+                                {t('exploreText')}
                             </p>
                             <Button asChild className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white shadow-lg shadow-red-200">
                                 <Link href="/university/explore">
-                                    Explore Events <ArrowRight className="ml-2 h-4 w-4" />
+                                    {t('exploreBtn')} <ArrowRight className="ml-2 h-4 w-4" />
                                 </Link>
                             </Button>
                         </Card>
@@ -427,15 +430,15 @@ export function DashboardClient({
                                                                 }}
                                                                 transition={{ duration: 2, repeat: Infinity }}
                                                             /> 
-                                                            Active
+                                                            {t('status.active')}
                                                         </motion.div>
                                                     ) : isPending ? (
                                                         <div className="px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider bg-gradient-to-r from-amber-50 to-yellow-50 text-amber-600 border border-amber-100 flex items-center gap-1.5 shadow-sm">
-                                                            <div className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" /> Pending
+                                                            <div className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" /> {t('status.pending')}
                                                         </div>
                                                     ) : (
                                                         <div className="px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider bg-gray-50 text-gray-500 border border-gray-100 shadow-sm">
-                                                            Available
+                                                            {t('status.available')}
                                                         </div>
                                                     )}
                                                 </div>
@@ -471,7 +474,7 @@ export function DashboardClient({
                                                         asChild
                                                     >
                                                         <Link href={`/university/events/${event.id}`}>
-                                                            {isAccepted ? 'Open Dashboard' : 'View Details'}
+                                                            {isAccepted ? t('openDashboard') : t('viewDetails')}
                                                             <ArrowRight className="ml-2 h-4 w-4 group-hover/btn:translate-x-1 transition-transform duration-300" />
                                                         </Link>
                                                     </Button>

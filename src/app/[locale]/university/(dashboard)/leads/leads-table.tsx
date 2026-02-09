@@ -22,12 +22,14 @@ import {
     TooltipProvider,
     TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { useTranslations } from "next-intl";
 
 interface GlobalLeadsTableProps {
     data: any[];
 }
 
 export function GlobalLeadsTable({ data }: GlobalLeadsTableProps) {
+    const t = useTranslations('university.leads');
     const [search, setSearch] = useState("");
     const [selectedEvent, setSelectedEvent] = useState("all");
     const [selectedMajor, setSelectedMajor] = useState("all");
@@ -86,7 +88,7 @@ export function GlobalLeadsTable({ data }: GlobalLeadsTableProps) {
 
     const downloadCSV = () => {
         const csvContent = [
-            ["Event", "Date", "Ticket Status", "Full Name", "Gender", "Email", "Phone", "Country", "City", "Major (Std)", "Major (Orig)", "Category", "Level"],
+            [t('table.sourceEvent'), t('table.status'), t('table.student'), 'Gender', t('table.contact'), 'Phone', 'Country', 'City', 'Major (Std)', t('table.interest'), 'Category', 'Level'],
             ...filteredData.map(item => [
                 `"${item.event.title}"`,
                 format(new Date(item.createdAt), "yyyy-MM-dd"),
@@ -122,7 +124,7 @@ export function GlobalLeadsTable({ data }: GlobalLeadsTableProps) {
                     <div className="relative w-full sm:w-80">
                         <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
                         <Input
-                            placeholder="Search by name, email, or major..."
+                            placeholder={t('searchPlaceholder')}
                             className="pl-9 bg-white"
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
@@ -131,10 +133,10 @@ export function GlobalLeadsTable({ data }: GlobalLeadsTableProps) {
                     
                     <Select value={selectedEvent} onValueChange={setSelectedEvent}>
                         <SelectTrigger className="w-[200px] bg-white">
-                            <SelectValue placeholder="All Events" />
+                            <SelectValue placeholder={t('allEvents')} />
                         </SelectTrigger>
                         <SelectContent>
-                            <SelectItem value="all">All Events</SelectItem>
+                            <SelectItem value="all">{t('allEvents')}</SelectItem>
                             {uniqueEvents.map((e: unknown) => (
                                 <SelectItem key={String(e)} value={String(e)}>{String(e)}</SelectItem>
                             ))}
@@ -144,10 +146,10 @@ export function GlobalLeadsTable({ data }: GlobalLeadsTableProps) {
                     <Select value={selectedMajor} onValueChange={setSelectedMajor}>
                         <SelectTrigger className="w-[200px] bg-white">
                             <Filter className="h-3.5 w-3.5 mr-2 text-gray-400" />
-                            <SelectValue placeholder="All Categories" />
+                            <SelectValue placeholder={t('allCategories')} />
                         </SelectTrigger>
                         <SelectContent>
-                            <SelectItem value="all">All Major Categories</SelectItem>
+                            <SelectItem value="all">{t('allCategories')}</SelectItem>
                             {uniqueCategories.map((m: unknown) => (
                                 <SelectItem key={String(m)} value={String(m)}>{String(m)}</SelectItem>
                             ))}
@@ -156,7 +158,7 @@ export function GlobalLeadsTable({ data }: GlobalLeadsTableProps) {
                 </div>
 
                 <Button variant="outline" onClick={downloadCSV} className="bg-white hover:bg-gray-50 text-gray-700 border-gray-200">
-                    <Download className="mr-2 h-4 w-4" /> Export CSV
+                    <Download className="mr-2 h-4 w-4" /> {t('exportCsv')}
                 </Button>
             </div>
 
@@ -165,11 +167,11 @@ export function GlobalLeadsTable({ data }: GlobalLeadsTableProps) {
                 <Table>
                     <TableHeader>
                         <TableRow className="bg-gray-50/50 hover:bg-gray-50/50 border-b border-gray-200">
-                            <TableHead className="py-4 pl-6 font-semibold text-gray-600 w-[300px]">Student</TableHead>
-                            <TableHead className="py-4 font-semibold text-gray-600 w-[250px]">Interest</TableHead>
-                            <TableHead className="py-4 font-semibold text-gray-600 w-[200px]">Contact</TableHead>
-                            <TableHead className="py-4 font-semibold text-gray-600 w-[180px]">Source Event</TableHead>
-                            <TableHead className="py-4 font-semibold text-gray-600 w-[100px]">Status</TableHead>
+                            <TableHead className="py-4 pl-6 font-semibold text-gray-600 w-[300px]">{t('table.student')}</TableHead>
+                            <TableHead className="py-4 font-semibold text-gray-600 w-[250px]">{t('table.interest')}</TableHead>
+                            <TableHead className="py-4 font-semibold text-gray-600 w-[200px]">{t('table.contact')}</TableHead>
+                            <TableHead className="py-4 font-semibold text-gray-600 w-[180px]">{t('table.sourceEvent')}</TableHead>
+                            <TableHead className="py-4 font-semibold text-gray-600 w-[100px]">{t('table.status')}</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -178,8 +180,8 @@ export function GlobalLeadsTable({ data }: GlobalLeadsTableProps) {
                                 <TableCell colSpan={5} className="text-center py-16">
                                     <div className="flex flex-col items-center justify-center text-gray-500">
                                         <Search className="h-10 w-10 text-gray-300 mb-2" />
-                                        <p className="text-lg font-medium">No leads found</p>
-                                        <p className="text-sm">Try adjusting your filters or search terms.</p>
+                                        <p className="text-lg font-medium">{t('noLeads')}</p>
+                                        <p className="text-sm">{t('tryAdjusting')}</p>
                                     </div>
                                 </TableCell>
                             </TableRow>
@@ -199,7 +201,7 @@ export function GlobalLeadsTable({ data }: GlobalLeadsTableProps) {
                                                 </span>
                                                 <div className="flex items-center gap-1.5 text-xs text-gray-500 flex-wrap">
                                                     <span className="flex items-center gap-1 whitespace-nowrap">
-                                                        {registrant.nationality || "International"}
+                                                        {registrant.nationality || t('international')}
                                                     </span>
                                                     <span>•</span>
                                                     <span className="whitespace-nowrap">{registrant.levelOfStudy}</span>
@@ -211,7 +213,7 @@ export function GlobalLeadsTable({ data }: GlobalLeadsTableProps) {
                                     <TableCell className="py-4 align-top">
                                         <div className="flex flex-col gap-1.5">
                                             <div className="font-medium text-gray-900 break-words max-w-[220px]">
-                                                {registrant.interestedMajor || <span className="text-gray-400 italic">Undecided</span>}
+                                                {registrant.interestedMajor || <span className="text-gray-400 italic">{t('undecided')}</span>}
                                             </div>
                                             <div className="flex flex-wrap gap-2">
                                                 {registrant.majorCategory && registrant.majorCategory !== 'Uncategorized' && (
@@ -230,7 +232,7 @@ export function GlobalLeadsTable({ data }: GlobalLeadsTableProps) {
                                                                 </Badge>
                                                             </TooltipTrigger>
                                                             <TooltipContent>
-                                                                <p>Standardized from &quot;{registrant.interestedMajor}&quot;</p>
+                                                                <p>{t('standardizedFrom', { major: registrant.interestedMajor })}</p>
                                                             </TooltipContent>
                                                         </Tooltip>
                                                     </TooltipProvider>
@@ -266,7 +268,7 @@ export function GlobalLeadsTable({ data }: GlobalLeadsTableProps) {
                                             variant="outline" 
                                             className={`${getGenderColor(registrant.gender)} font-medium border px-2.5 py-0.5 rounded-full whitespace-nowrap`}
                                         >
-                                            {registrant.gender || 'Unknown'}
+                                            {registrant.gender || t('unknown')}
                                         </Badge>
                                     </TableCell>
                                 </TableRow>
@@ -280,9 +282,9 @@ export function GlobalLeadsTable({ data }: GlobalLeadsTableProps) {
             {filteredData.length > 0 && (
                 <div className="flex flex-col sm:flex-row justify-between items-center gap-4 text-xs text-gray-500 px-2 font-medium">
                     <div className="flex items-center gap-4">
-                        <span>Showing {startIndex + 1}-{Math.min(startIndex + itemsPerPage, filteredData.length)} of {filteredData.length} leads</span>
+                        <span>{t('showing', { start: startIndex + 1, end: Math.min(startIndex + itemsPerPage, filteredData.length), total: filteredData.length })}</span>
                         <div className="h-4 w-px bg-gray-200 hidden sm:block"></div>
-                        <span>Total Database: {data.length}</span>
+                        <span>{t('totalDatabase', { count: data.length })}</span>
                     </div>
                     
                     <div className="flex items-center gap-2">
@@ -293,10 +295,10 @@ export function GlobalLeadsTable({ data }: GlobalLeadsTableProps) {
                             disabled={currentPage === 1}
                             className="h-8 w-24"
                         >
-                            Previous
+                            {t('previous')}
                         </Button>
                         <span className="min-w-[80px] text-center">
-                            Page {currentPage} of {Math.max(1, totalPages)}
+                            {t('pageInfo', { current: currentPage, total: Math.max(1, totalPages) })}
                         </span>
                         <Button
                             variant="outline"
@@ -305,7 +307,7 @@ export function GlobalLeadsTable({ data }: GlobalLeadsTableProps) {
                             disabled={currentPage === totalPages}
                             className="h-8 w-24"
                         >
-                            Next
+                            {t('next')}
                         </Button>
                     </div>
                 </div>

@@ -25,10 +25,12 @@ import {
     Star
 } from "lucide-react";
 import { format } from "date-fns";
+import { tr, enUS } from "date-fns/locale";
 import { AnimatedNumber, StaggerContainer, StaggerItem, AnimatedCard } from "@/components/ui/motion";
 import Link from "next/link";
 import { StudentSearchModal } from "./student-search-modal";
 import { FavoritesList } from "./favorites-list";
+import { useTranslations, useLocale } from "next-intl";
 
 
 // Animation variants
@@ -148,6 +150,9 @@ export function EventDetailClient({
     registerButtonComponent,
     programComponent,
 }: EventDetailClientProps) {
+    const t = useTranslations('university.eventDetail');
+    const locale = useLocale();
+    const dateLocale = locale === 'tr' ? tr : enUS;
     const [searchModalOpen, setSearchModalOpen] = useState(false);
     const [favoritesRefreshTrigger, setFavoritesRefreshTrigger] = useState(0);
 
@@ -207,7 +212,7 @@ export function EventDetailClient({
                                             }}
                                             transition={{ duration: 2, repeat: Infinity }}
                                         />
-                                        Active Participant
+                                        {t('activeParticipant')}
                                     </Badge>
                                 )}
                                 {isPending && (
@@ -215,12 +220,12 @@ export function EventDetailClient({
                                         <motion.span 
                                             className="w-2 h-2 rounded-full bg-amber-900 mr-2 inline-block animate-pulse"
                                         />
-                                        Pending Approval
+                                        {t('pendingApproval')}
                                     </Badge>
                                 )}
                                 {!participation && (
                                     <Badge className="bg-gray-100 text-gray-700 border-0 px-4 py-1.5 text-sm font-semibold">
-                                        Not Registered
+                                        {t('notRegistered')}
                                     </Badge>
                                 )}
                             </motion.div>
@@ -237,7 +242,7 @@ export function EventDetailClient({
                                     whileHover={{ scale: 1.02 }}
                                 >
                                     <Calendar className="h-5 w-5 text-red-500" />
-                                    <span className="font-medium">{format(new Date(event.startDateTime), "PPP")}</span>
+                                    <span className="font-medium">{format(new Date(event.startDateTime), "PPP", { locale: dateLocale })}</span>
                                 </motion.div>
                                 <motion.div 
                                     className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/80 backdrop-blur-sm border border-gray-100 shadow-sm"
@@ -259,9 +264,9 @@ export function EventDetailClient({
                                         animate={{ opacity: 1, scale: 1 }}
                                         transition={{ delay: 0.4 }}
                                     >
-                                        <div className="text-xs text-gray-500 uppercase tracking-wider mb-1">Your Booth</div>
+                                        <div className="text-xs text-gray-500 uppercase tracking-wider mb-1">{t('yourBooth')}</div>
                                         <div className="text-2xl font-bold text-gray-900">
-                                            {participation.boothNumber || "TBA"}
+                                            {participation.boothNumber || t('tba')}
                                         </div>
                                     </motion.div>
                                     <motion.div
@@ -271,7 +276,7 @@ export function EventDetailClient({
                                         <Button asChild className="bg-gradient-to-r from-red-500 to-red-600 text-white shadow-lg shadow-red-200 hover:from-red-600 hover:to-red-700 h-12 px-6 rounded-xl">
                                             <Link href={`/en/kiosk/${event.slug}`} target="_blank">
                                                 <ExternalLink className="h-4 w-4 mr-2" />
-                                                Open Kiosk
+                                                {t('openKiosk')}
                                             </Link>
                                         </Button>
                                     </motion.div>
@@ -284,7 +289,7 @@ export function EventDetailClient({
                                             className="bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-lg shadow-amber-200 hover:from-amber-600 hover:to-orange-600 h-12 px-6 rounded-xl"
                                         >
                                             <Search className="h-4 w-4 mr-2" />
-                                            Find Student
+                                            {t('findStudent')}
                                         </Button>
                                     </motion.div>
                                 </>
@@ -300,16 +305,16 @@ export function EventDetailClient({
                 <Tabs defaultValue={isAccepted ? "overview" : "city"} className="w-full">
                     <TabsList className="mb-6 bg-gray-100/80 p-1.5 rounded-2xl w-full flex justify-start overflow-x-auto no-scrollbar touch-pan-x snap-x">
                         <TabsTrigger value="overview" className="rounded-xl data-[state=active]:bg-white data-[state=active]:shadow-md px-6 py-3 font-medium">
-                            Overview
+                            {t('tabs.overview')}
                         </TabsTrigger>
                         {isAccepted && (
                             <TabsTrigger value="program" className="rounded-xl data-[state=active]:bg-white data-[state=active]:shadow-md px-6 py-3 font-medium">
-                                Program
+                                {t('tabs.program')}
                             </TabsTrigger>
                         )}
                         {isAccepted && (
                             <TabsTrigger value="students" className="rounded-xl data-[state=active]:bg-white data-[state=active]:shadow-md px-6 py-3 font-medium">
-                                Student Data
+                                {t('tabs.studentData')}
                                 <Badge className="ml-2 bg-red-100 text-red-700 border-0">
                                     {registrationsCount}
                                 </Badge>
@@ -318,11 +323,11 @@ export function EventDetailClient({
                         {isAccepted && (
                             <TabsTrigger value="favorites" className="rounded-xl data-[state=active]:bg-white data-[state=active]:shadow-md px-6 py-3 font-medium">
                                 <Star className="h-4 w-4 mr-1.5 fill-amber-400 text-amber-400" />
-                                Favorites
+                                {t('tabs.favorites')}
                             </TabsTrigger>
                         )}
                         <TabsTrigger value="city" className="rounded-xl data-[state=active]:bg-white data-[state=active]:shadow-md px-6 py-3 font-medium">
-                            City Guide
+                            {t('tabs.cityGuide')}
                         </TabsTrigger>
                     </TabsList>
 
@@ -338,7 +343,7 @@ export function EventDetailClient({
                                                 <div className="p-2 rounded-xl bg-red-100">
                                                     <Sparkles className="h-5 w-5 text-red-600" />
                                                 </div>
-                                                <CardTitle>Event Details</CardTitle>
+                                                <CardTitle>{t('eventDetails')}</CardTitle>
                                             </div>
                                         </CardHeader>
                                         <CardContent className="p-6">
@@ -349,8 +354,8 @@ export function EventDetailClient({
                                                             <Calendar className="h-5 w-5 text-red-500" />
                                                         </div>
                                                         <div>
-                                                            <div className="text-xs text-gray-500 uppercase tracking-wider">Date</div>
-                                                            <div className="font-semibold text-gray-900">{format(new Date(event.startDateTime), "PPPP")}</div>
+                                                            <div className="text-xs text-gray-500 uppercase tracking-wider">{t('date')}</div>
+                                                            <div className="font-semibold text-gray-900">{format(new Date(event.startDateTime), "PPPP", { locale: dateLocale })}</div>
                                                         </div>
                                                     </div>
                                                     <div className="flex items-center gap-4 p-4 rounded-xl bg-gray-50 hover:bg-gray-100 transition-colors">
@@ -358,9 +363,9 @@ export function EventDetailClient({
                                                             <Clock className="h-5 w-5 text-blue-500" />
                                                         </div>
                                                         <div>
-                                                            <div className="text-xs text-gray-500 uppercase tracking-wider">Time</div>
+                                                            <div className="text-xs text-gray-500 uppercase tracking-wider">{t('time')}</div>
                                                             <div className="font-semibold text-gray-900">
-                                                                {format(new Date(event.startDateTime), "p")} - {format(new Date(event.endDateTime), "p")}
+                                                                {format(new Date(event.startDateTime), "p", { locale: dateLocale })} - {format(new Date(event.endDateTime), "p", { locale: dateLocale })}
                                                             </div>
                                                         </div>
                                                     </div>
@@ -371,7 +376,7 @@ export function EventDetailClient({
                                                             <Building2 className="h-5 w-5 text-purple-500" />
                                                         </div>
                                                         <div>
-                                                            <div className="text-xs text-gray-500 uppercase tracking-wider">Venue</div>
+                                                            <div className="text-xs text-gray-500 uppercase tracking-wider">{t('venue')}</div>
                                                             <div className="font-semibold text-gray-900">{event.venueName}</div>
                                                         </div>
                                                     </div>
@@ -380,7 +385,7 @@ export function EventDetailClient({
                                                             <Navigation className="h-5 w-5 text-emerald-500" />
                                                         </div>
                                                         <div>
-                                                            <div className="text-xs text-gray-500 uppercase tracking-wider">Address</div>
+                                                            <div className="text-xs text-gray-500 uppercase tracking-wider">{t('address')}</div>
                                                             <div className="font-semibold text-gray-900 text-sm">{event.venueAddress}</div>
                                                         </div>
                                                     </div>
@@ -410,7 +415,7 @@ export function EventDetailClient({
                                             <CardHeader className="relative z-10">
                                                 <CardTitle className="text-white/90 flex items-center gap-2">
                                                     <Target className="h-5 w-5" />
-                                                    Performance
+                                                    {t('performance')}
                                                 </CardTitle>
                                             </CardHeader>
                                             <CardContent className="relative z-10 space-y-6">
@@ -418,11 +423,11 @@ export function EventDetailClient({
                                                     <div className="text-6xl font-display font-bold">
                                                         <AnimatedNumber value={registrationsCount} duration={1.5} />
                                                     </div>
-                                                    <div className="text-white/80 mt-2">Students Collected</div>
+                                                    <div className="text-white/80 mt-2">{t('studentsCollected')}</div>
                                                 </div>
                                                 <div className="flex items-center justify-center gap-2 text-white/70">
                                                     <TrendingUp className="h-4 w-4" />
-                                                    <span className="text-sm">Growing daily</span>
+                                                    <span className="text-sm">{t('growingDaily')}</span>
                                                 </div>
                                             </CardContent>
                                         </Card>
@@ -443,15 +448,15 @@ export function EventDetailClient({
                                                     >
                                                         <Clock className="h-5 w-5" />
                                                     </motion.div>
-                                                    Request Pending
+                                                    {t('requestPending')}
                                                 </CardTitle>
                                             </CardHeader>
                                             <CardContent>
                                                 <p className="text-amber-700 mb-4">
-                                                    Your participation request is being reviewed. You&apos;ll be notified via email once approved.
+                                                    {t('pendingMessage')}
                                                 </p>
                                                 <Button disabled className="w-full bg-amber-200 text-amber-800 cursor-not-allowed">
-                                                    Awaiting Response
+                                                    {t('awaitingResponse')}
                                                 </Button>
                                             </CardContent>
                                         </Card>
@@ -467,12 +472,12 @@ export function EventDetailClient({
                                             <CardHeader>
                                                 <CardTitle className="text-orange-800 flex items-center gap-2">
                                                     <Users className="h-5 w-5" />
-                                                    Join This Event
+                                                    {t('joinEvent')}
                                                 </CardTitle>
                                             </CardHeader>
                                             <CardContent>
                                                 <p className="text-orange-700 mb-4">
-                                                    Register to access student leads, manage your booth, and connect with prospective students.
+                                                    {t('joinMessage')}
                                                 </p>
                                                 {registerButtonComponent}
                                             </CardContent>
@@ -486,7 +491,7 @@ export function EventDetailClient({
                         <motion.div variants={itemVariants}>
                             <Card className="rounded-2xl border-gray-100 shadow-lg">
                                 <CardHeader className="bg-gradient-to-r from-gray-50 to-white border-b border-gray-50">
-                                    <CardTitle>About This Event</CardTitle>
+                                    <CardTitle>{t('aboutEvent')}</CardTitle>
                                 </CardHeader>
                                 <CardContent className="p-6">
                                     <p className="text-gray-600 whitespace-pre-wrap leading-relaxed">{event.description}</p>
@@ -505,9 +510,9 @@ export function EventDetailClient({
                                             <Calendar className="h-5 w-5 text-purple-600" />
                                         </div>
                                         <div>
-                                            <CardTitle>Event Program</CardTitle>
+                                            <CardTitle>{t('eventProgram')}</CardTitle>
                                             <CardDescription>
-                                                Schedule in {event.timezone} ({locationString} Time)
+                                                {t('scheduleInfo', { timezone: event.timezone, location: locationString })}
                                             </CardDescription>
                                         </div>
                                     </div>
@@ -537,9 +542,9 @@ export function EventDetailClient({
                                                 <Star className="h-5 w-5 text-amber-600 fill-amber-400" />
                                             </div>
                                             <div>
-                                                <CardTitle>Favorite Students</CardTitle>
+                                                <CardTitle>{t('favoriteStudents')}</CardTitle>
                                                 <CardDescription>
-                                                    High-potential students you want to follow up with
+                                                    {t('favoriteStudentsDesc')}
                                                 </CardDescription>
                                             </div>
                                         </div>
@@ -548,7 +553,7 @@ export function EventDetailClient({
                                             className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600"
                                         >
                                             <Search className="h-4 w-4 mr-2" />
-                                            Find Student
+                                            {t('findStudent')}
                                         </Button>
                                     </div>
                                 </CardHeader>
@@ -572,8 +577,8 @@ export function EventDetailClient({
                                 animate={{ opacity: 1, scale: 1 }}
                             >
                                 <MapPin className="w-16 h-16 text-gray-200 mx-auto mb-4" />
-                                <h3 className="text-xl font-bold text-gray-400 mb-2">No City Guide Available</h3>
-                                <p className="text-gray-400">Information about this city will be added soon.</p>
+                                <h3 className="text-xl font-bold text-gray-400 mb-2">{t('noCityGuide')}</h3>
+                                <p className="text-gray-400">{t('cityGuidePending')}</p>
                             </motion.div>
                         ) : (
                             <StaggerContainer className="space-y-8">
@@ -584,7 +589,7 @@ export function EventDetailClient({
                                             <AnimatedCard hoverScale={1.02} hoverY={-4}>
                                                 <Card className="rounded-2xl border-gray-100 shadow-lg h-full">
                                                     <CardHeader className="flex flex-row items-center justify-between pb-2">
-                                                        <CardTitle className="text-sm font-medium">Airport Info</CardTitle>
+                                                        <CardTitle className="text-sm font-medium">{t('airportInfo')}</CardTitle>
                                                         <div className="p-2 rounded-xl bg-blue-100">
                                                             <Plane className="h-4 w-4 text-blue-600" />
                                                         </div>
@@ -600,7 +605,7 @@ export function EventDetailClient({
                                         <AnimatedCard hoverScale={1.02} hoverY={-4}>
                                             <Card className="rounded-2xl border-gray-100 shadow-lg h-full">
                                                 <CardHeader className="flex flex-row items-center justify-between pb-2">
-                                                    <CardTitle className="text-sm font-medium">Currency</CardTitle>
+                                                    <CardTitle className="text-sm font-medium">{t('currency')}</CardTitle>
                                                     <div className="p-2 rounded-xl bg-emerald-100">
                                                         <DollarSign className="h-4 w-4 text-emerald-600" />
                                                     </div>
@@ -620,7 +625,7 @@ export function EventDetailClient({
                                             <div className="p-2 rounded-xl bg-purple-100">
                                                 <Landmark className="h-5 w-5 text-purple-600" />
                                             </div>
-                                            <h3 className="text-xl font-bold text-gray-900">Attractions</h3>
+                                            <h3 className="text-xl font-bold text-gray-900">{t('attractions')}</h3>
                                         </div>
                                         <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
                                             {attractions.map((place, i) => (
@@ -642,7 +647,7 @@ export function EventDetailClient({
                                                                     rel="noreferrer" 
                                                                     className="inline-flex items-center gap-1.5 text-sm text-red-600 hover:text-red-700 font-medium"
                                                                 >
-                                                                    <MapPin className="h-3.5 w-3.5" /> View on Map
+                                                                    <MapPin className="h-3.5 w-3.5" /> {t('viewOnMap')}
                                                                 </a>
                                                             )}
                                                         </CardContent>
@@ -660,7 +665,7 @@ export function EventDetailClient({
                                             <div className="p-2 rounded-xl bg-amber-100">
                                                 <Coffee className="h-5 w-5 text-amber-600" />
                                             </div>
-                                            <h3 className="text-xl font-bold text-gray-900">Cafes & Restaurants</h3>
+                                            <h3 className="text-xl font-bold text-gray-900">{t('cafesRestaurants')}</h3>
                                         </div>
                                         <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
                                             {cafes.map((place, i) => (
@@ -682,7 +687,7 @@ export function EventDetailClient({
                                                                     rel="noreferrer" 
                                                                     className="inline-flex items-center gap-1.5 text-sm text-red-600 hover:text-red-700 font-medium"
                                                                 >
-                                                                    <MapPin className="h-3.5 w-3.5" /> View on Map
+                                                                    <MapPin className="h-3.5 w-3.5" /> {t('viewOnMap')}
                                                                 </a>
                                                             )}
                                                         </CardContent>

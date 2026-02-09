@@ -19,14 +19,16 @@ import {
     Users,
     Calendar
 } from "lucide-react";
+import { useTranslations } from "next-intl";
+import { LanguageSwitcher } from "@/components/public/language-switcher";
 
 const navItems = [
-    { name: "Overview", href: "/university/dashboard", icon: LayoutDashboard },
-    { name: "My Events", href: "/university/events", icon: Calendar },
-    { name: "Analytics", href: "/university/analytics", icon: BarChart3 },
-    { name: "Global Leads", href: "/university/leads", icon: Users },
-    { name: "Lead Scanner", href: "/university/scan", icon: QrCode },
-    { name: "Event Market", href: "/university/explore", icon: Search },
+    { key: "overview", href: "/university/dashboard", icon: LayoutDashboard },
+    { key: "myEvents", href: "/university/events", icon: Calendar },
+    { key: "analytics", href: "/university/analytics", icon: BarChart3 },
+    { key: "globalLeads", href: "/university/leads", icon: Users },
+    { key: "leadScanner", href: "/university/scan", icon: QrCode },
+    { key: "eventMarket", href: "/university/explore", icon: Search },
 ];
 
 // Animation variants - using const assertions for proper TypeScript compatibility
@@ -70,10 +72,17 @@ const logoVariants = {
     }
 };
 
-export function UniversitySidebar({ user }: { user: any }) {
-    const pathname = usePathname();
+interface User {
+    email?: string | null;
+    image?: string | null;
+    name?: string | null;
+}
 
-    const NavContent = () => (
+function SidebarContent({ user }: { user: User }) {
+    const pathname = usePathname();
+    const t = useTranslations('university.sidebar');
+
+    return (
         <motion.div 
             className="flex flex-col h-full bg-gradient-to-b from-slate-900 via-slate-900 to-slate-950 border-r border-white/5 text-white"
             initial="hidden"
@@ -99,14 +108,15 @@ export function UniversitySidebar({ user }: { user: any }) {
                         className="w-full h-full object-contain"
                     />
                 </motion.div>
-                <div>
+                <div className="flex-1">
                     <motion.span 
                         className="font-display font-bold text-lg tracking-wide block bg-gradient-to-r from-white to-white/80 bg-clip-text text-transparent"
                     >
                         Sit Connect
                     </motion.span>
-                    <span className="text-[10px] uppercase tracking-[0.2em] text-white/40 font-medium">University Portal</span>
+                    <span className="text-[10px] uppercase tracking-[0.2em] text-white/40 font-medium">{t('universityPortal')}</span>
                 </div>
+                <LanguageSwitcher />
             </motion.div>
 
             {/* Global Search */}
@@ -170,7 +180,7 @@ export function UniversitySidebar({ user }: { user: any }) {
                                         ? "text-white" 
                                         : "text-white/40 group-hover:text-white/80"
                                 )} />
-                                <span className="relative z-10">{item.name}</span>
+                                <span className="relative z-10">{t(`nav.${item.key}`)}</span>
                                 
                                 {/* Active indicator dot */}
                                 {isActive && (
@@ -199,7 +209,7 @@ export function UniversitySidebar({ user }: { user: any }) {
                 >
                     <p className="text-[10px] text-red-400 uppercase font-bold tracking-[0.15em] mb-1 flex items-center gap-1.5">
                         <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
-                        Signed in as
+                        {t('signedInAs')}
                     </p>
                     <p className="text-sm font-medium truncate text-white/90">{user.email}</p>
                 </motion.div>
@@ -213,13 +223,15 @@ export function UniversitySidebar({ user }: { user: any }) {
                         onClick={() => signOut({ callbackUrl: "/university/login" })}
                     >
                         <LogOut className="h-4 w-4 group-hover:rotate-[-10deg] transition-transform duration-300" />
-                        Sign Out
+                        {t('signOut')}
                     </Button>
                 </motion.div>
             </motion.div>
         </motion.div>
     );
+}
 
+export function UniversitySidebar({ user }: { user: User }) {
     return (
         <>
             {/* Mobile Nav */}
@@ -233,7 +245,7 @@ export function UniversitySidebar({ user }: { user: any }) {
                         </motion.div>
                     </SheetTrigger>
                     <SheetContent side="left" className="w-72 p-0 border-0 bg-transparent">
-                        <NavContent />
+                        <SidebarContent user={user} />
                     </SheetContent>
                 </Sheet>
                 <div className="font-bold flex items-center gap-2.5 text-white">
@@ -257,7 +269,7 @@ export function UniversitySidebar({ user }: { user: any }) {
 
             {/* Desktop Sidebar */}
             <aside className="fixed inset-y-0 left-0 z-50 hidden w-72 flex-col md:flex">
-                <NavContent />
+                <SidebarContent user={user} />
             </aside>
         </>
     );
