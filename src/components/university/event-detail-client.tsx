@@ -250,11 +250,11 @@ export function EventDetailClient({
                         </div>
 
                         {/* Action Buttons */}
-                        <div className="flex flex-col gap-3">
+                        <div className="grid grid-cols-2 lg:flex lg:flex-col gap-3">
                             {isAccepted && participation && (
                                 <>
                                     <motion.div
-                                        className="px-5 py-3 rounded-2xl bg-white/80 backdrop-blur-sm border border-gray-100 shadow-lg text-center"
+                                        className="col-span-2 lg:col-span-1 px-5 py-3 rounded-2xl bg-white/80 backdrop-blur-sm border border-gray-100 shadow-lg text-center"
                                         initial={{ opacity: 0, scale: 0.9 }}
                                         animate={{ opacity: 1, scale: 1 }}
                                         transition={{ delay: 0.4 }}
@@ -298,7 +298,7 @@ export function EventDetailClient({
             {/* Tabs Section */}
             <motion.div variants={itemVariants}>
                 <Tabs defaultValue={isAccepted ? "overview" : "city"} className="w-full">
-                    <TabsList className="mb-6 bg-gray-100/80 p-1.5 rounded-2xl">
+                    <TabsList className="mb-6 bg-gray-100/80 p-1.5 rounded-2xl w-full flex justify-start overflow-x-auto no-scrollbar touch-pan-x snap-x">
                         <TabsTrigger value="overview" className="rounded-xl data-[state=active]:bg-white data-[state=active]:shadow-md px-6 py-3 font-medium">
                             Overview
                         </TabsTrigger>
@@ -328,7 +328,7 @@ export function EventDetailClient({
 
                     {/* OVERVIEW TAB */}
                     <TabsContent value="overview" className="space-y-6">
-                        <StaggerContainer className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                        <StaggerContainer className="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
                             {/* Event Info Card */}
                             <StaggerItem className="lg:col-span-2">
                                 <AnimatedCard hoverScale={1.01} hoverY={-4}>
@@ -622,7 +622,7 @@ export function EventDetailClient({
                                             </div>
                                             <h3 className="text-xl font-bold text-gray-900">Attractions</h3>
                                         </div>
-                                        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                                        <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
                                             {attractions.map((place, i) => (
                                                 <AnimatedCard key={i} hoverScale={1.02} hoverY={-4}>
                                                     <Card className="rounded-2xl border-gray-100 shadow-lg h-full">
@@ -662,7 +662,7 @@ export function EventDetailClient({
                                             </div>
                                             <h3 className="text-xl font-bold text-gray-900">Cafes & Restaurants</h3>
                                         </div>
-                                        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                                        <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
                                             {cafes.map((place, i) => (
                                                 <AnimatedCard key={i} hoverScale={1.02} hoverY={-4}>
                                                     <Card className="rounded-2xl border-gray-100 shadow-lg h-full">

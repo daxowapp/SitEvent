@@ -20,7 +20,7 @@ export default async function UniversityLayout({
             
             <UniversitySidebar user={session.user} />
             
-            <main className="flex-1 md:ml-72 p-6 md:p-10 relative z-10 min-h-screen">
+            <main className="flex-1 md:ml-72 p-6 md:p-10 pt-20 md:pt-10 relative z-10 min-h-screen">
                 <div className="max-w-7xl mx-auto">
                     {children}
                 </div>

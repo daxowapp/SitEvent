@@ -161,13 +161,13 @@ export function GlobalLeadsTable({ data }: GlobalLeadsTableProps) {
             </div>
 
             {/* Premium Table Card */}
-            <Card className="border-0 shadow-sm ring-1 ring-gray-200 bg-white/50 backdrop-blur-sm">
+            <Card className="border-0 shadow-sm ring-1 ring-gray-200 bg-white/50 backdrop-blur-sm overflow-x-auto">
                 <Table>
                     <TableHeader>
                         <TableRow className="bg-gray-50/50 hover:bg-gray-50/50 border-b border-gray-200">
                             <TableHead className="py-4 pl-6 font-semibold text-gray-600 w-[300px]">Student</TableHead>
-                            <TableHead className="py-4 font-semibold text-gray-600 w-[250px]">Interest & Category</TableHead>
-                            <TableHead className="py-4 font-semibold text-gray-600 w-[200px]">Contact Info</TableHead>
+                            <TableHead className="py-4 font-semibold text-gray-600 w-[250px]">Interest</TableHead>
+                            <TableHead className="py-4 font-semibold text-gray-600 w-[200px]">Contact</TableHead>
                             <TableHead className="py-4 font-semibold text-gray-600 w-[180px]">Source Event</TableHead>
                             <TableHead className="py-4 font-semibold text-gray-600 w-[100px]">Status</TableHead>
                         </TableRow>

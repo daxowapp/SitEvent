@@ -2,7 +2,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { redirect } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+
 import { Calendar, MapPin, Building2 } from "lucide-react";
 import { format } from "date-fns";
 import RequestJoinButton from "./request-join-button";
@@ -39,7 +39,7 @@ export default async function ExploreEventsPage() {
                 <p className="text-muted-foreground mt-2">Discover and join upcoming education fairs.</p>
             </div>
 
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
                 {availableEvents.length === 0 ? (
                     <div className="col-span-full text-center py-12 text-gray-500">
                         No new upcoming events found. Check back later!

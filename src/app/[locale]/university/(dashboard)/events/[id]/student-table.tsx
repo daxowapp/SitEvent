@@ -48,7 +48,7 @@ export function StudentDataTable({ data, fileName }: StudentDataTableProps) {
 
     return (
         <div className="space-y-4">
-            <div className="flex justify-between items-center bg-white p-4 rounded-lg border shadow-sm">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-4 rounded-lg border shadow-sm">
                 <div className="relative w-72">
                     <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
                     <Input
@@ -63,7 +63,7 @@ export function StudentDataTable({ data, fileName }: StudentDataTableProps) {
                 </Button>
             </div>
 
-            <div className="bg-white rounded-lg border shadow-sm overflow-hidden">
+            <div className="bg-white rounded-lg border shadow-sm overflow-x-auto">
                 <Table>
                     <TableHeader>
                         <TableRow className="bg-gray-50">

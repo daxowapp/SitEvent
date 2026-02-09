@@ -82,7 +82,7 @@ export function AnalyticsClient({
 
             {/* Stats Grid */}
             <motion.div 
-                className="grid gap-4 md:grid-cols-2 lg:grid-cols-4"
+                className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-4"
                 variants={containerVariants}
             >
                 {/* Total Leads */}
@@ -188,11 +188,11 @@ export function AnalyticsClient({
 
             {/* Charts Grid */}
             <motion.div 
-                className="grid gap-6 md:grid-cols-2"
+                className="grid gap-6 grid-cols-1 md:grid-cols-2"
                 variants={containerVariants}
             >
                 {/* Leads Over Time */}
-                <motion.div variants={itemVariants} className="col-span-2 lg:col-span-1">
+                <motion.div variants={itemVariants} className="col-span-1 lg:col-span-1">
                     <Card className="rounded-2xl border-gray-100 shadow-sm hover:shadow-lg transition-shadow overflow-hidden">
                         <CardHeader className="bg-gradient-to-r from-gray-50 to-white border-b border-gray-50">
                             <div className="flex items-center gap-2">
@@ -222,6 +222,9 @@ export function AnalyticsClient({
                                             tickLine={false} 
                                             axisLine={false}
                                             tickFormatter={(value) => value.split('-').slice(1).join('/')}
+                                            angle={-45}
+                                            textAnchor="end"
+                                            height={60}
                                         />
                                         <YAxis 
                                             stroke="#9ca3af" 
@@ -252,7 +255,7 @@ export function AnalyticsClient({
                 </motion.div>
 
                 {/* Gender Distribution */}
-                <motion.div variants={itemVariants} className="col-span-2 lg:col-span-1">
+                <motion.div variants={itemVariants} className="col-span-1 lg:col-span-1">
                     <Card className="rounded-2xl border-gray-100 shadow-sm hover:shadow-lg transition-shadow overflow-hidden">
                         <CardHeader className="bg-gradient-to-r from-gray-50 to-white border-b border-gray-50">
                             <div className="flex items-center gap-2">
@@ -303,7 +306,7 @@ export function AnalyticsClient({
                 </motion.div>
 
                 {/* Major Categories - Using AI-categorized data */}
-                <motion.div variants={itemVariants} className="col-span-2 md:col-span-1">
+                <motion.div variants={itemVariants} className="col-span-1 md:col-span-1">
                     <Card className="rounded-2xl border-gray-100 shadow-sm hover:shadow-lg transition-shadow overflow-hidden h-full">
                         <CardHeader className="bg-gradient-to-r from-gray-50 to-white border-b border-gray-50">
                             <div className="flex items-center gap-2">
@@ -358,7 +361,7 @@ export function AnalyticsClient({
                 </motion.div>
 
                 {/* Study Levels */}
-                <motion.div variants={itemVariants} className="col-span-2 md:col-span-1">
+                <motion.div variants={itemVariants} className="col-span-1 md:col-span-1">
                     <Card className="rounded-2xl border-gray-100 shadow-sm hover:shadow-lg transition-shadow overflow-hidden h-full">
                         <CardHeader className="bg-gradient-to-r from-gray-50 to-white border-b border-gray-50">
                             <div className="flex items-center gap-2">

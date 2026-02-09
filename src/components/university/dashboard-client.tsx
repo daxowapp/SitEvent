@@ -191,7 +191,7 @@ export function DashboardClient({
                         
                         {/* Quick Stats Mini Cards */}
                         <motion.div 
-                            className="flex gap-3"
+                            className="grid grid-cols-2 gap-3 w-full md:w-auto"
                             initial={{ opacity: 0, x: 20 }}
                             animate={{ opacity: 1, x: 0 }}
                             transition={{ delay: 0.6 }}
@@ -215,11 +215,11 @@ export function DashboardClient({
 
             {/* Main Stats Grid - Bento Style */}
             <motion.div 
-                className="grid gap-4 md:gap-6 grid-cols-2 lg:grid-cols-4"
+                className="grid gap-4 md:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4"
                 variants={containerVariants}
             >
                 {/* Available Events - Large Card */}
-                <motion.div variants={itemVariants} className="col-span-2 lg:col-span-1">
+                <motion.div variants={itemVariants} className="col-span-1 sm:col-span-2 lg:col-span-1">
                     <AnimatedCard className="h-full" hoverScale={1.03} hoverY={-8}>
                         <Card className="h-full bg-gradient-to-br from-blue-500 to-blue-600 border-0 shadow-xl shadow-blue-200 text-white relative overflow-hidden rounded-2xl min-h-[180px]">
                             <motion.div 
@@ -276,7 +276,7 @@ export function DashboardClient({
                 </motion.div>
 
                 {/* Total Leads - Highlighted */}
-                <motion.div variants={itemVariants} className="col-span-2 lg:col-span-1">
+                <motion.div variants={itemVariants} className="col-span-1 sm:col-span-2 lg:col-span-1">
                     <AnimatedCard className="h-full" hoverScale={1.04} hoverY={-10}>
                         <Card className="h-full bg-gradient-to-br from-red-500 via-red-600 to-orange-500 border-0 shadow-xl shadow-red-200 text-white relative overflow-hidden rounded-2xl min-h-[180px]">
                             <motion.div 

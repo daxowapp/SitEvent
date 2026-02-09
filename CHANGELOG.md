@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.2.8] - 2026-02-09
+
+### Fixed
+
+- **Mobile Responsiveness**: Comprehensive fixes for University Portal mobile layout.
+  - **Dashboard**: Adjusted metrics grid to 2-columns for better mobile spacing.
+  - **Events Pages**: Fixed horizontal scrolling for tabs and student data tables.
+  - **Analytics**: Optimized chart labelling and sizing for small screens.
+  - **UX Polish**: Improved layout of action buttons (`Open Kiosk`, `Find Student`) and table headers.
+
 ## [0.2.7] - 2026-02-08
 
 ### Added
