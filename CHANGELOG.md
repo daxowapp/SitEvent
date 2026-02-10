@@ -396,3 +396,4 @@ All notable changes to this project will be documented in this file.
 - **Program Visibility**: Added date display to event program sessions for better clarity.
 - **Admin User Fix**: Resolved unique constraint error on `accessCode` during user creation by handling empty strings correctly.
 - **Program Grouping**: Grouped event sessions by date with sticky headers for both Public Event Pages and University Portal.
+- **Registration Logic**: Fixed "Event Ended" check to use `endDateTime` instead of `startDateTime`, allowing late registrations for ongoing events.

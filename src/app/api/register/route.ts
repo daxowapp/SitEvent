@@ -73,7 +73,7 @@ export async function POST(request: NextRequest) {
         }
 
         const now = new Date();
-        if (new Date(event.startDateTime) < now) {
+        if (new Date(event.endDateTime) < now) {
             return NextResponse.json(
                 { error: "This event has already ended" },
                 { status: 400 }
