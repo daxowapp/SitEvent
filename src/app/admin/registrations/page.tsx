@@ -18,6 +18,7 @@ interface PageProps {
         status?: string;
         source?: string;
         sort?: string;
+        checkedIn?: string;
     }>;
 }
 
@@ -53,6 +54,12 @@ export default async function RegistrationsPage({ searchParams }: PageProps) {
         // If we already have a registrant filter (from query), merge it
         if (!where.registrant) where.registrant = {};
         where.registrant.utmSource = source;
+    }
+    const checkedIn = params.checkedIn;
+    if (checkedIn === 'true') {
+        where.checkIn = { isNot: null };
+    } else if (checkedIn === 'false') {
+        where.checkIn = null;
     }
 
     // Parallel data fetching

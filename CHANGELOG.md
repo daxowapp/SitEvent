@@ -2,7 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
-## [0.2.12] - 2026-02-09
+## [0.2.13] - 2026-02-12
+
+### Added
+
+- **Admin Registrations**:
+  - **Check-in Filter**: Filter registrations by "Checked In" or "Not Checked In" status.
+  - **Column Visibility**: Toggle visibility of table columns via a new "View" menu.
 
 ### Added
 
