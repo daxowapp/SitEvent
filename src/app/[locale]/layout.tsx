@@ -22,7 +22,9 @@ export const metadata = {
     title: "Sit Connect - Connect with Top Universities",
     description: "Meet university representatives at education fairs near you.",
     icons: {
-        icon: "/logo-red.svg",
+        icon: "/icon.png",
+        shortcut: "/favicon.ico",
+        apple: "/icon.png",
     },
 };
 

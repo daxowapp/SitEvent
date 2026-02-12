@@ -410,3 +410,4 @@ All notable changes to this project will be documented in this file.
 - **Program Grouping**: Grouped event sessions by date with sticky headers for both Public Event Pages and University Portal.
 - **Registration Logic**: Fixed "Event Ended" check to use `endDateTime` instead of `startDateTime`, allowing late registrations for ongoing events.
   2026-02-12 - Home Page & Event List Logic - Updated "Upcoming" vs "Past" logic to use `endDateTime`, ensuring ongoing events appear as active.
+  2026-02-12 - UI Update - Updated application favicon to a new optimized "Sit Connect" symbol.
