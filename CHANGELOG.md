@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.2.14] - 2026-02-12
+
+### Fixed
+
+- **Event Status Logic**: Events now correctly remain "Upcoming" or "Ongoing" until their `endDateTime` passes. Previously, they were marked as "Past" as soon as they started.
+
 ## [0.2.13] - 2026-02-12
 
 ### Added

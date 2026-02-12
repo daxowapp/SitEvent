@@ -147,7 +147,7 @@ export default async function EventPage({ params }: EventPageProps) {
     const timeZone = event.timezone || "UTC";
 
     const now = new Date();
-    const isPast = new Date(event.startDateTime) < now;
+    const isPast = new Date(event.endDateTime) < now;
     const isRegistrationOpen =
         !isPast &&
         (!event.registrationOpenAt || new Date(event.registrationOpenAt) <= now) &&
