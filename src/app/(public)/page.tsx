@@ -28,14 +28,14 @@ async function getUpcomingEvents(): Promise<DisplayEvent[]> {
         const events = await prisma.event.findMany({
             where: {
                 status: "PUBLISHED",
-                startDateTime: { gte: new Date() },
+                endDateTime: { gte: new Date() },
             },
             orderBy: { startDateTime: "asc" },
             take: 6,
         });
 
         return events;
-    } catch (error) {
+    } catch {
         console.warn("Database unavailable");
         return [];
     }
@@ -51,7 +51,7 @@ async function getPastEvents(): Promise<DisplayEvent[]> {
         const events = await prisma.event.findMany({
             where: {
                 status: "PUBLISHED",
-                startDateTime: { lt: new Date() },
+                endDateTime: { lt: new Date() },
             },
             orderBy: { startDateTime: "desc" },
             take: 3,

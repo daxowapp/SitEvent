@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { format } from "date-fns";
 
@@ -24,6 +23,7 @@ interface DisplayEvent {
     venueName: string | null;
     bannerImageUrl: string | null;
     startDateTime: Date;
+    endDateTime: Date;
     status: string;
 }
 
@@ -38,6 +38,7 @@ const MOCK_EVENTS: DisplayEvent[] = [
         venueName: "Istanbul Congress Center",
         bannerImageUrl: "https://images.unsplash.com/photo-1523580494863-6f3031224c94?w=800&q=80",
         startDateTime: new Date("2026-03-15T10:00:00"),
+        endDateTime: new Date("2026-03-15T18:00:00"),
         status: "PUBLISHED",
     },
     {
@@ -49,6 +50,7 @@ const MOCK_EVENTS: DisplayEvent[] = [
         venueName: "Dubai World Trade Centre",
         bannerImageUrl: "https://images.unsplash.com/photo-1512453979798-5ea932a23518?w=800&q=80",
         startDateTime: new Date("2026-04-20T09:00:00"),
+        endDateTime: new Date("2026-04-20T17:00:00"),
         status: "PUBLISHED",
     },
     {
@@ -60,6 +62,7 @@ const MOCK_EVENTS: DisplayEvent[] = [
         venueName: "Riyadh International Convention Center",
         bannerImageUrl: "https://images.unsplash.com/photo-1586724237569-f3d0c1dee8c6?w=800&q=80",
         startDateTime: new Date("2026-05-10T10:00:00"),
+        endDateTime: new Date("2026-05-10T16:00:00"),
         status: "PUBLISHED",
     },
     {
@@ -71,6 +74,7 @@ const MOCK_EVENTS: DisplayEvent[] = [
         venueName: "ExCeL London",
         bannerImageUrl: "https://images.unsplash.com/photo-1526304640152-d4619684e484?w=800&q=80",
         startDateTime: new Date("2026-06-15T09:00:00"),
+        endDateTime: new Date("2026-06-15T17:00:00"),
         status: "PUBLISHED",
     },
 ];
@@ -145,8 +149,8 @@ export default async function EventsPage({ searchParams }: EventsPageProps) {
     }
 
     const now = new Date();
-    const upcomingEvents = events.filter((e) => new Date(e.startDateTime) >= now);
-    const pastEvents = events.filter((e) => new Date(e.startDateTime) < now);
+    const upcomingEvents = events.filter((e) => new Date(e.endDateTime) >= now);
+    const pastEvents = events.filter((e) => new Date(e.endDateTime) < now);
 
     return (
         <div className="min-h-screen bg-white">

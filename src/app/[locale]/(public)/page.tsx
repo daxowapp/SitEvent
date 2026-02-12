@@ -30,7 +30,7 @@ async function getUpcomingEvents(searchQuery?: string): Promise<DisplayEvent[]> 
 
         const where: Prisma.EventWhereInput = {
             status: "PUBLISHED",
-            startDateTime: { gte: new Date() },
+            endDateTime: { gte: new Date() },
         };
 
         if (searchQuery) {
@@ -72,7 +72,7 @@ async function getPastEvents(): Promise<DisplayEvent[]> {
         const events = await prisma.event.findMany({
             where: {
                 status: "PUBLISHED",
-                startDateTime: { lt: new Date() },
+                endDateTime: { lt: new Date() },
             },
             orderBy: { startDateTime: "desc" },
             take: 3,
