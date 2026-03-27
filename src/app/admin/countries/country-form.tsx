@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { ArrowLeft, Save, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { createCountry, updateCountry } from "./actions";
+import { ALL_TIMEZONES } from "@/lib/timezones";
 
 interface CountryFormProps {
     country?: {
@@ -22,25 +23,6 @@ interface CountryFormProps {
 
 // Common flag emojis for quick selection
 const FLAG_EMOJIS = ["🇹🇷", "🇪🇬", "🇸🇦", "🇦🇪", "🇯🇴", "🇱🇧", "🇲🇦", "🇶🇦", "🇰🇼", "🇧🇭", "🇴🇲", "🇵🇸", "🇮🇶", "🇾🇪", "🇸🇾", "🇱🇾", "🇹🇳", "🇩🇿", "🇸🇩", "🇺🇸", "🇬🇧", "🇩🇪", "🇫🇷", "🇮🇹", "🇪🇸", "🇳🇱", "🇧🇪", "🇨🇭", "🇦🇹", "🇵🇱"];
-
-// Common timezones
-const TIMEZONES = [
-    "UTC",
-    "Europe/Istanbul",
-    "Africa/Cairo",
-    "Asia/Riyadh",
-    "Asia/Dubai",
-    "Asia/Amman",
-    "Asia/Beirut",
-    "Africa/Casablanca",
-    "Asia/Qatar",
-    "Asia/Kuwait",
-    "Europe/London",
-    "Europe/Paris",
-    "Europe/Berlin",
-    "America/New_York",
-    "America/Los_Angeles",
-];
 
 export function CountryForm({ country }: CountryFormProps) {
     const router = useRouter();
@@ -155,9 +137,9 @@ export function CountryForm({ country }: CountryFormProps) {
                                 onChange={(e) => setFormData({ ...formData, timezone: e.target.value })}
                                 className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                             >
-                                {TIMEZONES.map((tz) => (
+                                {ALL_TIMEZONES.map((tz) => (
                                     <option key={tz} value={tz}>
-                                        {tz}
+                                        {tz.replace(/_/g, " ")}
                                     </option>
                                 ))}
                             </select>

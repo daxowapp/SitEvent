@@ -18,6 +18,7 @@ import { ImageUpload } from "@/components/ui/image-upload";
 import { MultiImageUpload } from "@/components/ui/multi-image-upload";
 import { TranslatableInput, TranslatableTextarea } from "@/components/ui/translatable-input";
 import { duplicateEvent } from "@/app/actions/events";
+import { ALL_TIMEZONES } from "@/lib/timezones";
 
 type Translations = Partial<Record<'en' | 'tr' | 'ar', string>>;
 
@@ -79,16 +80,6 @@ interface EventFormProps {
     countries?: Country[];
     eventId?: string;
 }
-
-const TIMEZONES = [
-    "UTC",
-    "Europe/Istanbul",
-    "Europe/London",
-    "Europe/Paris",
-    "Asia/Dubai",
-    "Asia/Riyadh",
-    "America/New_York",
-];
 
 export function EventForm({ initialData, onSubmit, countries = [], eventId }: EventFormProps) {
     const router = useRouter();
@@ -381,9 +372,9 @@ export function EventForm({ initialData, onSubmit, countries = [], eventId }: Ev
                                 <SelectValue />
                             </SelectTrigger>
                             <SelectContent>
-                                {TIMEZONES.map((tz) => (
+                                {ALL_TIMEZONES.map((tz) => (
                                     <SelectItem key={tz} value={tz}>
-                                        {tz}
+                                        {tz.replace(/_/g, " ")}
                                     </SelectItem>
                                 ))}
                             </SelectContent>

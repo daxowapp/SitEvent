@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.2.15] - 2026-03-27
+
+### Added
+
+- **All IANA Time Zones**: Expanded timezone selection from a handful of hardcoded entries to the complete list of ~350 IANA time zones, grouped by region (Africa, America, Asia, Australia, Europe, Indian, Pacific).
+  - Created shared `src/lib/timezones.ts` module with `ALL_TIMEZONES` export.
+  - Updated Event form timezone dropdown.
+  - Updated Country form timezone dropdown.
+  - Timezone labels now display with spaces instead of underscores for readability.
+
 ## [0.2.14] - 2026-02-12
 
 ### Fixed
@@ -411,3 +421,4 @@ All notable changes to this project will be documented in this file.
 - **Registration Logic**: Fixed "Event Ended" check to use `endDateTime` instead of `startDateTime`, allowing late registrations for ongoing events.
   2026-02-12 - Home Page & Event List Logic - Updated "Upcoming" vs "Past" logic to use `endDateTime`, ensuring ongoing events appear as active.
   2026-02-12 - UI Update - Updated application favicon to a new optimized "Sit Connect" symbol.
+  2026-02-12 - Real-time Analytics - Added "Live Mode" to Admin Event Analytics dashboard, polling for updates every 15s.
