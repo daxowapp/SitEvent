@@ -157,7 +157,7 @@ export default async function EventAnalyticsPage({ params }: PageProps) {
                 </div>
             </div>
 
-            <AnalyticsDashboard data={analyticsData} />
+            <AnalyticsDashboard eventId={event.id} data={analyticsData} />
         </div>
     );
 }

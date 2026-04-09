@@ -79,7 +79,6 @@ export const ALL_COUNTRIES = [
     { name: "Iran", code: "IR", flag: "🇮🇷" },
     { name: "Iraq", code: "IQ", flag: "🇮🇶" },
     { name: "Ireland", code: "IE", flag: "🇮🇪" },
-    { name: "Israel", code: "IL", flag: "🇮🇱" },
     { name: "Italy", code: "IT", flag: "🇮🇹" },
     { name: "Jamaica", code: "JM", flag: "🇯🇲" },
     { name: "Japan", code: "JP", flag: "🇯🇵" },

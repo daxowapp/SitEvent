@@ -25,18 +25,9 @@ interface RegistrationFormProps {
     eventId: string;
     eventSlug: string;
 }
+import { ALL_COUNTRIES } from "@/lib/constants/countries";
 
-const COUNTRIES = [
-    "Afghanistan", "Albania", "Algeria", "Argentina", "Australia", "Austria",
-    "Bangladesh", "Belgium", "Brazil", "Canada", "China", "Colombia", "Egypt",
-    "France", "Germany", "India", "Indonesia", "Iran", "Iraq", "Ireland", "Italy",
-    "Japan", "Jordan", "Kazakhstan", "Kenya", "Kuwait", "Lebanon", "Libya",
-    "Malaysia", "Mexico", "Morocco", "Netherlands", "Nigeria", "Pakistan",
-    "Palestine", "Philippines", "Poland", "Portugal", "Qatar", "Russia",
-    "Saudi Arabia", "South Africa", "South Korea", "Spain", "Sudan", "Sweden",
-    "Switzerland", "Syria", "Tunisia", "Turkey", "UAE", "UK", "USA", "Ukraine",
-    "Uzbekistan", "Vietnam", "Yemen", "Other",
-];
+const COUNTRIES = [...ALL_COUNTRIES.map((c) => c.name), "Other"];
 
 const STUDY_LEVELS = [
     { value: "bachelor", label: "Bachelor's Degree" },

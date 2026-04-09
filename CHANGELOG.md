@@ -2,6 +2,9 @@
 
 All notable changes to this project will be documented in this file.
 
+2026-04-08 - Country List Update - Replaced hardcoded event form countries with the comprehensive international list (excluding Israel).
+
+
 ## [0.2.15] - 2026-03-27
 
 ### Added
