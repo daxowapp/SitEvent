@@ -8,11 +8,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
-import { ArrowLeft, Save, Loader2, Plus, X, Lock } from "lucide-react";
+import { ArrowLeft, Save, Loader2, Plus, X, Lock, FileUp, Trash2, FileText, Image as ImageIcon, Video, File, Download } from "lucide-react";
 import Link from "next/link";
 import { createUniversity, updateUniversity, deleteUniversity, generateUniversityData, getUniversityUser, createOrUpdateUniversityUser } from "./actions";
 import { ALL_COUNTRIES } from "@/lib/constants/countries";
-import { AlertTriangle, Sparkles, Trash2 } from "lucide-react";
+import { AlertTriangle, Sparkles } from "lucide-react";
 import {
     AlertDialog,
     AlertDialogAction,
@@ -25,6 +25,8 @@ import {
     AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
+import { supabase } from "@/lib/supabase-client";
+import { createUniversityFile, getUniversityFiles, deleteUniversityFile } from "@/app/actions/university-files";
 
 interface Country {
     id: string;
@@ -140,6 +142,101 @@ export function UniversityForm({ university, countries = [] }: UniversityFormPro
     const [credData, setCredData] = useState({ email: "", password: "" });
     const [hasUser, setHasUser] = useState(false);
     const [isSavingCreds, setIsSavingCreds] = useState(false);
+
+    // File Management State
+    const [files, setFiles] = useState<any[]>([]);
+    const [isUploadingFile, setIsUploadingFile] = useState(false);
+    const [fileLabel, setFileLabel] = useState("");
+
+    // Fetch existing files for university
+    useEffect(() => {
+        if (university?.id) {
+            getUniversityFiles(university.id).then(setFiles).catch(console.error);
+        }
+    }, [university?.id]);
+
+    const getFileTypeFromName = (name: string): "PDF" | "IMAGE" | "VIDEO" | "DOCUMENT" => {
+        const ext = name.split(".").pop()?.toLowerCase();
+        if (ext === "pdf") return "PDF";
+        if (["jpg", "jpeg", "png", "gif", "webp", "svg"].includes(ext || "")) return "IMAGE";
+        if (["mp4", "webm", "mov", "avi"].includes(ext || "")) return "VIDEO";
+        return "DOCUMENT";
+    };
+
+    const getFileIcon = (type: string) => {
+        switch (type) {
+            case "PDF": return <FileText className="h-5 w-5 text-red-500" />;
+            case "IMAGE": return <ImageIcon className="h-5 w-5 text-blue-500" />;
+            case "VIDEO": return <Video className="h-5 w-5 text-purple-500" />;
+            default: return <File className="h-5 w-5 text-gray-500" />;
+        }
+    };
+
+    const formatFileSize = (bytes: number) => {
+        if (bytes < 1024) return `${bytes} B`;
+        if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+        return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+    };
+
+    const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (!university?.id || !e.target.files?.[0]) return;
+
+        const file = e.target.files[0];
+        const label = fileLabel.trim() || file.name;
+
+        if (file.size > 50 * 1024 * 1024) {
+            toast.error("File too large (max 50MB)");
+            return;
+        }
+
+        setIsUploadingFile(true);
+        try {
+            const filePath = `${university.id}/${Date.now()}-${file.name}`;
+            const { error: uploadError } = await supabase.storage
+                .from("university-files")
+                .upload(filePath, file);
+
+            if (uploadError) throw uploadError;
+
+            const { data: urlData } = supabase.storage
+                .from("university-files")
+                .getPublicUrl(filePath);
+
+            const result = await createUniversityFile({
+                universityId: university.id,
+                fileName: file.name,
+                fileUrl: urlData.publicUrl,
+                fileType: getFileTypeFromName(file.name),
+                fileSize: file.size,
+                label,
+            });
+
+            if (result.success && result.file) {
+                setFiles(prev => [result.file, ...prev]);
+                setFileLabel("");
+                toast.success("File uploaded!");
+            } else {
+                toast.error("Failed to save file record");
+            }
+        } catch (error) {
+            console.error("Upload failed:", error);
+            toast.error("Upload failed. Check Supabase storage bucket.");
+        } finally {
+            setIsUploadingFile(false);
+            e.target.value = "";
+        }
+    };
+
+    const handleDeleteFile = async (fileId: string) => {
+        if (!university?.id) return;
+        const result = await deleteUniversityFile(fileId, university.id);
+        if (result.success) {
+            setFiles(prev => prev.filter(f => f.id !== fileId));
+            toast.success("File removed");
+        } else {
+            toast.error("Failed to remove file");
+        }
+    };
 
     // Fetch existing user credentials
     useEffect(() => {
@@ -482,6 +579,96 @@ export function UniversityForm({ university, countries = [] }: UniversityFormPro
                         )}
                     </CardContent>
                 </Card>
+
+                {/* Files & Brochures - Only shown when editing existing university */}
+                {university && (
+                    <Card>
+                        <CardHeader>
+                            <CardTitle className="flex items-center gap-2">
+                                <FileUp className="h-5 w-5 text-muted-foreground" />
+                                Files & Brochures
+                            </CardTitle>
+                            <CardDescription>Upload brochures, catalogs, and other media for this university. These will be delivered to students digitally.</CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                            {/* Upload Section */}
+                            <div className="flex flex-col sm:flex-row gap-3">
+                                <Input
+                                    placeholder="File label (optional)"
+                                    value={fileLabel}
+                                    onChange={(e) => setFileLabel(e.target.value)}
+                                    className="flex-1"
+                                />
+                                <div className="relative">
+                                    <input
+                                        type="file"
+                                        accept=".pdf,.doc,.docx,.png,.jpg,.jpeg,.webp,.mp4"
+                                        onChange={handleFileUpload}
+                                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                                        disabled={isUploadingFile}
+                                    />
+                                    <Button type="button" variant="outline" className="w-full sm:w-auto pointer-events-none" disabled={isUploadingFile}>
+                                        {isUploadingFile ? (
+                                            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                        ) : (
+                                            <FileUp className="h-4 w-4 mr-2" />
+                                        )}
+                                        {isUploadingFile ? "Uploading..." : "Upload File"}
+                                    </Button>
+                                </div>
+                            </div>
+
+                            {/* File List */}
+                            {files.length === 0 ? (
+                                <div className="text-center py-8 text-muted-foreground border-2 border-dashed rounded-lg">
+                                    <FileText className="h-8 w-8 mx-auto mb-2 opacity-40" />
+                                    <p className="text-sm">No files uploaded yet</p>
+                                    <p className="text-xs mt-1">Upload PDFs, images, or documents above</p>
+                                </div>
+                            ) : (
+                                <div className="space-y-2">
+                                    {files.map((file) => (
+                                        <div
+                                            key={file.id}
+                                            className="flex items-center gap-3 p-3 rounded-lg border bg-gray-50/50 hover:bg-gray-50 transition-colors group"
+                                        >
+                                            {getFileIcon(file.fileType)}
+                                            <div className="flex-1 min-w-0">
+                                                <p className="text-sm font-medium truncate">{file.label}</p>
+                                                <p className="text-xs text-muted-foreground">
+                                                    {file.fileName} · {formatFileSize(file.fileSize)}
+                                                </p>
+                                            </div>
+                                            <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                <Button
+                                                    type="button"
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    className="h-8 w-8"
+                                                    asChild
+                                                >
+                                                    <a href={file.fileUrl} target="_blank" rel="noopener noreferrer">
+                                                        <Download className="h-4 w-4 text-blue-600" />
+                                                    </a>
+                                                </Button>
+                                                <Button
+                                                    type="button"
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    className="h-8 w-8 text-red-500 hover:text-red-700 hover:bg-red-50"
+                                                    onClick={() => handleDeleteFile(file.id)}
+                                                >
+                                                    <Trash2 className="h-4 w-4" />
+                                                </Button>
+                                            </div>
+                                        </div>
+                                    ))}
+                                    <p className="text-xs text-muted-foreground text-right">{files.length} file(s)</p>
+                                </div>
+                            )}
+                        </CardContent>
+                    </Card>
+                )}
 
                 <Card>
                     <CardHeader>
