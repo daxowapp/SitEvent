@@ -588,6 +588,8 @@
                 "analytics": "Analytics",
                 "globalLeads": "Global Leads",
                 "leadScanner": "Lead Scanner",
+                "files": "Files & Brochures",
+                "boothScanner": "Booth Scanner",
                 "eventMarket": "Event Market"
             }
         }

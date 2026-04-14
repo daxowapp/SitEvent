@@ -49,6 +49,26 @@ enum MessageStatus {
   FAILED
 }
 
+enum FileType {
+  PDF
+  IMAGE
+  VIDEO
+  DOCUMENT
+}
+
+enum PointAction {
+  BOOTH_VISIT
+  COMPLETION_BONUS
+  EARLY_BIRD_BONUS
+  ADMIN_ADJUSTMENT
+}
+
+enum GiftTier {
+  BRONZE
+  SILVER
+  GOLD
+}
+
 // ============================================
 // CORE MODELS
 // ============================================
@@ -142,6 +162,16 @@ model Event {
   zohoCampaignId      String?   // Zoho Campaign ID for this event
   zohoLeadSource      String?   // Lead Source value
 
+  // Red Points Configuration
+  redPointsEnabled    Boolean   @default(false)
+  pointsPerVisit      Int       @default(10)   // Points per booth visit
+  completionBonus     Int       @default(50)   // Bonus for visiting ALL booths
+  earlyBirdBonus      Int       @default(5)    // Bonus for first N visits
+  earlyBirdCount      Int       @default(3)    // Number of visits for early bird
+  bronzeThreshold     Int       @default(30)   // Points for Bronze tier
+  silverThreshold     Int       @default(70)   // Points for Silver tier
+  goldThreshold       Int       @default(100)  // Points for Gold tier
+
   createdBy     AdminUser            @relation(fields: [createdById], references: [id])
   universities  EventParticipating[]
   registrations Registration[]
@@ -149,6 +179,9 @@ model Event {
   reminderRules ReminderRule[]
   sessions      EventSession[]
   favorites     FavoriteStudent[]
+  boothVisits   BoothVisit[]
+  pointsLedger  RedPointsLedger[]
+  giftRedemptions GiftRedemption[]
 }
 
 model EventSession {
@@ -186,6 +219,8 @@ model University {
   users        UniversityUser[]
   events       EventParticipating[]
   favorites    FavoriteStudent[]
+  files        UniversityFile[]
+  boothVisits  BoothVisit[]
   
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
@@ -198,6 +233,8 @@ model UniversityUser {
   name         String?
   universityId String
   university   University @relation(fields: [universityId], references: [id], onDelete: Cascade)
+  
+  boothScans   BoothVisit[]  // Scans performed by this university user
   
   createdAt    DateTime   @default(now())
   updatedAt    DateTime   @updatedAt
@@ -265,6 +302,9 @@ model Registration {
   checkIn     CheckIn?
   messageLogs MessageLog[]
   favorites   FavoriteStudent[]
+  boothVisits BoothVisit[]
+  pointsLedger RedPointsLedger[]
+  giftRedemptions GiftRedemption[]
 
   @@unique([eventId, registrantId])
 }
@@ -346,8 +386,9 @@ model AdminUser {
   lastLoginAt  DateTime?
   accessCode   String?   @unique
 
-  events   Event[]
-  checkIns CheckIn[]
+  events           Event[]
+  checkIns         CheckIn[]
+  giftRedemptions  GiftRedemption[]  // Gifts redeemed by this admin/staff
 }
 
 // ============================================
@@ -379,5 +420,93 @@ model AuditLog {
   metadata   Json?
   ipAddress  String?
   createdAt  DateTime @default(now())
+}
+
+// ============================================
+// PAPERLESS EVENTS — UNIVERSITY FILES
+// ============================================
+
+model UniversityFile {
+  id           String     @id @default(cuid())
+  universityId String
+  university   University @relation(fields: [universityId], references: [id], onDelete: Cascade)
+  
+  fileName     String     // Original file name
+  fileUrl      String     // Supabase Storage URL
+  fileType     FileType   @default(PDF)
+  fileSize     Int        @default(0)   // Size in bytes
+  label        String     // Display name (e.g., "2026 Programs Catalog")
+  description  String?    @db.Text
+  isActive     Boolean    @default(true)
+  
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  
+  @@index([universityId])
+}
+
+// ============================================
+// PAPERLESS EVENTS — BOOTH VISITS & RED POINTS
+// ============================================
+
+// Records when a university scans a student's QR at their booth
+model BoothVisit {
+  id              String          @id @default(cuid())
+  eventId         String
+  event           Event           @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  registrationId  String
+  registration    Registration    @relation(fields: [registrationId], references: [id], onDelete: Cascade)
+  universityId    String
+  university      University      @relation(fields: [universityId], references: [id], onDelete: Cascade)
+  scannedById     String          // UniversityUser who scanned
+  scannedBy       UniversityUser  @relation(fields: [scannedById], references: [id])
+  
+  pointsAwarded   Int             @default(0)
+  note            String?         @db.Text  // Optional note from uni rep
+  filesSentAt     DateTime?       // When brochures were sent/made available
+  
+  createdAt       DateTime        @default(now())
+  
+  // One visit per university per student per event
+  @@unique([eventId, registrationId, universityId])
+  @@index([eventId, universityId])
+  @@index([eventId, registrationId])
+}
+
+// Ledger of all point transactions for a student at an event
+model RedPointsLedger {
+  id              String      @id @default(cuid())
+  eventId         String
+  event           Event       @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  registrationId  String
+  registration    Registration @relation(fields: [registrationId], references: [id], onDelete: Cascade)
+  
+  action          PointAction
+  points          Int         // Positive = earned, negative = spent/deducted
+  referenceId     String?     // BoothVisit ID or other reference
+  description     String?     // Human-readable description
+  
+  createdAt       DateTime    @default(now())
+  
+  @@index([eventId, registrationId])
+}
+
+// Gift redemption records
+model GiftRedemption {
+  id              String       @id @default(cuid())
+  eventId         String
+  event           Event        @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  registrationId  String
+  registration    Registration @relation(fields: [registrationId], references: [id], onDelete: Cascade)
+  
+  tier            GiftTier
+  pointsAtRedemption Int       // Points balance at time of redemption
+  redeemedById    String       // AdminUser (help desk staff) who processed
+  redeemedBy      AdminUser    @relation(fields: [redeemedById], references: [id])
+  
+  createdAt       DateTime     @default(now())
+  
+  @@index([eventId])
+  @@index([eventId, registrationId])
 }
 

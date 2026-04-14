@@ -20,6 +20,7 @@ import {
     Globe,
     MapPin,
     GraduationCap,
+    Gift,
 } from "lucide-react";
 
 const navItems = [
@@ -28,6 +29,7 @@ const navItems = [
     { name: "Events", href: "/admin/events", icon: CalendarIcon, roles: ["SUPER_ADMIN", "EVENT_MANAGER"] },
     { name: "Registrations", href: "/admin/registrations", icon: UsersIcon, roles: ["SUPER_ADMIN", "EVENT_MANAGER"] },
     { name: "Scan QR", href: "/admin/scan", icon: CameraIcon, roles: ["SUPER_ADMIN", "EVENT_MANAGER", "EVENT_STAFF", "USHER"] },
+    { name: "Help Desk", href: "/admin/helpdesk", icon: Gift, roles: ["SUPER_ADMIN", "EVENT_MANAGER", "EVENT_STAFF"] },
     { name: "Countries", href: "/admin/countries", icon: Globe, roles: ["SUPER_ADMIN"] },
     { name: "Cities", href: "/admin/cities", icon: MapPin, roles: ["SUPER_ADMIN"] },
     { name: "Universities", href: "/admin/universities", icon: GraduationCap, roles: ["SUPER_ADMIN"] },

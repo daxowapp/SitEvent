@@ -479,6 +479,8 @@
                 "analytics": "Analizler",
                 "globalLeads": "Tüm Öğrenciler",
                 "leadScanner": "QR Okuyucu",
+                "files": "Dosyalar & Broşürler",
+                "boothScanner": "Stand Tarayıcı",
                 "eventMarket": "Etkinlik Pazarı"
             }
         }

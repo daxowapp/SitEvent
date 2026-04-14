@@ -5,6 +5,7 @@ import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { PrintButton } from "@/components/common/print-button";
+import { RedPointsWidget } from "@/components/public/red-points-widget";
 
 export const dynamic = "force-dynamic";
 
@@ -171,6 +172,11 @@ export default async function QrVerificationPage({ params }: QrPageProps) {
             </div>
 
             <p className="mt-8 text-gray-400 text-sm font-medium">SitConnect Events Platform 🇹🇷</p>
+
+            {/* Red Points Section */}
+            <div className="w-full max-w-md mt-6">
+                <RedPointsWidget qrToken={registration.qrToken} />
+            </div>
         </div>
     );
 }

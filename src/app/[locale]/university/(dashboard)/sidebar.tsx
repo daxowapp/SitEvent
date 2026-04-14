@@ -17,7 +17,9 @@ import {
     QrCode,
     BarChart3,
     Users,
-    Calendar
+    Calendar,
+    FileText,
+    Camera,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { LanguageSwitcher } from "@/components/public/language-switcher";
@@ -28,6 +30,8 @@ const navItems = [
     { key: "analytics", href: "/university/analytics", icon: BarChart3 },
     { key: "globalLeads", href: "/university/leads", icon: Users },
     { key: "leadScanner", href: "/university/scan", icon: QrCode },
+    { key: "files", href: "/university/files", icon: FileText },
+    { key: "boothScanner", href: "/university/scanner", icon: Camera },
     { key: "eventMarket", href: "/university/explore", icon: Search },
 ];
 
