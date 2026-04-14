@@ -56,6 +56,15 @@ async function createEvent(data: {
     // Zoho
     zohoCampaignId?: string;
     zohoLeadSource?: string;
+    // Red Points
+    redPointsEnabled?: boolean;
+    pointsPerVisit?: number;
+    completionBonus?: number;
+    earlyBirdBonus?: number;
+    earlyBirdCount?: number;
+    bronzeThreshold?: number;
+    silverThreshold?: number;
+    goldThreshold?: number;
 }) {
     "use server";
 
@@ -110,6 +119,15 @@ async function createEvent(data: {
             // Zoho
             zohoCampaignId: data.zohoCampaignId || null,
             zohoLeadSource: data.zohoLeadSource || null,
+            // Red Points
+            redPointsEnabled: data.redPointsEnabled || false,
+            pointsPerVisit: data.pointsPerVisit ?? 10,
+            completionBonus: data.completionBonus ?? 50,
+            earlyBirdBonus: data.earlyBirdBonus ?? 5,
+            earlyBirdCount: data.earlyBirdCount ?? 3,
+            bronzeThreshold: data.bronzeThreshold ?? 30,
+            silverThreshold: data.silverThreshold ?? 70,
+            goldThreshold: data.goldThreshold ?? 100,
             createdById: session.user.id,
         },
     });

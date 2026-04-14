@@ -19,6 +19,7 @@ import { MultiImageUpload } from "@/components/ui/multi-image-upload";
 import { TranslatableInput, TranslatableTextarea } from "@/components/ui/translatable-input";
 import { duplicateEvent } from "@/app/actions/events";
 import { ALL_TIMEZONES } from "@/lib/timezones";
+import { Switch } from "@/components/ui/switch";
 
 type Translations = Partial<Record<'en' | 'tr' | 'ar', string>>;
 
@@ -58,6 +59,15 @@ interface EventFormData {
     // Zoho CRM
     zohoCampaignId?: string;
     zohoLeadSource?: string;
+    // Red Points
+    redPointsEnabled?: boolean;
+    pointsPerVisit?: number;
+    completionBonus?: number;
+    earlyBirdBonus?: number;
+    earlyBirdCount?: number;
+    bronzeThreshold?: number;
+    silverThreshold?: number;
+    goldThreshold?: number;
 }
 
 interface Country {
@@ -625,6 +635,107 @@ export function EventForm({ initialData, onSubmit, countries = [], eventId }: Ev
                         </p>
                     </div>
                 </div>
+            </div>
+
+            {/* Red Points Gamification */}
+            <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                    <div>
+                        <h3 className="font-medium">🏆 Red Points Gamification</h3>
+                        <p className="text-sm text-muted-foreground">
+                            Enable booth visit tracking with a points and rewards system for students.
+                        </p>
+                    </div>
+                    <Switch
+                        checked={formData.redPointsEnabled || false}
+                        onCheckedChange={(checked) => setFormData({ ...formData, redPointsEnabled: checked })}
+                    />
+                </div>
+
+                {formData.redPointsEnabled && (
+                    <div className="space-y-4 pl-4 border-l-2 border-primary/20">
+                        <div className="grid gap-4 sm:grid-cols-3">
+                            <div className="space-y-2">
+                                <Label htmlFor="pointsPerVisit">Points per Booth Visit</Label>
+                                <Input
+                                    id="pointsPerVisit"
+                                    type="number"
+                                    min="1"
+                                    value={formData.pointsPerVisit ?? 10}
+                                    onChange={(e) => setFormData({ ...formData, pointsPerVisit: parseInt(e.target.value) || 10 })}
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="earlyBirdBonus">Early Bird Bonus</Label>
+                                <Input
+                                    id="earlyBirdBonus"
+                                    type="number"
+                                    min="0"
+                                    value={formData.earlyBirdBonus ?? 5}
+                                    onChange={(e) => setFormData({ ...formData, earlyBirdBonus: parseInt(e.target.value) || 0 })}
+                                />
+                                <p className="text-xs text-muted-foreground">Extra points for first visits</p>
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="earlyBirdCount">Early Bird Count</Label>
+                                <Input
+                                    id="earlyBirdCount"
+                                    type="number"
+                                    min="1"
+                                    value={formData.earlyBirdCount ?? 3}
+                                    onChange={(e) => setFormData({ ...formData, earlyBirdCount: parseInt(e.target.value) || 3 })}
+                                />
+                                <p className="text-xs text-muted-foreground">First N visits get bonus</p>
+                            </div>
+                        </div>
+
+                        <div className="space-y-2">
+                            <Label htmlFor="completionBonus">Completion Bonus</Label>
+                            <Input
+                                id="completionBonus"
+                                type="number"
+                                min="0"
+                                value={formData.completionBonus ?? 50}
+                                onChange={(e) => setFormData({ ...formData, completionBonus: parseInt(e.target.value) || 0 })}
+                            />
+                            <p className="text-xs text-muted-foreground">Bonus points when student visits ALL university booths</p>
+                        </div>
+
+                        <h4 className="font-medium text-sm text-muted-foreground pt-2">Tier Thresholds (points needed)</h4>
+                        <div className="grid gap-4 sm:grid-cols-3">
+                            <div className="space-y-2">
+                                <Label htmlFor="bronzeThreshold" className="flex items-center gap-1">🥉 Bronze</Label>
+                                <Input
+                                    id="bronzeThreshold"
+                                    type="number"
+                                    min="0"
+                                    value={formData.bronzeThreshold ?? 30}
+                                    onChange={(e) => setFormData({ ...formData, bronzeThreshold: parseInt(e.target.value) || 0 })}
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="silverThreshold" className="flex items-center gap-1">🥈 Silver</Label>
+                                <Input
+                                    id="silverThreshold"
+                                    type="number"
+                                    min="0"
+                                    value={formData.silverThreshold ?? 70}
+                                    onChange={(e) => setFormData({ ...formData, silverThreshold: parseInt(e.target.value) || 0 })}
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="goldThreshold" className="flex items-center gap-1">🥇 Gold</Label>
+                                <Input
+                                    id="goldThreshold"
+                                    type="number"
+                                    min="0"
+                                    value={formData.goldThreshold ?? 100}
+                                    onChange={(e) => setFormData({ ...formData, goldThreshold: parseInt(e.target.value) || 0 })}
+                                />
+                            </div>
+                        </div>
+                    </div>
+                )}
             </div>
 
             {/* Actions */}

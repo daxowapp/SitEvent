@@ -109,6 +109,15 @@ async function updateEvent(id: string, data: any) {
             // Zoho
             zohoCampaignId: data.zohoCampaignId || null,
             zohoLeadSource: data.zohoLeadSource || null,
+            // Red Points
+            redPointsEnabled: data.redPointsEnabled || false,
+            pointsPerVisit: data.pointsPerVisit ?? 10,
+            completionBonus: data.completionBonus ?? 50,
+            earlyBirdBonus: data.earlyBirdBonus ?? 5,
+            earlyBirdCount: data.earlyBirdCount ?? 3,
+            bronzeThreshold: data.bronzeThreshold ?? 30,
+            silverThreshold: data.silverThreshold ?? 70,
+            goldThreshold: data.goldThreshold ?? 100,
         },
     });
 
