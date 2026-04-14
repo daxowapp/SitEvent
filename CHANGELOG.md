@@ -2,6 +2,8 @@
 
 All notable changes to this project will be documented in this file.
 
+2026-04-14 - TikTok Pixel Integration - Added TikTok tracking pixel to the main localized layout for analytics tracking.
+
 2026-04-08 - Country List Update - Replaced hardcoded event form countries with the comprehensive international list (excluding Israel).
 
 
