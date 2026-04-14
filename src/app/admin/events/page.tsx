@@ -83,17 +83,24 @@ export default async function AdminEventsPage() {
                                         <Badge variant="outline">{event._count?.universities || 0}</Badge>
                                     </TableCell>
                                     <TableCell>
-                                        <Badge
-                                            variant={
-                                                event.status === "PUBLISHED"
-                                                    ? "default"
-                                                    : event.status === "DRAFT"
-                                                        ? "secondary"
-                                                        : "outline"
-                                            }
-                                        >
-                                            {event.status}
-                                        </Badge>
+                                        <div className="flex items-center gap-1.5">
+                                            <Badge
+                                                variant={
+                                                    event.status === "PUBLISHED"
+                                                        ? "default"
+                                                        : event.status === "DRAFT"
+                                                            ? "secondary"
+                                                            : "outline"
+                                                }
+                                            >
+                                                {event.status}
+                                            </Badge>
+                                            {event.redPointsEnabled && (
+                                                <Badge variant="outline" className="text-amber-600 border-amber-300 bg-amber-50 text-xs">
+                                                    🏆 RP
+                                                </Badge>
+                                            )}
+                                        </div>
                                     </TableCell>
                                     <TableCell className="text-right">
                                         <div className="flex justify-end gap-2">
