@@ -439,3 +439,4 @@ All notable changes to this project will be documented in this file.
   2026-02-12 - Home Page & Event List Logic - Updated "Upcoming" vs "Past" logic to use `endDateTime`, ensuring ongoing events appear as active.
   2026-02-12 - UI Update - Updated application favicon to a new optimized "Sit Connect" symbol.
   2026-02-12 - Real-time Analytics - Added "Live Mode" to Admin Event Analytics dashboard, polling for updates every 15s.
+2026-04-15 - Removed Legacy Scanner & Renamed Global Leads - Simplified university dashboard sidebar by removing the duplicate legacy Lead Scanner, retaining only the new Booth Scanner, and renamed Global Leads to Scanned Students for clarity.
