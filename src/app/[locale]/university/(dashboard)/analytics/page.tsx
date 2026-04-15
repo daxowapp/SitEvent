@@ -12,19 +12,13 @@ export default async function UniversityAnalyticsPage() {
 
     const universityId = session.user.universityId;
 
-    // Fetch University Data with Events and Registrations
+    // Fetch University Data with Events
     const university = await prisma.university.findUnique({
         where: { id: universityId },
         include: {
             events: {
                 include: {
-                    event: {
-                        include: {
-                            registrations: {
-                                include: { registrant: true }
-                            }
-                        }
-                    }
+                    event: true
                 }
             }
         }
@@ -32,18 +26,33 @@ export default async function UniversityAnalyticsPage() {
 
     if (!university) return <div>University not found</div>;
 
+    // Fetch valid scanned leads
+    const whereClause: any = {
+        universityId: universityId
+    };
+
+    if (session.user.role !== "ADMIN") {
+        whereClause.scannedById = session.user.id;
+    }
+
+    const boothVisits = await prisma.boothVisit.findMany({
+        where: whereClause,
+        include: {
+            registration: {
+                include: { registrant: true }
+            }
+        }
+    });
+
     // Calculate Stats
     const acceptedEvents = university.events.filter(e => e.status === "ACCEPTED" || e.status === "INVITED");
     const pendingEvents = university.events.filter(e => e.status === "REQUESTED");
     
-    const totalLeads = acceptedEvents.reduce((acc, participation) => {
-        return acc + (participation.event.registrations?.length || 0);
-    }, 0);
-
+    const totalLeads = boothVisits.length;
     const averageLeadsPerEvent = acceptedEvents.length > 0 ? Math.round(totalLeads / acceptedEvents.length) : 0;
 
     // Aggregate Data for Charts
-    const allRegistrations = acceptedEvents.flatMap(p => p.event.registrations);
+    const allRegistrations = boothVisits.map(visit => visit.registration);
 
     // Leads Over Time (Daily)
     const leadsByDate = allRegistrations.reduce((acc, reg) => {
@@ -102,13 +111,13 @@ export default async function UniversityAnalyticsPage() {
 
     // Recent Events
     const recentEvents = acceptedEvents
-        .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+        .sort((a, b) => new Date(b.event.startDateTime).getTime() - new Date(a.event.startDateTime).getTime())
         .slice(0, 5)
         .map(p => ({
-            id: p.id,
+            id: p.event.id,
             title: p.event.title,
             createdAt: p.createdAt,
-            leadsCount: p.event.registrations?.length || 0
+            leadsCount: boothVisits.filter(v => v.eventId === p.event.id).length
         }));
 
     return (
