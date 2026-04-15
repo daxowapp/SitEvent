@@ -2,6 +2,8 @@
 
 All notable changes to this project will be documented in this file.
 
+2026-04-15 - Lead Scanner Rewrite - Rebuilt university lead scanner for speed: continuous scanning (camera stays active), jsQR cross-platform library, audio/haptic feedback, duplicate prevention with cooldown, mobile-first compact UI, persistent lead capture via booth-scan API.
+
 2026-04-15 - Supabase Storage Fix - Fixed Supabase client crash on production (supabaseKey is required) by adding fallback to NEXT_PUBLIC_SUPABASE_ANON_KEY env var. Created storage buckets (events-media, universities, university-media, university) and configured RLS policies for public uploads.
 
 2026-04-14 - TikTok Pixel Integration - Added TikTok tracking pixel to the main localized layout for analytics tracking.
