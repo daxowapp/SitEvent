@@ -59,7 +59,7 @@ export async function processBoothScan(
             silverThreshold: true,
             goldThreshold: true,
             universities: {
-              where: { status: "ACCEPTED" },
+              where: { status: { in: ["ACCEPTED", "INVITED", "REQUESTED"] } },
               select: { universityId: true },
             },
           },
