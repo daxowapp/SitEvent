@@ -12,7 +12,7 @@ const Footer = () => {
         <footer id="contact" className="bg-foreground text-background">
             {/* Main Footer */}
             <div className="container mx-auto px-4 py-16">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10">
                     {/* Brand */}
                     <div className="lg:col-span-1">
                         <a href="/" className="inline-block mb-2">
@@ -100,6 +100,28 @@ const Footer = () => {
                             <li>
                                 <a href="/gdpr" className="text-background/70 hover:text-accent transition-colors text-sm">
                                     {t('legalLinks.gdpr')}
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+
+                    {/* Portals */}
+                    <div>
+                        <h4 className="font-semibold text-lg mb-4">Portals</h4>
+                        <ul className="space-y-3">
+                            <li>
+                                <a href="/scan-login" className="text-background/70 hover:text-accent transition-colors text-sm">
+                                    Fast Login (Scanner)
+                                </a>
+                            </li>
+                            <li>
+                                <a href="/admin/login" className="text-background/70 hover:text-accent transition-colors text-sm">
+                                    Event Member Login
+                                </a>
+                            </li>
+                            <li>
+                                <a href="/university/login" className="text-background/70 hover:text-accent transition-colors text-sm">
+                                    Universities Login
                                 </a>
                             </li>
                         </ul>
