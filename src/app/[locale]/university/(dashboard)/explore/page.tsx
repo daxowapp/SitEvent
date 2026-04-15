@@ -13,6 +13,11 @@ export default async function ExploreEventsPage() {
         redirect("/university/login");
     }
 
+    // RBAC: Only ADMINs can access this page
+    if (session.user.role !== "ADMIN") {
+        redirect("/university/dashboard");
+    }
+
     const universityId = session.user.universityId;
 
     // Get IDs of events already participating/requested

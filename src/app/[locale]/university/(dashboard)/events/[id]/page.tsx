@@ -46,6 +46,11 @@ export default async function UniversityEventPage({ params }: { params: Promise<
         redirect("/university/login");
     }
 
+    // RBAC: Only ADMINs can access this page
+    if (session.user.role !== "ADMIN") {
+        redirect("/university/dashboard");
+    }
+
     const event = await prisma.event.findUnique({
         where: { id },
         include: {
@@ -73,13 +78,38 @@ export default async function UniversityEventPage({ params }: { params: Promise<
     const isPending = status === "REQUESTED";
 
     // Fetch Registrants (only if accepted)
-    const registrations = isAccepted ? await prisma.registration.findMany({
-        where: { eventId: id },
-        include: {
-            registrant: true
-        },
-        orderBy: { createdAt: 'desc' }
-    }) : [];
+    // Strict Access Control: 
+    // - ADMINs see all students who visited this university's booth at this event
+    // - MEMBERs only see students they personally scanned at this event
+    let registrations: any[] = [];
+    if (isAccepted) {
+        const whereClause: any = {
+            eventId: id,
+            universityId: session.user.universityId
+        };
+
+        if (session.user.role !== "ADMIN") {
+            whereClause.scannedById = session.user.id;
+        }
+
+        const boothVisits = await prisma.boothVisit.findMany({
+            where: whereClause,
+            include: {
+                registration: {
+                    include: {
+                        registrant: true
+                    }
+                }
+            },
+            orderBy: { createdAt: 'desc' }
+        });
+
+        // Map it back to the expected array shape (Array of mapped objects mimicking Registration)
+        registrations = boothVisits.map(visit => ({
+            id: visit.id,
+            registrant: visit.registration.registrant
+        }));
+    }
 
     // Process City Data
     const attractions = (event.cityRef?.attractions as unknown as Attraction[]) || [];

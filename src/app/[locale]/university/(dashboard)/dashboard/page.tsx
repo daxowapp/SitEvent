@@ -11,6 +11,11 @@ export default async function UniversityDashboard() {
         redirect("/university/login");
     }
 
+    // Role check: Normal members should just be pushed to their scanner
+    if (session.user.role !== "ADMIN") {
+        redirect("/university/scanner");
+    }
+
     const universityId = session.user.universityId;
 
     // Fetch university data to get name and accepted events
