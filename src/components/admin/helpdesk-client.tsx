@@ -401,6 +401,7 @@ export function HelpDeskClient() {
       )}
 
       {/* Student Info & Redemption */}
+      {studentInfo && tier && (
         <div className="space-y-6 animate-fade-up pb-10">
           {/* Student Info Card */}
           <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm relative overflow-hidden">
