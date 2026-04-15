@@ -343,3 +343,105 @@ export async function sendUniversityAccessRequestEmail(
     return { success: false, error: error instanceof Error ? error.message : "Unknown error" };
   }
 }
+
+interface SendBrochuresParams {
+  to: string;
+  studentName: string;
+  universityName: string;
+  files: {
+    label: string;
+    fileUrl: string;
+  }[];
+}
+
+/**
+ * Send university brochures to a student via email
+ */
+export async function sendBrochuresEmail(
+  params: SendBrochuresParams
+): Promise<{ success: boolean; messageId?: string; error?: string }> {
+  try {
+    const { to, studentName, universityName, files } = params;
+
+    const filesHtml = files
+      .map(
+        (f) => `
+      <div style="margin-bottom: 12px;">
+        <a href="${f.fileUrl}" target="_blank" style="display: inline-block; background-color: #f1f5f9; color: #334155; padding: 12px 16px; text-decoration: none; border-radius: 8px; font-weight: 500; font-size: 14px; width: 100%; border: 1px solid #e2e8f0;">
+          📄 ${f.label}
+        </a>
+      </div>
+    `
+      )
+      .join("");
+
+    const { data, error } = await resend.emails.send({
+      from: process.env.RESEND_FROM_EMAIL || "Events Team <onboarding@resend.dev>",
+      to,
+      subject: `Your Brochures from ${universityName}`,
+      html: `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        </head>
+        <body style="font-family: 'Helvetica Neue', Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f4f6f8; color: #333;">
+          
+          <div style="background-color: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
+            <!-- Header -->
+            <div style="background: linear-gradient(135deg, #E30A17 0%, #B30000 100%); padding: 32px 24px; text-align: center;">
+              <h1 style="color: white; margin: 0; font-size: 24px; font-weight: 700;">University Materials</h1>
+              <p style="color: rgba(255,255,255,0.9); margin-top: 8px; font-size: 16px;">From ${universityName}</p>
+            </div>
+            
+            <div style="padding: 32px 24px;">
+              <p style="font-size: 16px; margin-bottom: 24px;">Hi <strong>${studentName}</strong>,</p>
+              
+              <p style="font-size: 16px; line-height: 1.5; margin-bottom: 24px;">
+                Thanks for visiting the <strong>${universityName}</strong> booth! As requested, here are the official brochures and materials for you to explore:
+              </p>
+              
+              <!-- Materials List -->
+              <div style="margin-bottom: 32px;">
+                ${filesHtml}
+              </div>
+              
+              <!-- Pro Tip -->
+              <div style="background-color: #fefce8; padding: 16px 20px; border-radius: 8px; margin-bottom: 24px;">
+                <p style="margin: 0; color: #854d0e; font-size: 14px; line-height: 1.5;">
+                  💡 <strong>Tip:</strong> These files are also permanently available on your Student Entry Pass under "Brochures & Catalogs".
+                </p>
+              </div>
+
+              <p style="text-align: center; color: #94a3b8; font-size: 14px; margin-top: 40px; margin-bottom: 0;">
+                Best of luck with your studies! <br>The SitConnect Team
+              </p>
+            </div>
+          </div>
+          
+          <div style="text-align: center; margin-top: 24px;">
+             <p style="color: #94a3b8; font-size: 12px;">© 2026 SitConnect Events. All rights reserved.</p>
+          </div>
+        </body>
+        </html>
+      `,
+    });
+
+    if (error) {
+      console.error("Resend error:", error);
+      throw new Error(error.message);
+    }
+
+    return {
+      success: true,
+      messageId: data?.id,
+    };
+  } catch (error) {
+    console.error("Failed to send brochures email:", error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Unknown error",
+    };
+  }
+}

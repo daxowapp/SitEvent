@@ -88,7 +88,7 @@ export function GlobalLeadsTable({ data }: GlobalLeadsTableProps) {
 
     const downloadCSV = () => {
         const csvContent = [
-            [t('table.sourceEvent'), t('table.status'), t('table.student'), 'Gender', t('table.contact'), 'Phone', 'Country', 'City', 'Major (Std)', t('table.interest'), 'Category', 'Level'],
+            [t('table.sourceEvent'), t('table.status'), t('table.student'), 'Gender', t('table.contact'), 'Phone', 'Country', 'City', 'Major (Std)', t('table.interest'), 'Category', 'Level', 'Points Awarded', 'Notes'],
             ...filteredData.map(item => [
                 `"${item.event.title}"`,
                 format(new Date(item.createdAt), "yyyy-MM-dd"),
@@ -102,7 +102,9 @@ export function GlobalLeadsTable({ data }: GlobalLeadsTableProps) {
                 `"${item.registrant.standardizedMajor || ''}"`,
                 `"${item.registrant.interestedMajor || ''}"`,
                 `"${item.registrant.majorCategory || ''}"`,
-                item.registrant.levelOfStudy || ''
+                item.registrant.levelOfStudy || '',
+                item.pointsAwarded || 0,
+                `"${item.note || ''}"`
             ])
         ].map(e => e.join(",")).join("\n");
 

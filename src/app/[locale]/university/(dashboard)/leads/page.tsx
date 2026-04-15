@@ -13,21 +13,18 @@ export default async function UniversityLeadsPage() {
 
     const universityId = session.user.universityId;
 
-    // Fetch All Registrants for Assigned Events
-    // Strict Access Control: Only fetch registrations where the event has this university assigned
-    const leads = await prisma.registration.findMany({
+    // Fetch Scanned Leads (Booth Visits)
+    // Strict Access Control: Only fetch students who actually visited this university's booth
+    const boothVisits = await prisma.boothVisit.findMany({
         where: {
-            event: {
-                universities: {
-                    some: {
-                        universityId: universityId,
-                        status: { in: ["ACCEPTED", "INVITED"] }
-                    }
-                }
-            }
+            universityId: universityId
         },
         include: {
-            registrant: true,
+            registration: {
+                include: {
+                    registrant: true,
+                }
+            },
             event: {
                 select: {
                     title: true,
@@ -39,6 +36,17 @@ export default async function UniversityLeadsPage() {
             createdAt: 'desc'
         }
     });
+
+    // Map `BoothVisit` shape to match what the `GlobalLeadsTable` expects
+    const leads = boothVisits.map(visit => ({
+        id: visit.id,
+        status: visit.registration.status,
+        createdAt: visit.createdAt, // The time of the SCAN
+        event: visit.event,
+        registrant: visit.registration.registrant,
+        pointsAwarded: visit.pointsAwarded,
+        note: visit.note
+    }));
 
     return (
         <div className="space-y-6">

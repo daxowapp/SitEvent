@@ -7,7 +7,7 @@
 
 import { prisma } from "@/lib/db";
 import { getRedPointsSummary } from "@/lib/red-points";
-import { sendConfirmationEmail } from "@/lib/email";
+import { sendConfirmationEmail, sendBrochuresEmail } from "@/lib/email";
 
 interface BoothScanResult {
   success: boolean;
@@ -179,9 +179,13 @@ export async function processBoothScan(
     }
 
     // Get university files count
-    const filesCount = await prisma.universityFile.count({
+    // Get university files count and files themselves
+    const files = await prisma.universityFile.findMany({
       where: { universityId, isActive: true },
+      select: { label: true, fileUrl: true }
     });
+    const filesCount = files.length;
+
 
     // Create booth visit + points in a transaction
     const boothVisit = await prisma.boothVisit.create({
@@ -207,6 +211,27 @@ export async function processBoothScan(
           referenceId: boothVisit.id,
           description: entry.description,
         })),
+      });
+    }
+
+    // Identify university name for the email
+    let uniName = "the University";
+    const uniInfo = await prisma.university.findUnique({
+      where: { id: universityId },
+      select: { name: true }
+    });
+    if (uniInfo) uniName = uniInfo.name;
+
+    // Asynchronously send brochures via email if any exist
+    if (files.length > 0) {
+      // Intentionally not awaiting to avoid blocking UI during fast scanning
+      sendBrochuresEmail({
+        to: registration.registrant.email,
+        studentName: registration.registrant.fullName,
+        universityName: uniName,
+        files: files.map(f => ({ label: f.label, fileUrl: f.fileUrl }))
+      }).catch(err => {
+        console.error("Failed to send async brochures email in boothScan:", err);
       });
     }
 
