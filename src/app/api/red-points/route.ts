@@ -44,19 +44,7 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    if (!registration.event.redPointsEnabled) {
-      return NextResponse.json({
-        enabled: false,
-        message: "Red Points are not enabled for this event",
-      });
-    }
-
-    const summary = await getRedPointsSummary(
-      registration.eventId,
-      registration.id
-    );
-
-    // Get visited university details
+    // Always fetch booth visits and files (even if Red Points is disabled)
     const visitedBooths = await prisma.boothVisit.findMany({
       where: {
         eventId: registration.eventId,
@@ -74,7 +62,7 @@ export async function GET(request: NextRequest) {
       orderBy: { createdAt: "desc" },
     });
 
-    // Get files received from visited universities
+    // Get files from all visited universities
     const universityIds = visitedBooths.map((v) => v.universityId);
     const receivedFiles = await prisma.universityFile.findMany({
       where: {
@@ -98,17 +86,44 @@ export async function GET(request: NextRequest) {
       },
     });
 
+    const formattedBooths = visitedBooths.map((v) => ({
+      universityId: v.universityId,
+      universityName: v.university.name,
+      universityLogo: v.university.logoUrl,
+      pointsAwarded: v.pointsAwarded,
+      visitedAt: v.createdAt,
+    }));
+
+    // If Red Points not enabled, return minimal data (but still include booths + files)
+    if (!registration.event.redPointsEnabled) {
+      return NextResponse.json({
+        enabled: false,
+        eventTitle: registration.event.title,
+        totalPoints: 0,
+        boothsVisited: visitedBooths.length,
+        totalBooths: 0,
+        currentTier: "NONE",
+        nextTier: null,
+        pointsToNextTier: 0,
+        progress: 0,
+        hasCompletionBonus: false,
+        giftRedeemed: false,
+        redeemedTier: null,
+        visitedBooths: formattedBooths,
+        receivedFiles,
+      });
+    }
+
+    const summary = await getRedPointsSummary(
+      registration.eventId,
+      registration.id
+    );
+
     return NextResponse.json({
       enabled: true,
       eventTitle: registration.event.title,
       ...summary,
-      visitedBooths: visitedBooths.map((v) => ({
-        universityId: v.universityId,
-        universityName: v.university.name,
-        universityLogo: v.university.logoUrl,
-        pointsAwarded: v.pointsAwarded,
-        visitedAt: v.createdAt,
-      })),
+      visitedBooths: formattedBooths,
       receivedFiles,
     });
   } catch (error) {
@@ -119,3 +134,4 @@ export async function GET(request: NextRequest) {
     );
   }
 }
+

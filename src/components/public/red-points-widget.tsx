@@ -103,7 +103,7 @@ export function RedPointsWidget({ qrToken }: Props) {
   const [data, setData] = useState<RedPointsData | null>(null);
   const [loading, setLoading] = useState(true);
   const [showBooths, setShowBooths] = useState(false);
-  const [showFiles, setShowFiles] = useState(false);
+  const [showFiles, setShowFiles] = useState(true);
 
   useEffect(() => {
     async function fetchData() {
@@ -137,15 +137,21 @@ export function RedPointsWidget({ qrToken }: Props) {
     );
   }
 
-  if (!data || !data.enabled) {
-    return null; // Don't show if Red Points not enabled
+  if (!data) {
+    return null;
+  }
+
+  // If no booth visits and no files, nothing to show
+  if (!data.enabled && (!data.visitedBooths || data.visitedBooths.length === 0) && (!data.receivedFiles || data.receivedFiles.length === 0)) {
+    return null;
   }
 
   const tier = tierConfig[data.currentTier as keyof typeof tierConfig] || tierConfig.NONE;
 
   return (
     <div className="space-y-4">
-      {/* Main Points Card */}
+      {/* Main Points Card — only when Red Points enabled */}
+      {data.enabled && (
       <Card className={`${tier.border} overflow-hidden`}>
         {/* Points Header */}
         <div className="bg-gradient-to-r from-red-600 to-red-700 p-5 text-white">
@@ -225,6 +231,7 @@ export function RedPointsWidget({ qrToken }: Props) {
           ) : null}
         </CardContent>
       </Card>
+      )}
 
       {/* Visited Booths List */}
       {data.visitedBooths.length > 0 && (
