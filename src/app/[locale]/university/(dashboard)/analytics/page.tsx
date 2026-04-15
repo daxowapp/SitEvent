@@ -10,6 +10,11 @@ export default async function UniversityAnalyticsPage() {
         redirect("/university/login");
     }
 
+    // RBAC: Only ADMINs can access this page
+    if (session.user.role !== "ADMIN") {
+        redirect("/university/dashboard");
+    }
+
     const universityId = session.user.universityId;
 
     // Fetch University Data with Events

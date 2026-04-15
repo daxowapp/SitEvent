@@ -3,17 +3,14 @@ import { prisma } from "@/lib/db";
 import { redirect } from "next/navigation";
 import { DashboardClient } from "@/components/university/dashboard-client";
 
+import { MemberDashboardClient } from "@/components/university/member-dashboard-client";
+
 export default async function UniversityDashboard() {
     const session = await auth();
 
     // Double check auth (layout handles it but good for safety)
     if (!session || session.user.type !== "UNIVERSITY" || !session.user.universityId) {
         redirect("/university/login");
-    }
-
-    // Role check: Normal members should just be pushed to their scanner
-    if (session.user.role !== "ADMIN") {
-        redirect("/university/scanner");
     }
 
     const universityId = session.user.universityId;
@@ -30,6 +27,19 @@ export default async function UniversityDashboard() {
 
     if (!university) return <div>University not found</div>;
 
+    // --- MEMBER DASHBOARD ---
+    if (session.user.role !== "ADMIN") {
+        const totalScannedByMe = await prisma.boothVisit.count({
+            where: {
+                scannedById: session.user.id,
+                universityId: session.user.universityId
+            }
+        });
+        
+        return <MemberDashboardClient universityName={university.name} totalScanned={totalScannedByMe} />;
+    }
+
+    // --- ADMIN DASHBOARD ---
     // Fetch ALL upcoming published events
     const allUpcomingEvents = await prisma.event.findMany({
         where: {
