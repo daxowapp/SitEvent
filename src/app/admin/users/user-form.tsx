@@ -166,11 +166,11 @@ export function UserForm({ user, onSuccess }: UserFormProps) {
                     name="accessCode"
                     render={({ field }) => (
                         <FormItem>
-                            <FormLabel>Access Code (PIN for Usher Login)</FormLabel>
+                            <FormLabel>Access Code (Fast Login PIN)</FormLabel>
                             <FormControl>
                                 <Input placeholder="e.g. 123456" {...field} />
                             </FormControl>
-                            <p className="text-xs text-muted-foreground">Used for ushers to login via PIN at the scanner page</p>
+                            <p className="text-xs text-muted-foreground">Allows this user to login instantly via PIN at the scanner page</p>
                             <FormMessage />
                         </FormItem>
                     )}
