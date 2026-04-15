@@ -60,14 +60,14 @@ export default async function UniversityLeadsPage() {
         <div className="space-y-6">
             <div className="flex justify-between items-end border-b pb-6">
                 <div>
-                    <h1 className="text-3xl font-bold font-display text-gray-900 tracking-tight">Global Lead Database</h1>
+                    <h1 className="text-3xl font-bold font-display text-gray-900 tracking-tight">Scanned Students</h1>
                     <p className="text-gray-500 mt-2 flex items-center gap-2">
                         <Users className="h-4 w-4" />
-                        Consolidated list of students from all your assigned events.
+                        Students scanned by your team at university booths.
                     </p>
                 </div>
                 <div className="bg-red-50 px-4 py-2 rounded-lg border border-red-100">
-                    <span className="block text-xs text-red-600 uppercase font-bold tracking-wider">Total Leads</span>
+                    <span className="block text-xs text-red-600 uppercase font-bold tracking-wider">Total Scanned</span>
                     <span className="block text-2xl font-bold text-red-700">{leads.length}</span>
                 </div>
             </div>

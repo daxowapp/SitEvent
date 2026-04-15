@@ -36,7 +36,6 @@ const getNavItems = (role?: string | null) => {
     items.push(
         { key: "analytics", href: "/university/analytics", icon: BarChart3 },
         { key: "globalLeads", href: "/university/leads", icon: Users },
-        { key: "leadScanner", href: "/university/scan", icon: QrCode },
         { key: "files", href: "/university/files", icon: FileText },
         { key: "boothScanner", href: "/university/scanner", icon: Camera }
     );

@@ -586,10 +586,10 @@
         "overview": "Overview",
         "myEvents": "My Events",
         "analytics": "Analytics",
-        "globalLeads": "Global Leads",
+        "globalLeads": "Scanned Students",
         "leadScanner": "Lead Scanner",
         "files": "Files & Brochures",
-        "boothScanner": "Booth Scanner",
+        "boothScanner": "Scanner",
         "eventMarket": "Event Market",
         "team": "Team"
       }
