@@ -8,10 +8,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
-import { ArrowLeft, Save, Loader2, Plus, X, Lock, FileUp, Trash2, FileText, Image as ImageIcon, Video, File, Download } from "lucide-react";
+import { ArrowLeft, Save, Loader2, Plus, X, Lock, FileUp, Trash2, FileText, Image as ImageIcon, Video, File, Download, Shield, ShieldHalf } from "lucide-react";
 import Link from "next/link";
-import { createUniversity, updateUniversity, deleteUniversity, generateUniversityData, getUniversityUser, createOrUpdateUniversityUser } from "./actions";
+import { createUniversity, updateUniversity, deleteUniversity, generateUniversityData, getAllUniversityUsers, createOrUpdateUniversityUser, deleteUniversityUser } from "./actions";
 import { ALL_COUNTRIES } from "@/lib/constants/countries";
+import { Badge } from "@/components/ui/badge";
 import { AlertTriangle, Sparkles } from "lucide-react";
 import {
     AlertDialog,
@@ -138,12 +139,28 @@ export function UniversityForm({ university, countries = [] }: UniversityFormPro
         }
     };
 
-    // Credential Management State
-    const [credData, setCredData] = useState({ email: "", password: "" });
-    const [hasUser, setHasUser] = useState(false);
+    // Team Management State
+    const [teamMembers, setTeamMembers] = useState<any[]>([]);
+    const [isLoadingTeam, setIsLoadingTeam] = useState(false);
     const [isSavingCreds, setIsSavingCreds] = useState(false);
+    
+    // New Member Form State
+    const [credData, setCredData] = useState({ email: "", password: "", role: "ADMIN" });
+    const [editingUserId, setEditingUserId] = useState<string | null>(null);
 
-    // File Management State
+    const loadTeam = async () => {
+        if (university?.id) {
+            setIsLoadingTeam(true);
+            try {
+                const members = await getAllUniversityUsers(university.id);
+                setTeamMembers(members);
+            } catch (error) {
+                console.error("Failed to load team:", error);
+            } finally {
+                setIsLoadingTeam(false);
+            }
+        }
+    };
     const [files, setFiles] = useState<any[]>([]);
     const [isUploadingFile, setIsUploadingFile] = useState(false);
     const [fileLabel, setFileLabel] = useState("");
@@ -240,34 +257,44 @@ export function UniversityForm({ university, countries = [] }: UniversityFormPro
 
     // Fetch existing user credentials
     useEffect(() => {
-        if (university?.id) {
-            getUniversityUser(university.id).then(user => {
-                if (user) {
-                    setCredData(prev => ({ ...prev, email: user.email }));
-                    setHasUser(true);
-                } else if (university.contactEmail) {
-                    setCredData(prev => ({ ...prev, email: university.contactEmail || "" }));
-                }
-            });
-        }
+        loadTeam();
     }, [university]);
 
     const handleSaveCredentials = async () => {
         if (!university) return;
         if (!credData.email) return toast.error("Email is required for login");
-        if (!hasUser && !credData.password) return toast.error("Password is required for new user");
+        if (!editingUserId && !credData.password) return toast.error("Password is required for new users");
 
         setIsSavingCreds(true);
         try {
-            await createOrUpdateUniversityUser(university.id, credData.email, credData.password);
-            toast.success(`User ${hasUser ? 'updated' : 'created'}! Password set.`);
-            setHasUser(true);
-            setCredData(prev => ({ ...prev, password: "" }));
-        } catch (e) {
-            toast.error("Failed to save credentials");
+            await createOrUpdateUniversityUser(university.id, credData.email, credData.role, credData.password, editingUserId || undefined);
+            toast.success(`User ${editingUserId ? 'updated' : 'created'} successfully!`);
+            
+            // Reset form and reload
+            setCredData({ email: "", password: "", role: "ADMIN" });
+            setEditingUserId(null);
+            loadTeam();
+        } catch (e: any) {
+            toast.error(e.message || "Failed to save credentials");
         } finally {
             setIsSavingCreds(false);
         }
+    };
+
+    const handleDeleteUser = async (userId: string) => {
+        if (!university) return;
+        try {
+            await deleteUniversityUser(userId, university.id);
+            toast.success("User deleted");
+            loadTeam();
+        } catch (error) {
+            toast.error("Failed to delete user");
+        }
+    };
+
+    const editUser = (user: any) => {
+        setCredData({ email: user.email, password: "", role: user.role });
+        setEditingUserId(user.id);
     };
 
     // Fetch cities when country changes
@@ -481,62 +508,133 @@ export function UniversityForm({ university, countries = [] }: UniversityFormPro
                 <Card>
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2">
-                            <Lock className="h-5 w-5 text-muted-foreground" />
-                            Portal Access
+                            <Shield className="h-5 w-5 text-muted-foreground" />
+                            University Team Accounts
                         </CardTitle>
-                        <CardDescription>Manage login credentials for the university portal</CardDescription>
+                        <CardDescription>Manage global access credentials for this university</CardDescription>
                     </CardHeader>
-                    <CardContent className="space-y-4">
-                        <div className="grid gap-4 md:grid-cols-2 items-start">
-                            <div className="space-y-2">
-                                <Label htmlFor="portalEmail">Login Email</Label>
-                                <Input
-                                    id="portalEmail"
-                                    type="email"
-                                    placeholder="user@university.edu"
-                                    value={credData.email}
-                                    onChange={(e) => setCredData({ ...credData, email: e.target.value })}
-                                />
+                    <CardContent className="space-y-6">
+                        {!university ? (
+                            <div className="text-center py-4 bg-muted/50 rounded-lg border border-dashed">
+                                <p className="text-sm text-muted-foreground">Save the university profile first to manage team accounts.</p>
                             </div>
-                            <div className="space-y-2">
-                                <Label htmlFor="portalPassword">Set Password</Label>
-                                <Input
-                                    id="portalPassword"
-                                    type="text"
-                                    placeholder={hasUser ? "Enter to reset (leave blank to keep)" : "Required for new user"}
-                                    value={credData.password}
-                                    onChange={(e) => setCredData({ ...credData, password: e.target.value })}
-                                />
-                            </div>
-                        </div>
-                        <div className="flex justify-between items-center">
-                            <div>
-                                {!university && (
-                                    <span className="text-xs text-amber-600 bg-amber-50 px-2 py-1 rounded border border-amber-200">
-                                        ⚠️ Save university first to create login.
-                                    </span>
-                                )}
-                                {hasUser && (
-                                    <span className="text-xs text-emerald-600 bg-emerald-50 px-2 py-1 rounded border border-emerald-200">
-                                        ✅ Active User Exists
-                                    </span>
-                                )}
-                            </div>
-                            <Button
-                                type="button"
-                                onClick={handleSaveCredentials}
-                                disabled={isSavingCreds || !university}
-                                variant="outline"
-                                className="border-gray-200 hover:bg-gray-50"
-                            >
-                                {isSavingCreds ? (
-                                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                                ) : (
-                                    <Save className="h-4 w-4 mr-2" />
-                                )}
-                                {hasUser ? "Update Credentials" : "Create Login"}
-                            </Button>
-                        </div>
+                        ) : (
+                            <>
+                                {/* Existing Team List */}
+                                <div className="space-y-3">
+                                    <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">Active Members</h3>
+                                    {isLoadingTeam ? (
+                                        <div className="flex items-center justify-center py-4">
+                                            <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+                                        </div>
+                                    ) : teamMembers.length === 0 ? (
+                                        <div className="text-sm text-muted-foreground text-center py-4 bg-gray-50 rounded-md border border-dashed">
+                                            No team members assigned yet.
+                                        </div>
+                                    ) : (
+                                        <div className="border rounded-md divide-y overflow-hidden">
+                                            {teamMembers.map((member) => (
+                                                <div key={member.id} className="flex flex-col sm:flex-row sm:items-center justify-between p-3 gap-3 bg-white hover:bg-gray-50 transition-colors">
+                                                    <div>
+                                                        <div className="flex items-center gap-2">
+                                                            <p className="font-medium text-sm">{member.name}</p>
+                                                            <Badge variant={member.role === "ADMIN" ? "default" : "secondary"} className="text-[10px] uppercase h-5">
+                                                                {member.role === "ADMIN" ? <Shield className="h-3 w-3 mr-1" /> : <ShieldHalf className="h-3 w-3 mr-1" />}
+                                                                {member.role === "ADMIN" ? "Admin" : "Member"}
+                                                            </Badge>
+                                                        </div>
+                                                        <p className="text-xs text-muted-foreground">{member.email}</p>
+                                                    </div>
+                                                    <div className="flex items-center gap-2">
+                                                        <Button type="button" variant="outline" size="sm" onClick={() => editUser(member)} className="h-8">
+                                                            Edit
+                                                        </Button>
+                                                        <Button type="button" variant="ghost" size="icon" onClick={() => handleDeleteUser(member.id)} className="h-8 w-8 text-destructive hover:bg-destructive/10">
+                                                            <Trash2 className="h-4 w-4" />
+                                                        </Button>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+
+                                <div className="border-t pt-4">
+                                    <h3 className="text-sm font-semibold mb-3 flex items-center gap-2">
+                                        <Plus className="h-4 w-4" /> 
+                                        {editingUserId ? "Edit Team Member" : "Add New Account"}
+                                    </h3>
+                                    <div className="grid gap-4 md:grid-cols-[1fr_1fr_1fr_auto] items-end bg-gray-50/50 p-3 rounded-lg border">
+                                        <div className="space-y-1">
+                                            <Label htmlFor="portalEmail" className="text-xs">Login Email</Label>
+                                            <Input
+                                                id="portalEmail"
+                                                type="email"
+                                                className="h-9"
+                                                placeholder="user@university.edu"
+                                                value={credData.email}
+                                                onChange={(e) => setCredData({ ...credData, email: e.target.value })}
+                                            />
+                                        </div>
+                                        <div className="space-y-1">
+                                            <Label htmlFor="portalRole" className="text-xs">System Role</Label>
+                                            <select
+                                                id="portalRole"
+                                                value={credData.role}
+                                                onChange={(e) => setCredData({ ...credData, role: e.target.value })}
+                                                className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                                            >
+                                                <option value="ADMIN">University Admin</option>
+                                                <option value="MEMBER">Scanner Member</option>
+                                            </select>
+                                        </div>
+                                        <div className="space-y-1">
+                                            <Label htmlFor="portalPassword" className="text-xs">
+                                                {editingUserId ? "Reset Password" : "Set Password"}
+                                            </Label>
+                                            <Input
+                                                id="portalPassword"
+                                                type="text"
+                                                className="h-9"
+                                                placeholder={editingUserId ? "Leave blank to keep" : "Required pass"}
+                                                value={credData.password}
+                                                onChange={(e) => setCredData({ ...credData, password: e.target.value })}
+                                            />
+                                        </div>
+                                        <div className="flex gap-2">
+                                            {editingUserId && (
+                                                <Button 
+                                                    type="button" 
+                                                    variant="ghost" 
+                                                    onClick={() => {
+                                                        setEditingUserId(null); 
+                                                        setCredData({ email: "", password: "", role: "ADMIN" });
+                                                    }}
+                                                    className="h-9 text-muted-foreground"
+                                                >
+                                                    Cancel
+                                                </Button>
+                                            )}
+                                            <Button
+                                                type="button"
+                                                onClick={handleSaveCredentials}
+                                                disabled={isSavingCreds || !university}
+                                                variant="default"
+                                                className="h-9 min-w-[90px]"
+                                            >
+                                                {isSavingCreds ? (
+                                                    <Loader2 className="h-4 w-4 animate-spin" />
+                                                ) : editingUserId ? (
+                                                    "Update"
+                                                ) : (
+                                                    "Add"
+                                                )}
+                                            </Button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </>
+                        )}
                     </CardContent>
                 </Card>
 

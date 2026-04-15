@@ -42,10 +42,7 @@ interface UniversityFile {
   createdAt: Date;
 }
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL || "",
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ""
-);
+import { supabase } from "@/lib/supabase-client";
 
 const fileTypeIcons: Record<string, React.ReactNode> = {
   PDF: <FileText className="w-5 h-5 text-red-500" />,

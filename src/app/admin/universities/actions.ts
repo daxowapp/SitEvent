@@ -193,49 +193,64 @@ export async function generateUniversityData(name: string) {
 }
 
 // University User Management
-export async function getUniversityUser(universityId: string) {
-    return prisma.universityUser.findFirst({
+export async function getAllUniversityUsers(universityId: string) {
+    return prisma.universityUser.findMany({
         where: { universityId },
-        select: { email: true, name: true }
+        select: { id: true, email: true, name: true, role: true },
+        orderBy: { createdAt: 'asc' }
     });
 }
 
-export async function createOrUpdateUniversityUser(universityId: string, email: string, password?: string) {
+export async function createOrUpdateUniversityUser(universityId: string, email: string, role: string, password?: string, userId?: string) {
     const { hash } = await import("bcryptjs");
 
     const data: any = {
         email,
         universityId,
-        name: "University Representative", // Default name
+        role,
     };
 
     if (password) {
         data.passwordHash = await hash(password, 10);
     }
 
-    // Check if user exists for this university
-    const existingUser = await prisma.universityUser.findFirst({
-        where: { universityId }
-    });
-
-    if (existingUser) {
-        return prisma.universityUser.update({
-            where: { id: existingUser.id },
+    // If we have an explicit ID to update
+    if (userId) {
+        const updated = await prisma.universityUser.update({
+            where: { id: userId },
             data
         });
-    } else {
-        // Ensure email is unique across system if needed, but upsert handles id/unique constraints
-        // We use upsert on email to be safe if checking by email
-        return prisma.universityUser.upsert({
-            where: { email },
-            update: {
-                ...data,
-                universityId // Ensure linked
-            },
-            create: {
-                ...data,
-                passwordHash: data.passwordHash || "" // Should prompt for password if new
-            }
-        });
+        revalidatePath(`/admin/universities/${universityId}`);
+        return updated;
     }
+
+    // If no explicit ID, see if we are updating by email organically
+    const existingEmailMatch = await prisma.universityUser.findFirst({
+        where: { email }
+    });
+
+    if (existingEmailMatch) {
+        throw new Error("A user with this email already exists.");
+    }
+
+    // Create a brand new user
+    // We provide a default name that they can change later
+    const created = await prisma.universityUser.create({
+        data: {
+            ...data,
+            name: role === "ADMIN" ? "University Admin" : "Event Staff",
+            passwordHash: data.passwordHash || "" 
+        }
+    });
+
+    revalidatePath(`/admin/universities/${universityId}`);
+    return created;
 }
+
+export async function deleteUniversityUser(userId: string, universityId: string) {
+    await prisma.universityUser.delete({
+        where: { id: userId }
+    });
+    revalidatePath(`/admin/universities/${universityId}`);
+}
+
