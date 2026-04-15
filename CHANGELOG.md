@@ -440,3 +440,4 @@ All notable changes to this project will be documented in this file.
   2026-02-12 - UI Update - Updated application favicon to a new optimized "Sit Connect" symbol.
   2026-02-12 - Real-time Analytics - Added "Live Mode" to Admin Event Analytics dashboard, polling for updates every 15s.
 2026-04-15 - Removed Legacy Scanner & Renamed Global Leads - Simplified university dashboard sidebar by removing the duplicate legacy Lead Scanner, retaining only the new Booth Scanner, and renamed Global Leads to Scanned Students for clarity.
+2026-04-15 - Enforced University RBAC on Analytics & Event Details - Added strict role-based access control measures. A normal university member (MEMBER) now only sees leads they personally scanned. An ADMIN now only sees leads their institution specifically scanned at the event, thereby ensuring global registrant data is not leaked to unauthorized parties across the entire event analytics and details views.
