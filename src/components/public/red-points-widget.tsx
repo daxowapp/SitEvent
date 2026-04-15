@@ -122,8 +122,8 @@ export function RedPointsWidget({ qrToken }: Props) {
 
     fetchData();
 
-    // Refresh every 30 seconds (for live updates during event)
-    const interval = setInterval(fetchData, 30000);
+    // Refresh every 10 seconds (for real-time updates during event)
+    const interval = setInterval(fetchData, 10000);
     return () => clearInterval(interval);
   }, [qrToken]);
 

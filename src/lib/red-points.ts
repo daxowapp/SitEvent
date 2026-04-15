@@ -40,7 +40,7 @@ export async function getRedPointsSummary(
       goldThreshold: true,
       universities: {
         where: {
-          status: "ACCEPTED",
+          status: { in: ["ACCEPTED", "INVITED", "REQUESTED"] },
         },
         select: { universityId: true },
       },
