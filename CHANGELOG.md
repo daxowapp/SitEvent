@@ -2,6 +2,8 @@
 
 All notable changes to this project will be documented in this file.
 
+2026-04-15 - University Tier RBAC & Team Management - Implemented Role-Based Access Control (`ADMIN` vs `MEMBER`) for university portals. Added Team Management dashboard to provision scanner reps. Enforced data isolation so `MEMBER` users only view leads they physically scanned at the booth.
+
 2026-04-15 - Lead Scanner Automation & Sync - Fixed scanner count resetting on refresh by caching metrics via API. Strictly scoped University Global Leads Dashboard to physical visits. Automated delivery of university brochures via explicit email trigger upon lead capture.
 
 2026-04-15 - Lead Scanner Rewrite - Rebuilt university lead scanner for speed: continuous scanning (camera stays active), jsQR cross-platform library, audio/haptic feedback, duplicate prevention with cooldown, mobile-first compact UI, persistent lead capture via booth-scan API.

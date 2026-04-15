@@ -12,6 +12,10 @@ export async function requestEventAccess(eventId: string) {
         return { success: false, error: "Unauthorized" };
     }
 
+    if (session.user.role !== "ADMIN") {
+        return { success: false, error: "Unauthorized. Only University Admins can request event access." };
+    }
+
 
 
     try {

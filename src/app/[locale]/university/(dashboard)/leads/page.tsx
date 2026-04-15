@@ -14,11 +14,19 @@ export default async function UniversityLeadsPage() {
     const universityId = session.user.universityId;
 
     // Fetch Scanned Leads (Booth Visits)
-    // Strict Access Control: Only fetch students who actually visited this university's booth
+    // Strict Access Control: 
+    // - ADMINs see all students who visited this university's booth
+    // - MEMBERs only see students they personally scanned
+    const whereClause: any = {
+        universityId: universityId
+    };
+
+    if (session.user.role !== "ADMIN") {
+        whereClause.scannedById = session.user.id;
+    }
+
     const boothVisits = await prisma.boothVisit.findMany({
-        where: {
-            universityId: universityId
-        },
+        where: whereClause,
         include: {
             registration: {
                 include: {

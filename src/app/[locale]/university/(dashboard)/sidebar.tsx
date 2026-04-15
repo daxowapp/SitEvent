@@ -24,16 +24,30 @@ import {
 import { useTranslations } from "next-intl";
 import { LanguageSwitcher } from "@/components/public/language-switcher";
 
-const navItems = [
-    { key: "overview", href: "/university/dashboard", icon: LayoutDashboard },
-    { key: "myEvents", href: "/university/events", icon: Calendar },
-    { key: "analytics", href: "/university/analytics", icon: BarChart3 },
-    { key: "globalLeads", href: "/university/leads", icon: Users },
-    { key: "leadScanner", href: "/university/scan", icon: QrCode },
-    { key: "files", href: "/university/files", icon: FileText },
-    { key: "boothScanner", href: "/university/scanner", icon: Camera },
-    { key: "eventMarket", href: "/university/explore", icon: Search },
-];
+const getNavItems = (role?: string | null) => {
+    const items = [
+        { key: "overview", href: "/university/dashboard", icon: LayoutDashboard },
+    ];
+
+    if (role === "ADMIN") {
+        items.push({ key: "myEvents", href: "/university/events", icon: Calendar });
+    }
+
+    items.push(
+        { key: "analytics", href: "/university/analytics", icon: BarChart3 },
+        { key: "globalLeads", href: "/university/leads", icon: Users },
+        { key: "leadScanner", href: "/university/scan", icon: QrCode },
+        { key: "files", href: "/university/files", icon: FileText },
+        { key: "boothScanner", href: "/university/scanner", icon: Camera }
+    );
+
+    if (role === "ADMIN") {
+        items.push({ key: "eventMarket", href: "/university/explore", icon: Search });
+        items.push({ key: "team", href: "/university/team", icon: Users });
+    }
+
+    return items;
+};
 
 // Animation variants - using const assertions for proper TypeScript compatibility
 const sidebarVariants = {
@@ -80,6 +94,7 @@ interface User {
     email?: string | null;
     image?: string | null;
     name?: string | null;
+    role?: string | null;
 }
 
 function SidebarContent({ user }: { user: User }) {
@@ -124,7 +139,7 @@ function SidebarContent({ user }: { user: User }) {
 
             {/* Navigation */}
             <motion.div className="flex-1 px-4 py-8 space-y-1.5">
-                {navItems.map((item, index) => {
+                {getNavItems(user.role).map((item, index) => {
                     const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
                     const Icon = item.icon;
 

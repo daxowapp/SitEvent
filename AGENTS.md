@@ -279,6 +279,7 @@ SitEvent/
 | `RegistrationStatus` | `REGISTERED`, `CANCELLED` |
 | `CheckInMethod` | `QR`, `MANUAL` |
 | `AdminRole` | `SUPER_ADMIN`, `EVENT_MANAGER`, `EVENT_STAFF`, `USHER` |
+| `UniversityRole`| `ADMIN`, `MEMBER` |
 | `MessageChannel` | `EMAIL`, `WHATSAPP` |
 | `MessageStatus` | `QUEUED`, `SENT`, `FAILED` |
 | `ParticipationStatus` | `INVITED`, `ACCEPTED`, `DECLINED`, `REQUESTED` |
@@ -342,7 +343,8 @@ SitEvent/
 | `EVENT_MANAGER` | Event management, registrations, analytics |
 | `EVENT_STAFF` | Scanner access, limited admin |
 | `USHER` | Scanner access only (PIN login) |
-| `UNIVERSITY` | University portal only |
+| `UNIVERSITY (ADMIN)` | University dashboard, participate in events, view global booth leads, manage team roster. |
+| `UNIVERSITY (MEMBER)`| University scanner rep. Can only view leads that they personally scanned. |
 
 ### Authorization Helpers (`src/lib/role-check.ts`)
 - `requireRole(allowedRoles)` — Check specific roles

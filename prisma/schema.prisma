@@ -226,11 +226,17 @@ model University {
   updatedAt    DateTime @updatedAt
 }
 
+enum UniversityRole {
+  ADMIN
+  MEMBER
+}
+
 model UniversityUser {
   id           String     @id @default(cuid())
   email        String     @unique
   passwordHash String
   name         String?
+  role         UniversityRole @default(ADMIN)
   universityId String
   university   University @relation(fields: [universityId], references: [id], onDelete: Cascade)
   

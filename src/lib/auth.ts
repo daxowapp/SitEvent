@@ -92,7 +92,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                                 email: user.email,
                                 name: user.name,
                                 universityId: user.universityId,
-                                role: "UNIVERSITY",
+                                role: user.role, // "ADMIN" or "MEMBER" (from UniversityRole)
                                 type: "UNIVERSITY",
                             };
                         }

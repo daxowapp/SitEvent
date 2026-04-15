@@ -1,10 +1,10 @@
 import "next-auth";
-import { AdminRole } from "@prisma/client";
+import { AdminRole, UniversityRole } from "@prisma/client";
 
 declare module "next-auth" {
     interface User {
         id: string;
-        role: AdminRole | "UNIVERSITY";
+        role: AdminRole | UniversityRole | "UNIVERSITY";
         universityId?: string;
         type?: "ADMIN" | "UNIVERSITY";
     }
