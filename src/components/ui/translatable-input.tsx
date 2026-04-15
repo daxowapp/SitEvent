@@ -10,9 +10,10 @@ const LOCALES = [
     { code: 'en', label: 'English', flag: '🇬🇧', rtl: false },
     { code: 'tr', label: 'Türkçe', flag: '🇹🇷', rtl: false },
     { code: 'ar', label: 'العربية', flag: '🇸🇦', rtl: true },
+    { code: 'ms', label: 'Melayu', flag: '🇲🇾', rtl: false },
 ] as const;
 
-type LocaleCode = 'en' | 'tr' | 'ar';
+type LocaleCode = 'en' | 'tr' | 'ar' | 'ms';
 type Translations = Partial<Record<LocaleCode, string>>;
 
 interface TranslatableInputProps {
