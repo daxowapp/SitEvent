@@ -318,7 +318,7 @@ function ScannerContent() {
             </div>
 
             {selectedEventId && (
-                <div className="grid md:grid-cols-2 gap-8 animate-fade-in-up delay-100">
+                <div className="flex flex-col-reverse md:grid md:grid-cols-2 gap-8 animate-fade-in-up delay-100">
                     <div className="space-y-6">
                         {/* Stats Cards */}
                         <div className="grid grid-cols-2 gap-4">

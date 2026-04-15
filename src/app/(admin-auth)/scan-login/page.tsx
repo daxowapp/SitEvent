@@ -14,6 +14,7 @@ function UsherLoginForm() {
     const searchParams = useSearchParams();
     const callbackUrl = searchParams.get("callbackUrl") || "/admin/scan";
     const [pin, setPin] = useState("");
+    const [station, setStation] = useState<"USHER" | "HELPDESK">("USHER");
     const [loading, setLoading] = useState(false);
 
     const handleLogin = async (e?: React.FormEvent) => {
@@ -31,12 +32,14 @@ function UsherLoginForm() {
                 redirect: false,
             });
 
+            const finalUrl = searchParams.get("callbackUrl") || (station === "HELPDESK" ? "/admin/helpdesk" : "/admin/scan");
+
             if (result?.error) {
                 toast.error("Invalid PIN code");
                 setPin("");
             } else {
-                toast.success("Welcome back!");
-                router.push(callbackUrl); 
+                toast.success(`Welcome to ${station === "HELPDESK" ? "Help Desk" : "Check-in"}!`);
+                router.push(finalUrl); 
                 router.refresh();
             }
         } catch (error) {
@@ -59,14 +62,33 @@ function UsherLoginForm() {
                     <KeyRound className="h-8 w-8 text-blue-600 dark:text-blue-300" />
                 </div>
                 <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
-                    Usher Fast Login
+                    Staff PIN Login
                 </h2>
                 <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
-                    Enter your access code to start scanning.
+                    Select your station and enter your access PIN.
                 </p>
             </div>
 
             <form onSubmit={handleLogin} className="mt-8 space-y-6">
+                
+                {/* Station Selection */}
+                <div className="flex bg-gray-100 dark:bg-gray-900 p-1 rounded-xl">
+                    <button
+                        type="button"
+                        onClick={() => setStation("USHER")}
+                        className={`flex-1 py-3 text-sm font-bold rounded-lg transition-all ${station === "USHER" ? "bg-white shadow-sm text-blue-700" : "text-gray-500 hover:text-gray-700"}`}
+                    >
+                        Check-In Station
+                    </button>
+                    <button
+                        type="button"
+                        onClick={() => setStation("HELPDESK")}
+                        className={`flex-1 py-3 text-sm font-bold rounded-lg transition-all ${station === "HELPDESK" ? "bg-white shadow-sm text-purple-700" : "text-gray-500 hover:text-gray-700"}`}
+                    >
+                        Red Points Help Desk
+                    </button>
+                </div>
+
                 <div className="relative">
                     <input
                         type="text"
@@ -76,7 +98,7 @@ function UsherLoginForm() {
                         placeholder="Enter PIN"
                         value={pin}
                         onChange={handlePinChange}
-                        className="block w-full rounded-xl border border-gray-300 bg-gray-50 px-4 py-4 text-center text-3xl font-bold tracking-[0.5em] text-gray-900 placeholder-gray-300 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-900 dark:text-white dark:placeholder-gray-600"
+                        className={`block w-full rounded-xl border-2 px-4 py-4 text-center text-3xl font-bold tracking-[0.5em] transition-colors focus:outline-none focus:ring-0 ${station === "HELPDESK" ? 'border-purple-100 bg-purple-50 text-purple-900 focus:border-purple-500' : 'border-blue-100 bg-blue-50 text-blue-900 focus:border-blue-500'}`}
                     />
                 </div>
 
