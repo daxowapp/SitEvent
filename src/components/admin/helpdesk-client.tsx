@@ -401,93 +401,116 @@ export function HelpDeskClient() {
       )}
 
       {/* Student Info & Redemption */}
-      {studentInfo && tier && (
-        <div className="space-y-4 animate-fade-up">
-          {/* Student Card */}
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-lg flex items-center gap-2">
-                <User className="w-5 h-5" />
-                {studentInfo.studentName}
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-2 text-sm">
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Event</span>
-                <span className="font-medium">{studentInfo.eventTitle}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Phone</span>
-                <span>{studentInfo.studentPhone}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Country</span>
-                <span>{studentInfo.studentCountry}</span>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Points & Tier */}
-          <Card className={`border-2 ${studentInfo.currentTier === "GOLD" ? "border-yellow-300" : studentInfo.currentTier === "SILVER" ? "border-gray-300" : studentInfo.currentTier === "BRONZE" ? "border-amber-300" : "border-gray-200"}`}>
-            <CardContent className="p-5">
-              <div className="text-center space-y-2">
-                <div className="text-4xl font-black text-red-600">
-                  {studentInfo.totalPoints}
+        <div className="space-y-6 animate-fade-up pb-10">
+          {/* Student Info Card */}
+          <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm relative overflow-hidden">
+             {/* decorative top bar */}
+             <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-red-500 to-red-400" />
+             
+             <div className="flex items-center gap-4 mb-6">
+                <div className="w-14 h-14 rounded-full bg-red-50 flex items-center justify-center border border-red-100 flex-shrink-0 mt-1">
+                    <User className="w-6 h-6 text-red-600" />
                 </div>
-                <div className="text-sm text-muted-foreground">Red Points</div>
-                <Badge className={`${tier.color} text-base px-4 py-1.5`}>
-                  {tier.emoji} {tier.label}
-                </Badge>
-                <div className="flex items-center gap-2 justify-center text-sm text-muted-foreground mt-2">
-                  <Star className="w-4 h-4" />
-                  {studentInfo.boothsVisited} / {studentInfo.totalBooths} booths
+                <div>
+                    <h2 className="text-xl md:text-2xl font-bold font-display text-gray-900 tracking-tight">{studentInfo.studentName}</h2>
+                    <p className="text-sm text-gray-500 font-medium">{studentInfo.studentEmail}</p>
                 </div>
-              </div>
+             </div>
 
-              {/* Progress */}
+             <div className="grid grid-cols-1 md:grid-cols-2 gap-y-4 gap-x-6 bg-gray-50/50 rounded-xl p-4 border border-gray-100">
+                 <div className="space-y-1">
+                     <span className="text-xs font-bold uppercase tracking-widest text-gray-400">Event</span>
+                     <p className="text-sm font-medium text-gray-900 leading-tight">{studentInfo.eventTitle}</p>
+                 </div>
+                 <div className="space-y-1">
+                     <span className="text-xs font-bold uppercase tracking-widest text-gray-400">Contact</span>
+                     <p className="text-sm font-medium text-gray-900">{studentInfo.studentPhone || "N/A"}</p>
+                 </div>
+                 <div className="space-y-1 md:col-span-2">
+                     <span className="text-xs font-bold uppercase tracking-widest text-gray-400">Country</span>
+                     <p className="text-sm font-medium text-gray-900">{studentInfo.studentCountry}</p>
+                 </div>
+             </div>
+          </div>
+
+          {/* Red Points Bento Box */}
+          <div className="grid grid-cols-2 gap-4">
+              <div className="col-span-2 md:col-span-1 rounded-2xl border border-red-100 bg-gradient-to-br from-red-50 to-white p-6 shadow-[0_4px_20px_-4px_rgba(239,68,68,0.1)] text-center relative overflow-hidden group">
+                   <div className="absolute inset-0 bg-red-500/5 blur-xl transition-all opacity-100" />
+                   <div className="relative">
+                       <div className="flex justify-center mb-1"><Zap className="w-5 h-5 text-red-500/50 fill-red-500/10" /></div>
+                       <div className="text-6xl font-black font-display text-red-600 tracking-tighter">{studentInfo.totalPoints}</div>
+                       <div className="text-[10px] uppercase tracking-[0.2em] text-red-900/60 font-bold mt-2">Total Red Points</div>
+                   </div>
+              </div>
+              <div className="col-span-2 md:col-span-1 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm flex flex-col justify-center items-center text-center">
+                   <Badge className={`${tier.color} text-lg px-5 py-2 font-bold mb-3 border-2 border-black/5`}>
+                        {tier.emoji} {tier.label} Tier
+                   </Badge>
+                   <div className="flex items-center gap-1.5 text-sm font-semibold tracking-wide text-gray-500">
+                      <Star className="w-4 h-4 text-amber-400 fill-amber-400" />
+                      {studentInfo.boothsVisited} / {studentInfo.totalBooths} Booths Scanned
+                   </div>
+              </div>
+              
               {studentInfo.nextTier && (
-                <div className="mt-4">
-                  <div className="flex justify-between text-xs mb-1">
-                    <span>{studentInfo.currentTier || "Start"}</span>
-                    <span>{studentInfo.nextTier}</span>
+                  <div className="col-span-2 rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
+                      <div className="flex justify-between items-end mb-3">
+                          <div>
+                              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Progress to {studentInfo.nextTier}</p>
+                          </div>
+                          <div className="text-sm font-bold text-red-600">{studentInfo.pointsToNextTier} pts left</div>
+                      </div>
+                      <Progress value={studentInfo.progress} className="h-2.5 bg-gray-100 [&>div]:bg-gradient-to-r [&>div]:from-red-500 [&>div]:to-red-400" />
+                      <div className="flex justify-between text-xs font-semibold text-gray-400 mt-2">
+                        <span>{studentInfo.currentTier || "Start"}</span>
+                        <span>{studentInfo.nextTier}</span>
+                      </div>
                   </div>
-                  <Progress value={studentInfo.progress} className="h-2" />
-                </div>
               )}
-            </CardContent>
-          </Card>
+          </div>
 
           {/* Redemption Section */}
-          <Card>
-            <CardContent className="p-5">
+          <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
               {studentInfo.giftRedeemed ? (
-                <div className="text-center space-y-2">
-                  <CheckCircle2 className="w-10 h-10 mx-auto text-green-500" />
-                  <p className="font-semibold text-green-800">
-                    Gift already redeemed
-                  </p>
-                  <p className="text-sm text-muted-foreground">
-                    {studentInfo.redeemedTier} tier gift was claimed
-                  </p>
+                <div className="text-center space-y-3 py-2">
+                  <div className="w-16 h-16 bg-green-50 rounded-full flex items-center justify-center mx-auto border border-green-100">
+                      <CheckCircle2 className="w-8 h-8 text-green-500" />
+                  </div>
+                  <div>
+                      <p className="font-bold text-gray-900 text-xl tracking-tight">
+                        Gift Already Redeemed!
+                      </p>
+                      <p className="text-sm font-medium text-gray-500 mt-1">
+                        They claimed the <strong className="text-green-700">{studentInfo.redeemedTier}</strong> tier gift.
+                      </p>
+                  </div>
                 </div>
               ) : studentInfo.currentTier === "NONE" ? (
-                <div className="text-center space-y-2">
-                  <AlertCircle className="w-10 h-10 mx-auto text-gray-400" />
-                  <p className="font-medium text-muted-foreground">
-                    Not eligible for a gift yet
-                  </p>
-                  <p className="text-sm text-muted-foreground">
-                    {studentInfo.pointsToNextTier} more points needed for Bronze
-                  </p>
+                <div className="text-center space-y-3 py-2">
+                  <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto border border-gray-100">
+                      <AlertCircle className="w-8 h-8 text-gray-400" />
+                  </div>
+                  <div>
+                      <p className="font-bold text-gray-900 text-xl tracking-tight">
+                        Not Eligible Yet
+                      </p>
+                      <p className="text-sm font-medium text-gray-500 mt-1">
+                        Collect <strong className="text-red-500">{studentInfo.pointsToNextTier} more pts</strong> to unlock a gift.
+                      </p>
+                  </div>
                 </div>
               ) : (
-                <div className="text-center space-y-3">
-                  <Gift className="w-10 h-10 mx-auto text-red-500" />
+                <div className="text-center space-y-5">
+                  <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto border border-red-100 relative group animate-pulse">
+                      <div className="absolute inset-0 bg-red-400/20 rounded-full blur-md" />
+                      <Gift className="w-8 h-8 text-red-500 relative z-10" />
+                  </div>
                   <div>
-                    <p className="font-semibold text-lg">
-                      Eligible: {tier.emoji} {tier.label} Gift
-                    </p>
-                    <p className="text-sm text-muted-foreground">
+                    <h3 className="font-black text-2xl font-display tracking-tight text-gray-900">
+                      {tier.emoji} {tier.label} Gift
+                    </h3>
+                    <p className="text-sm font-medium text-gray-500 mt-1">
                       {tier.giftDescription}
                     </p>
                   </div>
@@ -495,32 +518,32 @@ export function HelpDeskClient() {
                     onClick={handleRedeem}
                     disabled={redeeming}
                     size="lg"
-                    className="w-full bg-red-600 hover:bg-red-700"
+                    className="w-full bg-red-600 hover:bg-red-700 text-white shadow-xl shadow-red-500/20 py-6 text-lg font-bold rounded-xl transition-all hover:scale-[1.02]"
                   >
                     {redeeming ? (
-                      <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                      <Loader2 className="w-6 h-6 mr-2 animate-spin" />
                     ) : (
-                      <Gift className="w-5 h-5 mr-2" />
+                      <Gift className="w-6 h-6 mr-2" />
                     )}
-                    Redeem {tier.label} Gift
+                    Redeem {tier.label} Reward
                   </Button>
                 </div>
               )}
-            </CardContent>
-          </Card>
+          </div>
 
           {/* Scan Another */}
           <Button
             variant="outline"
+            size="lg"
             onClick={() => {
               setStudentInfo(null);
               setError(null);
               startCamera();
             }}
-            className="w-full"
+            className="w-full py-6 text-base font-bold rounded-xl border-2 hover:bg-gray-50 transition-colors bg-white mt-4 shadow-sm"
           >
-            <Camera className="w-4 h-4 mr-2" />
-            Scan Another Student
+            <Camera className="w-5 h-5 mr-2 text-gray-500" />
+            Scan Next Student
           </Button>
         </div>
       )}
