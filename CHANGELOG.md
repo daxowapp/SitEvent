@@ -448,3 +448,4 @@ All notable changes to this project will be documented in this file.
 2026-04-15 - Upgrade Helpdesk Scanner UI - Synchronized the Helpdesk scanner UI to use the exact same modern, high-speed camera engine used by the Usher Check-in scanner.
 2026-04-15 - Redesign Helpdesk Student Info UI - Refactored the Help Desk Redemption student information interface to use a premium, modern bento-box aesthetic.
 2026-04-15 - Fix Syntax Error - Resolved unclosed JSX expression in Help Desk component causing deployment pipeline failure.
+2026-04-15 - Clarified Help Desk Call to Action - Changed the Redemption button wording to make it clear that the action marks the gift as received in the backend database.

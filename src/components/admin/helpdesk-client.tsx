@@ -526,7 +526,7 @@ export function HelpDeskClient() {
                     ) : (
                       <Gift className="w-6 h-6 mr-2" />
                     )}
-                    Redeem {tier.label} Reward
+                    Mark {tier.label} Gift as Received
                   </Button>
                 </div>
               )}
