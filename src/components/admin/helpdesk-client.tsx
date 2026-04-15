@@ -66,6 +66,22 @@ export function HelpDeskClient() {
   const animationRef = useRef<number | null>(null);
   const lastScannedRef = useRef<string | null>(null);
 
+  
+  const playBeep = useCallback((success: boolean) => {
+      try {
+          const ctx = new AudioContext();
+          const oscillator = ctx.createOscillator();
+          const gain = ctx.createGain();
+          oscillator.connect(gain);
+          gain.connect(ctx.destination);
+          oscillator.frequency.value = success ? 880 : 300;
+          oscillator.type = "sine";
+          gain.gain.value = 0.3;
+          oscillator.start();
+          oscillator.stop(ctx.currentTime + (success ? 0.15 : 0.3));
+      } catch { }
+  }, []);
+
   const stopCamera = useCallback(() => {
     if (animationRef.current) {
       cancelAnimationFrame(animationRef.current);
@@ -94,13 +110,16 @@ export function HelpDeskClient() {
         const data = await res.json();
 
         if (!res.ok) {
+          playBeep(false);
           setError(data.error || "Student not found");
           return;
         }
 
+        playBeep(true);
         setStudentInfo(data);
         stopCamera();
       } catch (err) {
+        playBeep(false);
         setError("Network error. Please try again.");
       } finally {
         setLoading(false);
@@ -233,44 +252,78 @@ export function HelpDeskClient() {
           <Card>
             <CardContent className="p-0">
               {scanning ? (
-                <div className="relative">
+
+                <div className="relative rounded-3xl overflow-hidden shadow-2xl border border-gray-200">
                   <video
                     ref={videoRef}
-                    className="w-full aspect-[4/3] object-cover bg-black"
+                    className="w-full aspect-[4/3] md:aspect-square object-cover bg-black"
                     playsInline
+                    autoPlay
                     muted
                   />
                   <canvas ref={canvasRef} className="hidden" />
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="w-52 h-52 border-2 border-white/60 rounded-2xl" />
+                  
+                  {/* Scanner Overlay UI */}
+                  <div className="absolute inset-0 pointer-events-none">
+                    {/* Green scanning corners */}
+                    <div className="absolute inset-0 flex items-center justify-center">
+                        <div className="w-52 h-52 relative">
+                            <div className="absolute top-0 left-0 w-10 h-10 border-t-4 border-l-4 border-green-400 rounded-tl-2xl" />
+                            <div className="absolute top-0 right-0 w-10 h-10 border-t-4 border-r-4 border-green-400 rounded-tr-2xl" />
+                            <div className="absolute bottom-0 left-0 w-10 h-10 border-b-4 border-l-4 border-green-400 rounded-bl-2xl" />
+                            <div className="absolute bottom-0 right-0 w-10 h-10 border-b-4 border-r-4 border-green-400 rounded-br-2xl" />
+                            {/* Scan line */}
+                            <div className="absolute left-2 right-2 h-0.5 bg-green-400/80 shadow-[0_0_15px_rgba(74,222,128,0.6)] animate-[scan_2s_ease-in-out_infinite]" />
+                        </div>
+                    </div>
+
+                    {/* Status pill */}
+                    <div className="absolute top-4 left-1/2 -translate-x-1/2 mt-2">
+                        <div className="flex items-center gap-2 bg-black/60 backdrop-blur-md px-4 py-2 rounded-full">
+                            <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
+                            <span className="text-white text-xs font-medium">Scanning Active</span>
+                        </div>
+                    </div>
                   </div>
+
                   {loading && (
-                    <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+                    <div className="absolute inset-0 bg-black/50 flex items-center justify-center z-10 backdrop-blur-sm">
                       <Loader2 className="w-8 h-8 animate-spin text-white" />
                     </div>
                   )}
-                  <div className="absolute bottom-4 left-0 right-0 text-center">
+                  <style jsx>{`
+                      @keyframes scan {
+                          0%, 100% { top: 8px; }
+                          50% { top: calc(100% - 8px); }
+                      }
+                  `}</style>
+                  <div className="absolute bottom-4 left-0 right-0 text-center z-20">
                     <Button
-                      variant="outline"
+                      variant="secondary"
                       size="sm"
                       onClick={stopCamera}
-                      className="bg-white/90"
+                      className="rounded-full bg-white/90 hover:bg-white text-gray-800 shadow-lg px-6"
                     >
-                      Cancel
+                      Cancel Scanning
                     </Button>
                   </div>
                 </div>
               ) : (
-                <div className="p-10 text-center space-y-4">
-                  <Gift className="w-16 h-16 mx-auto text-red-500" />
-                  <Button
-                    onClick={startCamera}
-                    size="lg"
-                    className="bg-red-600 hover:bg-red-700"
-                  >
-                    <Camera className="w-5 h-5 mr-2" />
-                    Scan Student QR
-                  </Button>
+                <div className="aspect-[3/4] md:aspect-square rounded-3xl overflow-hidden shadow-2xl border border-gray-200 bg-gray-900 relative">
+                  <div className="absolute inset-0 flex flex-col items-center justify-center bg-gray-900/95 z-10 w-full h-full text-center p-6">
+                    <div className="w-20 h-20 rounded-full bg-white/10 flex items-center justify-center mb-6">
+                        <Gift className="w-10 h-10 text-white/60" />
+                    </div>
+                    <Button
+                        onClick={startCamera}
+                        size="lg"
+                        className="rounded-full px-10 py-6 bg-red-600 hover:bg-red-700 text-white font-bold text-lg shadow-xl shadow-red-500/30 transform hover:scale-105 transition-all"
+                    >
+                        <Camera className="w-5 h-5 mr-2" />
+                        Start Scanning
+                    </Button>
+                    <p className="text-white/40 text-xs mt-4">For Helpdesk Gift Redemption</p>
+                  </div>
                 </div>
               )}
             </CardContent>

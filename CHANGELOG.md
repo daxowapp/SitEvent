@@ -420,6 +420,9 @@ All notable changes to this project will be documented in this file.
 - Environment variables template (`.env.example`)
 - Prisma scripts: generate, migrate, seed, push, studio
 
+2026-04-15 - QR Scanner Standardization - Ported the high-performance continuous jsQR engine and UX to all system scanners.
+2026-04-15 - Dynamic Event Registration URL - Created `/active` universal URL that auto-redirects scanner to the closest active event.
+
 2026-02-08 - Cross-Event Check-in & Mobile Redirect - Enabled scanning cross-event QR codes with auto-registration, and added mobile redirect button for Alex26 event.
 
 2026-02-08 - Bug Fixes - Localized mobile redirect button and fixed missing translation for language study level.
