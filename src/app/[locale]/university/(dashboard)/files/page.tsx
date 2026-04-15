@@ -24,10 +24,8 @@ export default async function UniversityFilesPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="container max-w-3xl mx-auto py-6 px-4">
-        <UniversityFilesClient universityId={universityId} />
-      </div>
+    <div className="container max-w-3xl mx-auto">
+      <UniversityFilesClient universityId={universityId} />
     </div>
   );
 }
