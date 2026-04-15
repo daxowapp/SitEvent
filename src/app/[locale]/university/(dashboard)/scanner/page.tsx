@@ -19,7 +19,7 @@ export default async function BoothScannerPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="w-full">
       <div className="container max-w-lg mx-auto py-6 px-4">
         <BoothScannerClient />
       </div>
