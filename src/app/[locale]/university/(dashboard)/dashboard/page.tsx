@@ -29,14 +29,13 @@ export default async function UniversityDashboard() {
 
     // --- MEMBER DASHBOARD ---
     if (session.user.role !== "ADMIN") {
-        const totalScannedByMe = await prisma.boothVisit.count({
+        const totalScannedByTeam = await prisma.boothVisit.count({
             where: {
-                scannedById: session.user.id,
                 universityId: session.user.universityId
             }
         });
         
-        return <MemberDashboardClient universityName={university.name} totalScanned={totalScannedByMe} />;
+        return <MemberDashboardClient universityName={university.name} totalScanned={totalScannedByTeam} />;
     }
 
     // --- ADMIN DASHBOARD ---
