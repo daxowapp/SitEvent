@@ -104,6 +104,9 @@ function EventTable({ events, emptyMessage }: { events: any[], emptyMessage: str
                                 <Button variant="ghost" size="sm" asChild>
                                     <Link href={`/admin/events/${event.id}/analytics`}>Analytics</Link>
                                 </Button>
+                                <Button variant="ghost" size="sm" asChild>
+                                    <Link href={`/admin/events/${event.id}/messaging`}>Message</Link>
+                                </Button>
                                 <CopyKioskLinkButton 
                                     slug={event.slug} 
                                     city={event.city} 
