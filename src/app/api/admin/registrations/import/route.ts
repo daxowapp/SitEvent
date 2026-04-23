@@ -3,7 +3,7 @@ import { prisma } from "@/lib/db";
 import { auth } from "@/lib/auth";
 import { generateQrToken } from "@/lib/qr";
 import { sendConfirmationEmail } from "@/lib/email";
-import { format } from "date-fns";
+import { formatInTimeZone } from "date-fns-tz";
 import { enUS, tr, ar } from "date-fns/locale";
 import { getTranslations } from "next-intl/server";
 import { z } from "zod";
@@ -136,7 +136,8 @@ export async function POST(request: NextRequest) {
 
                 // D. Send Email
                 const dateLocale = dateLocales[lead.language as keyof typeof dateLocales] || enUS;
-                const eventDate = format(new Date(event.startDateTime), "PPP p", { locale: dateLocale });
+                const timeZone = event.timezone || "UTC";
+                const eventDate = `${formatInTimeZone(new Date(event.startDateTime), timeZone, "PPP", { locale: dateLocale })} ${formatInTimeZone(new Date(event.startDateTime), timeZone, "h:mm a", { locale: dateLocale })}`;
                 
                 // We need to fetch translations for each user's language preference
                 // Note: In a loop this is not efficient, but for imports < 1000 it's fine.

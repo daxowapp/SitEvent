@@ -166,7 +166,9 @@ export async function POST(request: NextRequest) {
         // Send confirmation messages (async - don't block response)
         const dateLocales = { en: enUS, tr: tr, ar: ar };
         const dateLocale = dateLocales[locale as keyof typeof dateLocales] || enUS;
-        const eventDate = format(new Date(event.startDateTime), "PPP p", { locale: dateLocale });
+        const { formatInTimeZone } = await import("date-fns-tz");
+        const timeZone = event.timezone || "UTC";
+        const eventDate = `${formatInTimeZone(new Date(event.startDateTime), timeZone, "PPP", { locale: dateLocale })} ${formatInTimeZone(new Date(event.startDateTime), timeZone, "h:mm a", { locale: dateLocale })}`;
         const eventVenue = `${event.venueName}, ${event.city}`;
 
         // Fetch translations for email

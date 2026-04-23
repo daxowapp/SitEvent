@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { prisma } from "@/lib/db";
 import { format } from "date-fns";
+import { formatInTimeZone } from "date-fns-tz";
 import { QrCodeDisplay } from "./qr-display";
 
 interface SuccessPageProps {
@@ -236,8 +237,8 @@ export default async function SuccessPage({
                                         </div>
                                         <div>
                                             <p className="font-bold text-gray-900">Date & Time</p>
-                                            <p className="text-gray-600 text-sm mt-1">{format(new Date(event.startDateTime), "EEEE, MMMM d, yyyy")}</p>
-                                            <p className="text-gray-500 text-sm">{format(new Date(event.startDateTime), "h:mm a")} - {format(new Date(event.endDateTime), "h:mm a")}</p>
+                                            <p className="text-gray-600 text-sm mt-1">{formatInTimeZone(new Date(event.startDateTime), event.timezone || "UTC", "EEEE, MMMM d, yyyy")}</p>
+                                            <p className="text-gray-500 text-sm">{formatInTimeZone(new Date(event.startDateTime), event.timezone || "UTC", "h:mm a")} - {formatInTimeZone(new Date(event.endDateTime), event.timezone || "UTC", "h:mm a")}</p>
                                         </div>
                                     </div>
 

@@ -1,7 +1,7 @@
 "use server";
 
 import { prisma } from "@/lib/db";
-import { format } from "date-fns";
+import { formatInTimeZone } from "date-fns-tz";
 import { sendConfirmationEmail } from "@/lib/email";
 import { sendWhatsAppConfirmation } from "@/lib/whatsapp";
 
@@ -32,7 +32,8 @@ export async function recoverTicketKiosk(emailOrPhone: string, eventId: string) 
 
         // Resend confirmation (Async)
         // We do this to ensure they have it on their phone too
-        const eventDate = format(new Date(registration.event.startDateTime), "PPP");
+        const timeZone = registration.event.timezone || "UTC";
+        const eventDate = `${formatInTimeZone(new Date(registration.event.startDateTime), timeZone, "PPP")} ${formatInTimeZone(new Date(registration.event.startDateTime), timeZone, "h:mm a")}`;
         const eventVenue = registration.event.venueName || registration.event.city || "TBA";
 
         // Fire and forget email/whatsapp

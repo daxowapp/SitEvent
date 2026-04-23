@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { prisma } from "@/lib/db";
 import { format } from "date-fns";
+import { formatInTimeZone } from "date-fns-tz";
 import { RegistrationForm } from "./registration-form";
 import { TrackingScripts } from "@/components/tracking-scripts";
 import { ImageCarousel } from "@/components/public/image-carousel";
@@ -145,7 +146,7 @@ export default async function EventPage({ params }: EventPageProps) {
                             <div className="flex flex-wrap gap-6 text-gray-600 pt-2">
                                 <div className="flex items-center gap-2">
                                     <span className="text-[hsl(var(--turkish-red))]">📅</span>
-                                    <span className="font-medium">{format(new Date(event.startDateTime), "EEEE, MMMM d, yyyy")}</span>
+                                    <span className="font-medium">{formatInTimeZone(new Date(event.startDateTime), event.timezone || "UTC", "EEEE, MMMM d, yyyy")}</span>
                                 </div>
                                 <div className="flex items-center gap-2">
                                     <span className="text-[hsl(var(--turkish-red))]">📍</span>
@@ -300,8 +301,8 @@ export default async function EventPage({ params }: EventPageProps) {
                                         </div>
                                         <div>
                                             <p className="font-bold text-gray-900">Date & Time</p>
-                                            <p className="text-gray-600 text-sm mt-1">{format(new Date(event.startDateTime), "MMMM d, yyyy")}</p>
-                                            <p className="text-gray-500 text-sm">{format(new Date(event.startDateTime), "h:mm a")} - {format(new Date(event.endDateTime), "h:mm a")}</p>
+                                            <p className="text-gray-600 text-sm mt-1">{formatInTimeZone(new Date(event.startDateTime), event.timezone || "UTC", "MMMM d, yyyy")}</p>
+                                            <p className="text-gray-500 text-sm">{formatInTimeZone(new Date(event.startDateTime), event.timezone || "UTC", "h:mm a")} - {formatInTimeZone(new Date(event.endDateTime), event.timezone || "UTC", "h:mm a")} ({(event.timezone || "UTC").replace('_', ' ')})</p>
                                         </div>
                                     </div>
 

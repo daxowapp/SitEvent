@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+2026-04-23 - Timezone Alignment Fix - Fixed an issue where the registration confirmation email and success page displayed dates and times in server timezone (UTC) instead of the actual local timezone of the event. Replaced `format()` with `formatInTimeZone()` from `date-fns-tz` to ensure the dates render accurately based on `event.timezone`.
+
+2026-04-23 - Bulk Email Resend Endpoint - Created `/api/admin/events/[id]/resend-emails` POST endpoint to mass-resend corrected confirmation emails to all registered students. Supports `dryRun` mode and per-send throttling to respect Resend API rate limits.
+
+2026-04-23 - Timezone Fix (All Entry Points) - Extended the timezone fix to every code path that sends emails: kiosk ticket recovery (`kiosk.ts`), bulk import (`import/route.ts`), and the non-localized event detail page. All now use `formatInTimeZone()` consistently.
+
 2026-04-15 - University Modules Core Fixes - Refactored university dashboard global team credential manager. Translated missing i18n keys for lateral team navigation. Fixed a hydration/render crash on the files management page originating from raw Supabase variable dependency by integrating centralized client configuration.
 
 2026-04-15 - University Tier RBAC & Team Management - Implemented Role-Based Access Control (`ADMIN` vs `MEMBER`) for university portals. Added Team Management dashboard to provision scanner reps. Enforced data isolation so `MEMBER` users only view leads they physically scanned at the booth.

@@ -2,7 +2,7 @@
 
 import { prisma } from "@/lib/db";
 import { sendConfirmationEmail } from "@/lib/email";
-import { format } from "date-fns";
+import { formatInTimeZone } from "date-fns-tz";
 
 export async function resendTicket(email: string) {
     if (!email) return { success: false, error: "Email is required" };
@@ -33,12 +33,14 @@ export async function resendTicket(email: string) {
             return { success: false, error: "No active event registration found for this email." };
         }
 
+        const timeZone = registration.event.timezone || "UTC";
+
         // Resend email
         await sendConfirmationEmail({
             to: registration.registrant.email,
             studentName: registration.registrant.fullName,
             eventTitle: registration.event.title,
-            eventDate: format(new Date(registration.event.startDateTime), "PPP"),
+            eventDate: `${formatInTimeZone(new Date(registration.event.startDateTime), timeZone, "PPP")} ${formatInTimeZone(new Date(registration.event.startDateTime), timeZone, "h:mm a")}`,
             eventVenue: registration.event.venueAddress || registration.event.venueName || "TBA",
             qrToken: registration.qrToken,
             translations: {
