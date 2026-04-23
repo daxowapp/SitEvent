@@ -32,6 +32,7 @@ const MOCK_EVENTS = [
         ],
         startDateTime: new Date("2026-03-15T10:00:00"),
         endDateTime: new Date("2026-03-15T18:00:00"),
+        timezone: "Europe/Istanbul",
         status: "PUBLISHED",
         description: `Join us for the premier education fair in Istanbul. Meet representatives from top universities worldwide and explore scholarship opportunities.
 
@@ -146,7 +147,7 @@ export default async function EventPage({ params }: EventPageProps) {
                             <div className="flex flex-wrap gap-6 text-gray-600 pt-2">
                                 <div className="flex items-center gap-2">
                                     <span className="text-[hsl(var(--turkish-red))]">📅</span>
-                                    <span className="font-medium">{formatInTimeZone(new Date(event.startDateTime), event.timezone || "UTC", "EEEE, MMMM d, yyyy")}</span>
+                                    <span className="font-medium">{formatInTimeZone(new Date(event.startDateTime), (event as any).timezone || "UTC", "EEEE, MMMM d, yyyy")}</span>
                                 </div>
                                 <div className="flex items-center gap-2">
                                     <span className="text-[hsl(var(--turkish-red))]">📍</span>
@@ -301,8 +302,8 @@ export default async function EventPage({ params }: EventPageProps) {
                                         </div>
                                         <div>
                                             <p className="font-bold text-gray-900">Date & Time</p>
-                                            <p className="text-gray-600 text-sm mt-1">{formatInTimeZone(new Date(event.startDateTime), event.timezone || "UTC", "MMMM d, yyyy")}</p>
-                                            <p className="text-gray-500 text-sm">{formatInTimeZone(new Date(event.startDateTime), event.timezone || "UTC", "h:mm a")} - {formatInTimeZone(new Date(event.endDateTime), event.timezone || "UTC", "h:mm a")} ({(event.timezone || "UTC").replace('_', ' ')})</p>
+                                            <p className="text-gray-600 text-sm mt-1">{formatInTimeZone(new Date(event.startDateTime), (event as any).timezone || "UTC", "MMMM d, yyyy")}</p>
+                                            <p className="text-gray-500 text-sm">{formatInTimeZone(new Date(event.startDateTime), (event as any).timezone || "UTC", "h:mm a")} - {formatInTimeZone(new Date(event.endDateTime), (event as any).timezone || "UTC", "h:mm a")} ({((event as any).timezone || "UTC").replace('_', ' ')})</p>
                                         </div>
                                     </div>
 
