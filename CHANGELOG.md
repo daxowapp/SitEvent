@@ -2,6 +2,8 @@
 
 All notable changes to this project will be documented in this file.
 
+2026-04-24 - Document Validation with QR - Added a complete document validation system. Admins can register official letters/documents, auto-generate QR codes with unique reference numbers (LTR-YYYY-NNNN), and recipients can scan the QR to verify authenticity on a public /verify page. Features: create/revoke/delete documents, download QR as PNG, manual lookup by reference number, and expiry/revocation handling. New `ValidatedDocument` Prisma model, 3 API routes, admin Documents page with sidebar navigation, and a standalone public verification page with animated valid/invalid/expired states.
+
 2026-04-23 - Timezone Alignment Fix - Fixed an issue where the registration confirmation email and success page displayed dates and times in server timezone (UTC) instead of the actual local timezone of the event. Replaced `format()` with `formatInTimeZone()` from `date-fns-tz` to ensure the dates render accurately based on `event.timezone`.
 
 2026-04-23 - Bulk Email Resend Endpoint - Created `/api/admin/events/[id]/resend-emails` POST endpoint to mass-resend corrected confirmation emails to all registered students. Supports `dryRun` mode and per-send throttling to respect Resend API rate limits.

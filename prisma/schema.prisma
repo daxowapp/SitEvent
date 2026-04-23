@@ -392,9 +392,10 @@ model AdminUser {
   lastLoginAt  DateTime?
   accessCode   String?   @unique
 
-  events           Event[]
-  checkIns         CheckIn[]
-  giftRedemptions  GiftRedemption[]  // Gifts redeemed by this admin/staff
+  events              Event[]
+  checkIns            CheckIn[]
+  giftRedemptions     GiftRedemption[]  // Gifts redeemed by this admin/staff
+  validatedDocuments  ValidatedDocument[]
 }
 
 // ============================================
@@ -516,3 +517,29 @@ model GiftRedemption {
   @@index([eventId, registrationId])
 }
 
+// ============================================
+// DOCUMENT VALIDATION WITH QR
+// ============================================
+
+model ValidatedDocument {
+  id              String    @id @default(cuid())
+  token           String    @unique @default(cuid())  // QR lookup key
+  referenceNumber String?   @unique                    // e.g. "LTR-2026-0042"
+  subject         String                               // Letter subject
+  recipientName   String?                              // "To whom"
+  senderName      String?                              // Who signed
+  senderTitle     String?                              // e.g. "Director"
+  issuedAt        DateTime  @default(now())            // Date on the letter
+  expiresAt       DateTime?                            // Optional expiry
+  notes           String?   @db.Text                   // Extra context
+  isRevoked       Boolean   @default(false)            // Can revoke if needed
+
+  createdById     String
+  createdBy       AdminUser @relation(fields: [createdById], references: [id])
+
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@index([token])
+  @@index([referenceNumber])
+}

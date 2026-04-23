@@ -230,6 +230,7 @@ SitEvent/
         │   ├── registrations/ # Registration management
         │   ├── analytics/    # Analytics dashboard
         │   ├── scan/         # QR scanner page
+        │   ├── documents/    # Document validation management
         │   ├── universities/ # University management
         │   ├── users/        # Admin user management
         │   ├── templates/    # Message template management
@@ -310,6 +311,7 @@ SitEvent/
 | `BoothVisit` | Records when a university scans a student's QR (booth visit) |
 | `RedPointsLedger` | Individual point transactions linked to booth visits |
 | `GiftRedemption` | Records gift redemptions at the help desk |
+| `ValidatedDocument` | Official letters/documents with QR tokens for public verification |
 
 ### Key Relationships
 - `Event` → `City` → `Country` (location hierarchy)
@@ -419,6 +421,9 @@ Used for REST-style endpoints:
 - `GET/POST /api/admin/events` — Event management
 - `POST /api/admin/checkin` — Check-in processing
 - `GET /api/admin/export` — Data export (CSV/Excel)
+- `GET/POST /api/admin/documents` — Document validation CRUD (admin)
+- `GET/PATCH/DELETE /api/admin/documents/[id]` — Single document management
+- `GET /api/documents/verify?token=xxx&ref=xxx` — Public document verification (no auth)
 - `GET /api/qr` — QR code image generation
 - `POST /api/ai` — AI enrichment trigger
 - `GET/POST /api/university` — University portal API
@@ -686,7 +691,46 @@ The Paperless Events system replaces physical brochures with digital files and i
 
 ---
 
-## 16. Known Constraints & TODOs
+## 16. Document Validation System
+
+### Overview
+The Document Validation system allows admins to register official letters/documents, generate QR codes to embed in physical letters, and provide a public verification page where anyone scanning the QR can confirm the document's authenticity.
+
+### Database Model: `ValidatedDocument`
+| Field | Type | Purpose |
+|---|---|---|
+| `token` | String (unique) | QR code lookup key (auto-generated CUID) |
+| `referenceNumber` | String? (unique) | Human-readable ref like `LTR-2026-0042` |
+| `subject` | String | Letter subject (shown publicly) |
+| `recipientName` | String? | Who the letter is addressed to |
+| `senderName` | String? | Who signed the letter |
+| `senderTitle` | String? | Sender's title/role |
+| `issuedAt` | DateTime | Date on the letter |
+| `expiresAt` | DateTime? | Optional expiry date |
+| `isRevoked` | Boolean | Revocation flag |
+| `createdById` | String | Admin who created the entry |
+
+### Key Pages
+| Route | Purpose |
+|---|---|
+| `/admin/documents` | Admin document management (create, list, revoke, delete) |
+| `/verify?token=xxx` | Public verification page (standalone, no auth required) |
+| `/verify?ref=LTR-2026-0001` | Manual verification by reference number |
+
+### QR Utilities
+- `getDocumentVerifyUrl(token)` — Generate `/verify?token=xxx` URL
+- `generateDocumentQrDataUrl(token)` — QR as base64 data URL (for display)
+- `generateDocumentQrBuffer(token)` — QR as PNG buffer (for download)
+
+### Workflow
+1. Admin creates document entry in `/admin/documents` → QR code + reference number auto-generated
+2. Admin downloads QR code PNG and attaches it to the physical letter
+3. Recipient scans QR with phone camera → redirected to `/verify?token=xxx`
+4. Verification page shows: ✅ Valid (with subject, sender, date) or ❌ Invalid/Revoked/Expired
+
+---
+
+## 17. Known Constraints & TODOs
 
 - **Rate limiter** is in-memory — won't work with multiple Vercel serverless instances. Migrate to Redis.
 - **Translation files** need regular sync — keys added to `en.json` must be added to all locales.
@@ -697,7 +741,7 @@ The Paperless Events system replaces physical brochures with digital files and i
 
 ---
 
-## 17. File Quick Reference
+## 18. File Quick Reference
 
 | Need to... | Look at... |
 |---|---|
