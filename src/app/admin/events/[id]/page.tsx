@@ -173,6 +173,8 @@ async function getAllUniversities() {
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { EventSessionsList } from "@/components/admin/events/sessions/session-list";
+import { EventMessagingPanel } from "@/components/admin/events/event-messaging-panel";
+import { differenceInDays, differenceInHours } from "date-fns";
 
 import { DuplicateEventButton } from "../duplicate-event-button";
 
@@ -191,6 +193,14 @@ export default async function EditEventPage({ params }: { params: Promise<{ id: 
 
     // Format times in the EVENT'S timezone for the form inputs
     const tz = event.timezone || "UTC";
+
+    // Calculate days/hours until event for messaging panel
+    const now = new Date();
+    const eventStart = new Date(event.startDateTime);
+    const daysUntil = Math.max(0, differenceInDays(eventStart, now));
+    const hoursUntil = Math.max(0, differenceInHours(eventStart, now));
+    const isPast = eventStart < now;
+    const totalRegistrants = await prisma.registration.count({ where: { eventId: id, status: "REGISTERED" } });
 
     // We use strict format for datetime-local: YYYY-MM-DDThh:mm
     const initialData = {
@@ -218,10 +228,11 @@ export default async function EditEventPage({ params }: { params: Promise<{ id: 
             </div>
 
             <Tabs defaultValue="details" className="w-full">
-                <TabsList className="grid w-full grid-cols-3">
+                <TabsList className="grid w-full grid-cols-4">
                     <TabsTrigger value="details">Details</TabsTrigger>
                     <TabsTrigger value="program">Program</TabsTrigger>
                     <TabsTrigger value="universities">Universities</TabsTrigger>
+                    <TabsTrigger value="messaging">Messaging</TabsTrigger>
                 </TabsList>
 
                 <TabsContent value="details" className="space-y-6">
@@ -282,6 +293,24 @@ export default async function EditEventPage({ params }: { params: Promise<{ id: 
                         participatingUniversities={event.universities as any}
                         allUniversities={allUniversities}
                     />
+                </TabsContent>
+
+                <TabsContent value="messaging">
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Email & Reminders</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <EventMessagingPanel
+                                eventId={id}
+                                eventTitle={event.title}
+                                daysUntil={daysUntil}
+                                hoursUntil={hoursUntil}
+                                totalRegistrants={totalRegistrants}
+                                isPast={isPast}
+                            />
+                        </CardContent>
+                    </Card>
                 </TabsContent>
             </Tabs>
         </div>

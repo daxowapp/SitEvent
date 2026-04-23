@@ -10,6 +10,8 @@ All notable changes to this project will be documented in this file.
 
 2026-04-23 - Bulk Reminder Endpoint - Created `/api/admin/events/[id]/send-reminder` POST endpoint to send reminder emails (+ WhatsApp) to all registrants. Auto-calculates days/hours until event, supports custom messages, dryRun preview, and includes correct timezone formatting.
 
+2026-04-23 - Admin Messaging Panel - Added a "Messaging" tab to the admin Event Edit page with: bulk resend confirmation, bulk send reminder, single-person resend/reminder by email, preview/dry-run mode, auto-calculated countdown, and real-time result feedback. Created `/api/admin/events/[id]/send-single` endpoint for individual sends.
+
 2026-04-15 - University Modules Core Fixes - Refactored university dashboard global team credential manager. Translated missing i18n keys for lateral team navigation. Fixed a hydration/render crash on the files management page originating from raw Supabase variable dependency by integrating centralized client configuration.
 
 2026-04-15 - University Tier RBAC & Team Management - Implemented Role-Based Access Control (`ADMIN` vs `MEMBER`) for university portals. Added Team Management dashboard to provision scanner reps. Enforced data isolation so `MEMBER` users only view leads they physically scanned at the booth.
