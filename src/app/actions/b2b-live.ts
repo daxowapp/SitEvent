@@ -654,6 +654,12 @@ export async function resetLiveSession(eventId: string) {
       },
     });
 
+    // Clear any active break
+    await prisma.b2BEvent.update({
+      where: { id: eventId },
+      data: { breakStart: null, breakEnd: null },
+    });
+
     revalidatePath(`/admin/b2b/${eventId}/live`);
     return { success: true };
   } catch (error) {
