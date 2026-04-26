@@ -23,7 +23,7 @@ import {
 } from "lucide-react";
 import {
   checkInParticipant, endMeeting, undoCheckIn, resetLiveSession,
-  markParticipantDone, bulkCheckIn, walkInCheckIn,
+  markParticipantDone, bulkCheckIn, walkInCheckIn, tickAutoAssign,
 } from "@/app/actions/b2b-live";
 
 type LiveData = NonNullable<
@@ -195,6 +195,19 @@ export function B2BLiveDashboard({ data }: { data: LiveData }) {
     const interval = setInterval(() => router.refresh(), 3000);
     return () => clearInterval(interval);
   }, [router]);
+
+  // Periodic auto-assign tick every 10s — catches break buffer expiry
+  useEffect(() => {
+    const interval = setInterval(async () => {
+      if (data.stats.idleNow > 0 && data.stats.waiting > 0) {
+        const result = await tickAutoAssign(data.event.id);
+        if (result.assigned > 0) {
+          router.refresh();
+        }
+      }
+    }, 10000);
+    return () => clearInterval(interval);
+  }, [data.event.id, data.stats.idleNow, data.stats.waiting, router]);
 
   const handleCheckIn = useCallback(async (id: string, existingEmail?: string | null) => {
     // If no email, show prompt first

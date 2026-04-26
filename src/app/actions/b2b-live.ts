@@ -303,6 +303,46 @@ async function batchAutoAssign(eventId: string) {
   return assigned;
 }
 
+/**
+ * Periodic auto-assign tick — called by the admin dashboard every ~10s.
+ * Handles the case where break buffers expire and new assignments
+ * need to be triggered without a check-in or meeting-end event.
+ */
+export async function tickAutoAssign(eventId: string) {
+  try {
+    // Quick check: are there idle universities AND waiting participants?
+    const [idleCount, waitingCount] = await Promise.all([
+      prisma.b2BParticipant.count({
+        where: {
+          b2bEventId: eventId,
+          side: "A",
+          id: {
+            notIn: (
+              await prisma.b2BMeeting.findMany({
+                where: { b2bEventId: eventId, status: "IN_PROGRESS" },
+                select: { participantAId: true },
+              })
+            ).map((m) => m.participantAId),
+          },
+        },
+      }),
+      prisma.b2BParticipant.count({
+        where: { b2bEventId: eventId, side: "B", liveStatus: "WAITING" },
+      }),
+    ]);
+
+    if (idleCount === 0 || waitingCount === 0) return { assigned: 0 };
+
+    const assigned = await batchAutoAssign(eventId);
+    if (assigned > 0) {
+      revalidatePath(`/admin/b2b/${eventId}/live`);
+    }
+    return { assigned };
+  } catch {
+    return { assigned: 0 };
+  }
+}
+
 // ============================================
 // CHECK-IN
 // ============================================
