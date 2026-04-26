@@ -34,12 +34,12 @@ import {
 import {
   ArrowLeft, Calendar, Clock, MapPin, Users, Plus, Trash2, Upload,
   Wand2, Download, Loader2, GraduationCap, Building2, FileSpreadsheet,
-  CheckCircle2, XCircle, AlertTriangle,
+  CheckCircle2, XCircle, AlertTriangle, Pencil,
 } from "lucide-react";
 import {
   addUniversityToB2B, addParticipantB, removeParticipant,
   generateB2BSchedule, clearB2BSchedule, importParticipantsB,
-  deleteB2BEvent, updateMeetingStatus,
+  deleteB2BEvent, updateMeetingStatus, updateB2BEvent, updateParticipantB,
 } from "@/app/actions/b2b";
 
 type EventData = NonNullable<Awaited<ReturnType<typeof import("@/app/actions/b2b").getB2BEvent>>>;
@@ -50,6 +50,8 @@ export function B2BEventDetailClient({ event }: { event: EventData }) {
   const [showAddUni, setShowAddUni] = useState(false);
   const [showAddB, setShowAddB] = useState(false);
   const [showImport, setShowImport] = useState(false);
+  const [showEditEvent, setShowEditEvent] = useState(false);
+  const [editingParticipant, setEditingParticipant] = useState<any>(null);
   const [availableUnis, setAvailableUnis] = useState<any[]>([]);
 
   const sideA = event.participants.filter((p) => p.side === "A");
@@ -84,6 +86,27 @@ export function B2BEventDetailClient({ event }: { event: EventData }) {
     const result = await addParticipantB(event.id, formData);
     if (result.error) toast.error(result.error);
     else { toast.success("Participant added!"); setShowAddB(false); router.refresh(); }
+    setLoading("");
+  };
+
+  const handleEditEvent = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setLoading("editEvent");
+    const formData = new FormData(e.currentTarget);
+    const result = await updateB2BEvent(event.id, formData);
+    if (result.error) toast.error(result.error);
+    else { toast.success("Event updated!"); setShowEditEvent(false); router.refresh(); }
+    setLoading("");
+  };
+
+  const handleEditParticipant = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!editingParticipant) return;
+    setLoading("editPart");
+    const formData = new FormData(e.currentTarget);
+    const result = await updateParticipantB(editingParticipant.id, formData);
+    if (result.error) toast.error(result.error);
+    else { toast.success("Participant updated!"); setEditingParticipant(null); router.refresh(); }
     setLoading("");
   };
 
@@ -182,6 +205,9 @@ export function B2BEventDetailClient({ event }: { event: EventData }) {
               <Button variant="outline" size="sm" className="gap-2"><Download className="h-4 w-4" />Export CSV</Button>
             </a>
           )}
+          <Button variant="outline" size="sm" className="gap-2" onClick={() => setShowEditEvent(true)}>
+            <Pencil className="h-4 w-4" />Edit
+          </Button>
           <AlertDialog>
             <AlertDialogTrigger asChild>
               <Button variant="destructive" size="sm" className="gap-2"><Trash2 className="h-4 w-4" />Delete</Button>
@@ -286,9 +312,14 @@ export function B2BEventDetailClient({ event }: { event: EventData }) {
                         {p.arrivalTime && <span className="ml-2 inline-flex items-center gap-0.5 bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 px-1.5 py-0.5 rounded text-[10px] font-medium"><Clock className="h-2.5 w-2.5" />{p.arrivalTime}</span>}
                       </p>
                     </div>
-                    <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:text-destructive" onClick={() => handleRemove(p.id)} disabled={loading === `remove-${p.id}`}>
-                      {loading === `remove-${p.id}` ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
-                    </Button>
+                    <div className="flex items-center gap-1">
+                      <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setEditingParticipant(p)}>
+                        <Pencil className="h-3.5 w-3.5" />
+                      </Button>
+                      <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:text-destructive" onClick={() => handleRemove(p.id)} disabled={loading === `remove-${p.id}`}>
+                        {loading === `remove-${p.id}` ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
+                      </Button>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -510,6 +541,66 @@ export function B2BEventDetailClient({ event }: { event: EventData }) {
               {loading === "import" ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Upload className="h-4 w-4 mr-2" />}Import
             </Button>
           </form>
+        </DialogContent>
+      </Dialog>
+      {/* EDIT EVENT DIALOG */}
+      <Dialog open={showEditEvent} onOpenChange={setShowEditEvent}>
+        <DialogContent className="max-w-md">
+          <DialogHeader><DialogTitle>Edit B2B Event</DialogTitle></DialogHeader>
+          <form onSubmit={handleEditEvent} className="space-y-4">
+            <div className="space-y-2"><Label>Event Name</Label><Input name="name" defaultValue={event.name} required /></div>
+            <div className="space-y-2"><Label>Slug</Label><Input name="slug" defaultValue={event.slug} required /></div>
+            <div className="space-y-2"><Label>Date</Label><Input name="date" type="date" defaultValue={new Date(event.date).toISOString().split('T')[0]} required /></div>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-2"><Label>Start Time</Label><Input name="startTime" type="time" defaultValue={event.startTime} required /></div>
+              <div className="space-y-2"><Label>End Time</Label><Input name="endTime" type="time" defaultValue={event.endTime} required /></div>
+            </div>
+            <div className="space-y-2"><Label>Slot Duration (minutes)</Label><Input name="slotDuration" type="number" min={5} max={120} defaultValue={event.slotDuration} required /></div>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-2"><Label>Break Start</Label><Input name="breakStart" type="time" defaultValue={event.breakStart || ''} /></div>
+              <div className="space-y-2"><Label>Break End</Label><Input name="breakEnd" type="time" defaultValue={event.breakEnd || ''} /></div>
+            </div>
+            <div className="space-y-2"><Label>Location</Label><Input name="location" defaultValue={event.location || ''} /></div>
+            <Button type="submit" className="w-full" disabled={loading === "editEvent"}>
+              {loading === "editEvent" ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}Save Changes
+            </Button>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* EDIT PARTICIPANT DIALOG */}
+      <Dialog open={!!editingParticipant} onOpenChange={(open) => !open && setEditingParticipant(null)}>
+        <DialogContent>
+          <DialogHeader><DialogTitle>Edit Participant</DialogTitle></DialogHeader>
+          {editingParticipant && (
+            <form onSubmit={handleEditParticipant} className="space-y-4">
+              <div className="space-y-2"><Label>Name *</Label><Input name="name" defaultValue={editingParticipant.name} required /></div>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-2"><Label>Contact Person</Label><Input name="contactPerson" defaultValue={editingParticipant.contactPerson || ''} /></div>
+                <div className="space-y-2"><Label>Type</Label>
+                  <Select name="organization" defaultValue={editingParticipant.organization || ''}>
+                    <SelectTrigger><SelectValue placeholder="Select..." /></SelectTrigger>
+                    <SelectContent><SelectItem value="Agent">Agent</SelectItem><SelectItem value="School">School</SelectItem><SelectItem value="Company">Company</SelectItem></SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-2"><Label>Email</Label><Input name="contactEmail" type="email" defaultValue={editingParticipant.contactEmail || ''} /></div>
+                <div className="space-y-2"><Label>Phone</Label><Input name="contactPhone" defaultValue={editingParticipant.contactPhone || ''} /></div>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-2"><Label>Country</Label><Input name="country" defaultValue={editingParticipant.country || ''} /></div>
+                <div className="space-y-2">
+                  <Label>Arrival Time</Label>
+                  <Input name="arrivalTime" type="time" defaultValue={editingParticipant.arrivalTime || ''} />
+                  <p className="text-[10px] text-muted-foreground">Leave empty = available from event start</p>
+                </div>
+              </div>
+              <Button type="submit" className="w-full" disabled={loading === "editPart"}>
+                {loading === "editPart" ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}Save Changes
+              </Button>
+            </form>
+          )}
         </DialogContent>
       </Dialog>
     </div>

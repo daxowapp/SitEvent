@@ -372,6 +372,36 @@ export async function removeParticipant(participantId: string) {
   }
 }
 
+export async function updateParticipantB(participantId: string, formData: FormData) {
+  await requireB2BAdmin();
+
+  try {
+    const participant = await prisma.b2BParticipant.findUnique({
+      where: { id: participantId },
+    });
+    if (!participant) return { error: "Participant not found" };
+
+    await prisma.b2BParticipant.update({
+      where: { id: participantId },
+      data: {
+        name: (formData.get("name") as string) || participant.name,
+        contactPerson: (formData.get("contactPerson") as string) || null,
+        contactEmail: (formData.get("contactEmail") as string) || null,
+        contactPhone: (formData.get("contactPhone") as string) || null,
+        organization: (formData.get("organization") as string) || null,
+        country: (formData.get("country") as string) || null,
+        arrivalTime: (formData.get("arrivalTime") as string) || null,
+      },
+    });
+
+    revalidatePath(`/admin/b2b/${participant.b2bEventId}`);
+    return { success: true };
+  } catch (error) {
+    console.error("Failed to update participant:", error);
+    return { error: "Failed to update participant" };
+  }
+}
+
 // ============================================
 // SCHEDULE GENERATION
 // ============================================
