@@ -152,12 +152,12 @@ async function autoAssign(eventId: string) {
   });
   if (!nextWaiting) return null; // No one waiting
 
-  // Get completed meetings for this participant (to avoid repeats)
+  // Get ALL meetings for this participant (including old SCHEDULED ones)
+  // to avoid duplicate pair constraint violations
   const alreadyMet = await prisma.b2BMeeting.findMany({
     where: {
       b2bEventId: eventId,
       participantBId: nextWaiting.id,
-      status: { in: ["COMPLETED", "IN_PROGRESS"] },
     },
     select: { participantAId: true },
   });
@@ -279,6 +279,16 @@ export async function checkInParticipant(participantId: string) {
         liveStatus: "WAITING",
         arrivedAt: new Date(),
         queuePosition: (maxQueue?.queuePosition || 0) + 1,
+      },
+    });
+
+    // Clean up old pre-scheduled meetings for this participant
+    // (from the old scheduling system — they'd block the unique constraint)
+    await prisma.b2BMeeting.deleteMany({
+      where: {
+        b2bEventId: participant.b2bEventId,
+        participantBId: participantId,
+        status: "SCHEDULED",
       },
     });
 
@@ -519,5 +529,59 @@ export async function bulkCheckIn(eventId: string) {
   } catch (error) {
     console.error("Bulk check-in failed:", error);
     return { error: "Bulk check-in failed" };
+  }
+}
+
+// ============================================
+// WALK-IN CHECK-IN (not on the list)
+// ============================================
+
+export async function walkInCheckIn(eventId: string, formData: FormData) {
+  await requireB2BAdmin();
+
+  try {
+    const name = (formData.get("name") as string)?.trim();
+    const organization = (formData.get("organization") as string)?.trim() || null;
+    const contactPerson = (formData.get("contactPerson") as string)?.trim() || null;
+    const contactPhone = (formData.get("contactPhone") as string)?.trim() || null;
+
+    if (!name) return { error: "Name is required" };
+
+    // Get current max queue position
+    const maxQueue = await prisma.b2BParticipant.findFirst({
+      where: { b2bEventId: eventId, liveStatus: "WAITING" },
+      orderBy: { queuePosition: "desc" },
+      select: { queuePosition: true },
+    });
+
+    // Create participant and check in immediately
+    const participant = await prisma.b2BParticipant.create({
+      data: {
+        b2bEventId: eventId,
+        side: "B",
+        name,
+        organization,
+        contactPerson,
+        contactPhone,
+        liveStatus: "WAITING",
+        arrivedAt: new Date(),
+        queuePosition: (maxQueue?.queuePosition || 0) + 1,
+      },
+    });
+
+    // Auto-assign
+    const assigned = await batchAutoAssign(eventId);
+
+    revalidatePath(`/admin/b2b/${eventId}/live`);
+    return {
+      success: true,
+      assigned,
+      message: assigned > 0
+        ? `${name} added and assigned to a university!`
+        : `${name} added to the queue.`,
+    };
+  } catch (error) {
+    console.error("Walk-in check-in failed:", error);
+    return { error: "Failed to add walk-in participant" };
   }
 }

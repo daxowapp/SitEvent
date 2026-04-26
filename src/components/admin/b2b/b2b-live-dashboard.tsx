@@ -16,11 +16,11 @@ import {
 import {
   ArrowLeft, Clock, Users, GraduationCap, UserCheck, UserX,
   Loader2, RotateCcw, Radio, Square, Timer, CheckCircle2,
-  AlertTriangle, Undo2, Volume2, VolumeX, Link2, Copy, UserMinus, UsersRound,
+  AlertTriangle, Undo2, Volume2, VolumeX, Link2, Copy, UserMinus, UsersRound, UserPlus,
 } from "lucide-react";
 import {
   checkInParticipant, endMeeting, undoCheckIn, resetLiveSession,
-  markParticipantDone, bulkCheckIn,
+  markParticipantDone, bulkCheckIn, walkInCheckIn,
 } from "@/app/actions/b2b-live";
 
 type LiveData = NonNullable<
@@ -244,6 +244,20 @@ export function B2BLiveDashboard({ data }: { data: LiveData }) {
     const result = await bulkCheckIn(data.event.id);
     if (result.error) toast.error(result.error);
     else toast.success(result.message);
+    setLoading("");
+    router.refresh();
+  }, [data.event.id, router]);
+
+  const handleWalkIn = useCallback(async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setLoading("walkin");
+    const formData = new FormData(e.currentTarget);
+    const result = await walkInCheckIn(data.event.id, formData);
+    if (result.error) toast.error(result.error);
+    else {
+      toast.success(result.message);
+      (e.target as HTMLFormElement).reset();
+    }
     setLoading("");
     router.refresh();
   }, [data.event.id, router]);
@@ -553,6 +567,40 @@ export function B2BLiveDashboard({ data }: { data: LiveData }) {
                 ))}
               </div>
             )}
+          </div>
+
+          {/* WALK-IN (not on the list) */}
+          <div>
+            <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-wider flex items-center gap-2 mb-3">
+              <UserPlus className="h-4 w-4 text-emerald-400" />Walk-in
+            </h2>
+            <form onSubmit={handleWalkIn} className="bg-gray-900 border border-gray-800 rounded-xl p-3 space-y-2">
+              <input
+                name="name"
+                placeholder="Name *"
+                required
+                className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              />
+              <input
+                name="organization"
+                placeholder="Organization (optional)"
+                className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              />
+              <input
+                name="contactPhone"
+                placeholder="Phone (optional)"
+                className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              />
+              <Button
+                type="submit"
+                size="sm"
+                className="w-full bg-emerald-600 hover:bg-emerald-700 gap-1.5 text-xs"
+                disabled={loading === "walkin"}
+              >
+                {loading === "walkin" ? <Loader2 className="h-3 w-3 animate-spin" /> : <UserPlus className="h-3 w-3" />}
+                Add & Check In
+              </Button>
+            </form>
           </div>
 
           {/* DONE PARTICIPANTS */}
