@@ -535,13 +535,21 @@ export async function generateB2BSchedule(eventId: string) {
     });
 
     revalidatePath(`/admin/b2b/${eventId}`);
+
+    // Build info messages
+    const messages: string[] = [];
+    if (adjusted) {
+      messages.push(`Slot duration auto-adjusted from ${event.slotDuration}min → ${slotDuration}min`);
+    }
+    if (result.adjusted) {
+      messages.push(result.adjusted);
+    }
+
     return {
       success: true,
       meetingsCreated: result.meetings.length,
       validation: result.validation,
-      adjusted: adjusted
-        ? `Slot duration auto-adjusted from ${event.slotDuration}min → ${slotDuration}min to fit all ${validation.slotsNeeded} meetings`
-        : undefined,
+      adjusted: messages.length > 0 ? messages.join(". ") : undefined,
     };
   } catch (error) {
     console.error("Failed to generate schedule:", error);

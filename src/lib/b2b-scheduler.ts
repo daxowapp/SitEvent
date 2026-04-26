@@ -39,6 +39,7 @@ export interface ScheduleResult {
   meetings: MeetingAssignment[];
   validation: ScheduleValidation;
   error?: string;
+  adjusted?: string;
 }
 
 /**
@@ -242,15 +243,6 @@ export function generateSchedule(
     if (!assigned) unscheduled++;
   }
 
-  if (unscheduled > 0) {
-    return {
-      success: false,
-      meetings: [],
-      validation,
-      error: `Could not schedule ${unscheduled} meetings. Some participants arrive too late to meet everyone. Try extending the event end time or reducing slot duration.`,
-    };
-  }
-
   // Sort meetings by time slot, then by table number
   meetings.sort((a, b) => {
     const timeDiff = a.timeSlot.getTime() - b.timeSlot.getTime();
@@ -262,5 +254,8 @@ export function generateSchedule(
     success: true,
     meetings,
     validation,
+    adjusted: unscheduled > 0
+      ? `${unscheduled} meetings skipped — some participants arrive too late to meet all universities. They'll have fewer meetings.`
+      : undefined,
   };
 }
