@@ -108,6 +108,7 @@ export const b2bEventSchema = z.object({
     slotDuration: z.number().int().min(5).max(120).default(20),
     breakStart: z.string().regex(/^\d{2}:\d{2}$/).optional().or(z.literal("")),
     breakEnd: z.string().regex(/^\d{2}:\d{2}$/).optional().or(z.literal("")),
+    breakBetweenMeetings: z.number().int().min(0).max(30).default(5),
     location: z.string().optional(),
     description: z.string().optional(),
 });

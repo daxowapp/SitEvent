@@ -22,6 +22,7 @@ interface B2BEventFormProps {
     slotDuration: number;
     breakStart: string | null;
     breakEnd: string | null;
+    breakBetweenMeetings: number;
     location: string | null;
     description: string | null;
   };
@@ -224,6 +225,26 @@ export function B2BEventForm({ event }: B2BEventFormProps) {
             Define a break period (e.g., lunch) where no meetings will be
             scheduled
           </p>
+        </div>
+
+        <div className="border-t pt-4">
+          <h3 className="text-sm font-medium text-muted-foreground mb-3">
+            Buffer Between Meetings
+          </h3>
+          <div className="max-w-xs space-y-2">
+            <Label htmlFor="breakBetweenMeetings">Break Between Meetings (minutes)</Label>
+            <Input
+              id="breakBetweenMeetings"
+              name="breakBetweenMeetings"
+              type="number"
+              min={0}
+              max={30}
+              defaultValue={event?.breakBetweenMeetings ?? 5}
+            />
+            <p className="text-xs text-muted-foreground">
+              Buffer time after each meeting before the next one starts (default: 5 min)
+            </p>
+          </div>
         </div>
       </div>
 

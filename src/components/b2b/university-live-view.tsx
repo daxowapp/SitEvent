@@ -117,9 +117,9 @@ export function UniversityLiveView({ data, token }: { data: UniversityData; toke
     setNotes(data.activeMeeting?.notesA || "");
   }, [data.activeMeeting?.id]);
 
-  // Auto-refresh every 5 seconds
+  // Auto-refresh every 3 seconds for real-time updates
   useEffect(() => {
-    const interval = setInterval(() => router.refresh(), 5000);
+    const interval = setInterval(() => router.refresh(), 3000);
     return () => clearInterval(interval);
   }, [router]);
 

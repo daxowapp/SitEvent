@@ -133,6 +133,7 @@ export async function createB2BEvent(formData: FormData) {
     slotDuration: parseInt(formData.get("slotDuration") as string) || 20,
     breakStart: (formData.get("breakStart") as string) || "",
     breakEnd: (formData.get("breakEnd") as string) || "",
+    breakBetweenMeetings: parseInt(formData.get("breakBetweenMeetings") as string) || 5,
     location: (formData.get("location") as string) || "",
     description: (formData.get("description") as string) || "",
   };
@@ -153,6 +154,7 @@ export async function createB2BEvent(formData: FormData) {
         slotDuration: parsed.data.slotDuration,
         breakStart: parsed.data.breakStart || null,
         breakEnd: parsed.data.breakEnd || null,
+        breakBetweenMeetings: parsed.data.breakBetweenMeetings || 5,
         location: parsed.data.location || null,
         description: parsed.data.description || null,
         createdById: user.id!,
@@ -182,6 +184,7 @@ export async function updateB2BEvent(eventId: string, formData: FormData) {
     slotDuration: parseInt(formData.get("slotDuration") as string) || 20,
     breakStart: (formData.get("breakStart") as string) || "",
     breakEnd: (formData.get("breakEnd") as string) || "",
+    breakBetweenMeetings: parseInt(formData.get("breakBetweenMeetings") as string) || 5,
     location: (formData.get("location") as string) || "",
     description: (formData.get("description") as string) || "",
   };
@@ -203,6 +206,7 @@ export async function updateB2BEvent(eventId: string, formData: FormData) {
         slotDuration: parsed.data.slotDuration,
         breakStart: parsed.data.breakStart || null,
         breakEnd: parsed.data.breakEnd || null,
+        breakBetweenMeetings: parsed.data.breakBetweenMeetings || 5,
         location: parsed.data.location || null,
         description: parsed.data.description || null,
       },

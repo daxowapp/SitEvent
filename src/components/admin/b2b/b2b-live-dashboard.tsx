@@ -190,9 +190,9 @@ export function B2BLiveDashboard({ data }: { data: LiveData }) {
   const [promptEmail, setPromptEmail] = useState("");
   const [qrModal, setQrModal] = useState<{ name: string; url: string } | null>(null);
 
-  // Auto-refresh every 5 seconds
+  // Auto-refresh every 3 seconds for real-time updates
   useEffect(() => {
-    const interval = setInterval(() => router.refresh(), 5000);
+    const interval = setInterval(() => router.refresh(), 3000);
     return () => clearInterval(interval);
   }, [router]);
 

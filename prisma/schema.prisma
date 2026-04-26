@@ -569,6 +569,7 @@ model B2BEvent {
   slotDuration        Int       @default(20)      // Minutes per meeting
   breakStart          String?                     // "12:00" — lunch break start
   breakEnd            String?                     // "13:00" — lunch break end
+  breakBetweenMeetings Int     @default(5)        // Minutes of buffer between meetings
   location            String?
   description         String?   @db.Text
   isScheduleGenerated Boolean   @default(false)

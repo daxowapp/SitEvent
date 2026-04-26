@@ -129,6 +129,25 @@ export async function getLiveDashboard(eventId: string) {
  * 3. Has not already met this participant
  */
 async function autoAssign(eventId: string) {
+  // Get event config first (needed for breaks + slot duration)
+  const event = await prisma.b2BEvent.findUnique({
+    where: { id: eventId },
+    select: { slotDuration: true, breakStart: true, breakEnd: true, breakBetweenMeetings: true },
+  });
+  if (!event) return null;
+
+  // Check if we're in the main break period
+  if (event.breakStart && event.breakEnd) {
+    const nowDate = new Date();
+    const hhmm = `${nowDate.getHours().toString().padStart(2, "0")}:${nowDate.getMinutes().toString().padStart(2, "0")}`;
+    if (hhmm >= event.breakStart && hhmm < event.breakEnd) {
+      return null; // During main break — no assignments
+    }
+  }
+
+  const breakBufferMs = (event.breakBetweenMeetings ?? 5) * 60 * 1000;
+  const nowMs = Date.now();
+
   // Get all Side A participants
   const sideA = await prisma.b2BParticipant.findMany({
     where: { b2bEventId: eventId, side: "A" },
@@ -141,19 +160,40 @@ async function autoAssign(eventId: string) {
   });
   const busyUniIds = new Set(activeMeetings.map((m) => m.participantAId));
 
-  // Get idle universities
-  const idleUnis = sideA.filter((u) => !busyUniIds.has(u.id));
-  if (idleUnis.length === 0) return null; // All busy
+  // Get last completed meeting for each university to enforce break buffer
+  const uniLastMeetings = await prisma.b2BMeeting.findMany({
+    where: {
+      b2bEventId: eventId,
+      status: "COMPLETED",
+      participantAId: { in: sideA.map((u) => u.id) },
+    },
+    select: { participantAId: true, actualEnd: true },
+    orderBy: { actualEnd: "desc" },
+  });
+  const uniLastEndMap = new Map<string, Date>();
+  for (const m of uniLastMeetings) {
+    if (!uniLastEndMap.has(m.participantAId) && m.actualEnd) {
+      uniLastEndMap.set(m.participantAId, m.actualEnd);
+    }
+  }
 
-  // Get ALL waiting participants (not just the first one)
+  // Get idle universities — not in meeting AND break buffer has passed
+  const idleUnis = sideA.filter((u) => {
+    if (busyUniIds.has(u.id)) return false;
+    const lastEnd = uniLastEndMap.get(u.id);
+    if (lastEnd && (nowMs - lastEnd.getTime()) < breakBufferMs) return false;
+    return true;
+  });
+  if (idleUnis.length === 0) return null;
+
+  // Get ALL waiting participants
   const allWaiting = await prisma.b2BParticipant.findMany({
     where: { b2bEventId: eventId, side: "B", liveStatus: "WAITING" },
     orderBy: { arrivedAt: "asc" },
   });
-  if (allWaiting.length === 0) return null; // No one waiting
+  if (allWaiting.length === 0) return null;
 
   // Get last completed meeting time for each waiting participant
-  // to prioritize those who have been waiting the longest
   const waitingIds = allWaiting.map((w) => w.id);
   const lastMeetings = await prisma.b2BMeeting.findMany({
     where: {
@@ -165,7 +205,6 @@ async function autoAssign(eventId: string) {
     orderBy: { actualEnd: "desc" },
   });
 
-  // Build map: participantId -> last meeting end time
   const lastMeetingEndMap = new Map<string, Date>();
   for (const m of lastMeetings) {
     if (!lastMeetingEndMap.has(m.participantBId) && m.actualEnd) {
@@ -173,39 +212,33 @@ async function autoAssign(eventId: string) {
     }
   }
 
-  // Sort waiting participants by priority:
-  // 1. Those who NEVER had a meeting (fresh arrivals) — by arrival time
-  // 2. Those whose last meeting ended longest ago
-  // This ensures no one waits 2+ sessions while others keep going
+  // Sort: fresh arrivals first, then by longest wait since last meeting
   const sortedWaiting = [...allWaiting].sort((a, b) => {
     const aLast = lastMeetingEndMap.get(a.id);
     const bLast = lastMeetingEndMap.get(b.id);
-
-    // Never-had-meeting participants go first (sorted by arrival)
     if (!aLast && !bLast) {
       return new Date(a.arrivedAt || 0).getTime() - new Date(b.arrivedAt || 0).getTime();
     }
-    if (!aLast) return -1; // a never met, prioritize
-    if (!bLast) return 1;  // b never met, prioritize
-
-    // Both had meetings — whoever finished earliest goes first (waited longer)
+    if (!aLast) return -1;
+    if (!bLast) return 1;
     return aLast.getTime() - bLast.getTime();
   });
 
-  // Try each waiting participant in priority order until we find a match
-  for (const nextWaiting of sortedWaiting) {
-    // Get ALL meetings for this participant (including old SCHEDULED ones)
-    // to avoid duplicate pair constraint violations
+  // Filter out participants still on their break buffer
+  const readyWaiting = sortedWaiting.filter((p) => {
+    const lastEnd = lastMeetingEndMap.get(p.id);
+    if (lastEnd && (nowMs - lastEnd.getTime()) < breakBufferMs) return false;
+    return true;
+  });
+
+  // Try each ready participant in priority order
+  for (const nextWaiting of readyWaiting) {
     const alreadyMet = await prisma.b2BMeeting.findMany({
-      where: {
-        b2bEventId: eventId,
-        participantBId: nextWaiting.id,
-      },
+      where: { b2bEventId: eventId, participantBId: nextWaiting.id },
       select: { participantAId: true },
     });
     const metUniIds = new Set(alreadyMet.map((m) => m.participantAId));
 
-    // If they've met everyone, mark DONE and continue to next
     if (metUniIds.size >= sideA.length) {
       await prisma.b2BParticipant.update({
         where: { id: nextWaiting.id },
@@ -214,57 +247,36 @@ async function autoAssign(eventId: string) {
       continue;
     }
 
-    // Get completed meeting counts per university
     const uniMeetingCounts = await prisma.b2BMeeting.groupBy({
       by: ["participantAId"],
-      where: {
-        b2bEventId: eventId,
-        status: { in: ["COMPLETED", "IN_PROGRESS"] },
-      },
+      where: { b2bEventId: eventId, status: { in: ["COMPLETED", "IN_PROGRESS"] } },
       _count: true,
     });
-    const countMap = new Map(
-      uniMeetingCounts.map((c) => [c.participantAId, c._count])
-    );
+    const countMap = new Map(uniMeetingCounts.map((c) => [c.participantAId, c._count]));
 
-    // Find best university: idle, hasn't met this participant, fewest meetings
     const candidates = idleUnis
       .filter((u) => !metUniIds.has(u.id))
       .sort((a, b) => (countMap.get(a.id) || 0) - (countMap.get(b.id) || 0));
 
-    if (candidates.length === 0) {
-      // All unmet universities are busy — skip to next participant
-      continue;
-    }
+    if (candidates.length === 0) continue;
 
     const bestUni = candidates[0];
-    const now = new Date();
-    const endTime = new Date(now.getTime() + 15 * 60 * 1000); // Default 15 min
+    const meetingStart = new Date();
+    const endTime = new Date(meetingStart.getTime() + event.slotDuration * 60 * 1000);
 
-    // Get event slot duration
-    const event = await prisma.b2BEvent.findUnique({
-      where: { id: eventId },
-      select: { slotDuration: true },
-    });
-    if (event) {
-      endTime.setTime(now.getTime() + event.slotDuration * 60 * 1000);
-    }
-
-    // Create meeting
     const meeting = await prisma.b2BMeeting.create({
       data: {
         b2bEventId: eventId,
         participantAId: bestUni.id,
         participantBId: nextWaiting.id,
-        timeSlot: now,
+        timeSlot: meetingStart,
         endTime,
         status: "IN_PROGRESS",
-        actualStart: now,
+        actualStart: meetingStart,
         tableNumber: sideA.indexOf(bestUni) + 1,
       },
     });
 
-    // Update participant status
     await prisma.b2BParticipant.update({
       where: { id: nextWaiting.id },
       data: { liveStatus: "IN_MEETING", queuePosition: null },
@@ -273,7 +285,6 @@ async function autoAssign(eventId: string) {
     return meeting;
   }
 
-  // No matches found for any waiting participant
   return null;
 }
 
