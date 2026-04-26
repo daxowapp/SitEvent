@@ -391,12 +391,15 @@ export async function generateB2BSchedule(eventId: string) {
     if (sideA.length === 0) return { error: "No universities (Side A) added yet" };
     if (sideB.length === 0) return { error: "No participants (Side B) added yet" };
 
-    // Generate time slots
-    const timeSlots = generateTimeSlots(
+    let slotDuration = event.slotDuration;
+    let adjusted = false;
+
+    // Generate time slots with current duration
+    let timeSlots = generateTimeSlots(
       event.date,
       event.startTime,
       event.endTime,
-      event.slotDuration,
+      slotDuration,
       event.breakStart,
       event.breakEnd
     );
@@ -405,10 +408,57 @@ export async function generateB2BSchedule(eventId: string) {
       return { error: "No time slots available. Check event start/end times and slot duration." };
     }
 
-    // Validate capacity
-    const validation = validateCapacity(sideA.length, sideB.length, timeSlots.length);
+    // Validate capacity — if not enough slots, auto-calculate optimal duration
+    let validation = validateCapacity(sideA.length, sideB.length, timeSlots.length);
     if (!validation.isValid) {
-      return { error: validation.message };
+      // Calculate total available minutes
+      const startParts = event.startTime.split(":").map(Number);
+      const endParts = event.endTime.split(":").map(Number);
+      let totalMinutes = (endParts[0] * 60 + endParts[1]) - (startParts[0] * 60 + startParts[1]);
+
+      // Subtract break time
+      if (event.breakStart && event.breakEnd) {
+        const breakStartParts = event.breakStart.split(":").map(Number);
+        const breakEndParts = event.breakEnd.split(":").map(Number);
+        const breakMinutes = (breakEndParts[0] * 60 + breakEndParts[1]) - (breakStartParts[0] * 60 + breakStartParts[1]);
+        totalMinutes -= breakMinutes;
+      }
+
+      // Calculate minimum slot duration: total_minutes / slots_needed
+      const slotsNeeded = validation.slotsNeeded;
+      const optimalDuration = Math.floor(totalMinutes / slotsNeeded);
+
+      if (optimalDuration < 5) {
+        return {
+          error: `Cannot fit ${slotsNeeded} meetings. Even with 5-minute slots, only ${Math.floor(totalMinutes / 5)} slots available. Add more time or reduce participants.`,
+        };
+      }
+
+      // Auto-adjust slot duration
+      slotDuration = optimalDuration;
+      adjusted = true;
+
+      // Regenerate slots with new duration
+      timeSlots = generateTimeSlots(
+        event.date,
+        event.startTime,
+        event.endTime,
+        slotDuration,
+        event.breakStart,
+        event.breakEnd
+      );
+
+      // Re-validate
+      validation = validateCapacity(sideA.length, sideB.length, timeSlots.length);
+      if (!validation.isValid) {
+        return { error: validation.message };
+      }
+
+      // Persist the adjusted slot duration
+      await prisma.b2BEvent.update({
+        where: { id: eventId },
+        data: { slotDuration },
+      });
     }
 
     // Generate schedule
@@ -448,6 +498,9 @@ export async function generateB2BSchedule(eventId: string) {
       success: true,
       meetingsCreated: result.meetings.length,
       validation: result.validation,
+      adjusted: adjusted
+        ? `Slot duration auto-adjusted from ${event.slotDuration}min → ${slotDuration}min to fit all ${validation.slotsNeeded} meetings`
+        : undefined,
     };
   } catch (error) {
     console.error("Failed to generate schedule:", error);

@@ -90,7 +90,11 @@ export function B2BEventDetailClient({ event }: { event: EventData }) {
     setLoading("generate");
     const result = await generateB2BSchedule(event.id);
     if (result.error) toast.error(result.error);
-    else { toast.success(`${result.meetingsCreated} meetings scheduled!`); router.refresh(); }
+    else {
+      if (result.adjusted) toast.info(result.adjusted, { duration: 8000 });
+      toast.success(`${result.meetingsCreated} meetings scheduled!`);
+      router.refresh();
+    }
     setLoading("");
   };
 
