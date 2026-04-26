@@ -121,6 +121,26 @@ export default async function UniversityEventPage({ params }: { params: Promise<
         ? `${event.cityRef.name}, ${event.cityRef.country.name}`
         : `${event.city || ""}, ${event.country || ""}`;
 
+    // Check for linked B2B event
+    let b2bLiveToken: string | null = null;
+    const b2bEvent = await prisma.b2BEvent.findUnique({
+        where: { eventId: id },
+        select: { id: true },
+    });
+    if (b2bEvent) {
+        const b2bParticipant = await prisma.b2BParticipant.findFirst({
+            where: {
+                b2bEventId: b2bEvent.id,
+                universityId: session.user.universityId,
+                side: "A",
+            },
+            select: { scheduleToken: true },
+        });
+        if (b2bParticipant?.scheduleToken) {
+            b2bLiveToken = b2bParticipant.scheduleToken;
+        }
+    }
+
     return (
         <EventDetailClient
             event={{
@@ -153,6 +173,7 @@ export default async function UniversityEventPage({ params }: { params: Promise<
             cafes={cafes}
             transportation={transportation}
             hasCityRef={!!event.cityRef}
+            b2bLiveToken={b2bLiveToken}
             studentTableComponent={
                 isAccepted ? (
                     <StudentDataTable data={registrations} fileName={`students-${event.slug}`} />

@@ -22,7 +22,8 @@ import {
     Landmark,
     Navigation,
     Search,
-    Star
+    Star,
+    Radio
 } from "lucide-react";
 import { format } from "date-fns";
 import { tr, enUS } from "date-fns/locale";
@@ -129,6 +130,7 @@ interface EventDetailClientProps {
     cafes: Cafe[];
     transportation: Transportation;
     hasCityRef: boolean;
+    b2bLiveToken?: string | null;
     children?: React.ReactNode;
     studentTableComponent?: React.ReactNode;
     registerButtonComponent?: React.ReactNode;
@@ -149,6 +151,7 @@ export function EventDetailClient({
     studentTableComponent,
     registerButtonComponent,
     programComponent,
+    b2bLiveToken,
 }: EventDetailClientProps) {
     const t = useTranslations('university.eventDetail');
     const locale = useLocale();
@@ -292,6 +295,19 @@ export function EventDetailClient({
                                             {t('findStudent')}
                                         </Button>
                                     </motion.div>
+                                    {b2bLiveToken && (
+                                        <motion.div
+                                            whileHover={{ scale: 1.03 }}
+                                            whileTap={{ scale: 0.98 }}
+                                        >
+                                            <Button asChild className="bg-gradient-to-r from-red-600 to-red-700 text-white shadow-lg shadow-red-300 hover:from-red-700 hover:to-red-800 h-12 px-6 rounded-xl">
+                                                <Link href={`/b2b/university/${b2bLiveToken}`} target="_blank">
+                                                    <Radio className="h-4 w-4 mr-2 animate-pulse" />
+                                                    B2B Live
+                                                </Link>
+                                            </Button>
+                                        </motion.div>
+                                    )}
                                 </>
                             )}
                             {!participation && registerButtonComponent}
