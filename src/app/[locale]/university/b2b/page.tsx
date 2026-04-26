@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
 import Link from "next/link";
 import { format } from "date-fns";
-import { Handshake, Calendar, Clock, MapPin, ChevronRight } from "lucide-react";
+import { Handshake, Calendar, Clock, MapPin, ChevronRight, Radio } from "lucide-react";
 
 export default async function UniversityB2BPage() {
   const session = await auth();
@@ -40,27 +40,31 @@ export default async function UniversityB2BPage() {
       ) : (
         <div className="space-y-3">
           {participations.map((p) => (
-            <Link key={p.id} href={`b2b/${p.b2bEvent.id}`} className="block group">
-              <div className="rounded-xl border bg-card p-5 transition-all hover:shadow-md hover:border-primary/30">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h3 className="font-semibold text-lg group-hover:text-primary transition-colors">{p.b2bEvent.name}</h3>
-                    <div className="flex items-center gap-3 mt-1 text-sm text-muted-foreground">
-                      <span className="flex items-center gap-1"><Calendar className="h-3.5 w-3.5" />{format(new Date(p.b2bEvent.date), "MMM d, yyyy")}</span>
-                      <span className="flex items-center gap-1"><Clock className="h-3.5 w-3.5" />{p.b2bEvent.startTime} — {p.b2bEvent.endTime}</span>
-                      {p.b2bEvent.location && <span className="flex items-center gap-1"><MapPin className="h-3.5 w-3.5" />{p.b2bEvent.location}</span>}
-                    </div>
+            <div key={p.id} className="rounded-xl border bg-card p-5 transition-all hover:shadow-md hover:border-primary/30">
+              <div className="flex items-center justify-between">
+                <Link href={`b2b/${p.b2bEvent.id}`} className="flex-1 group">
+                  <h3 className="font-semibold text-lg group-hover:text-primary transition-colors">{p.b2bEvent.name}</h3>
+                  <div className="flex flex-wrap items-center gap-3 mt-1 text-sm text-muted-foreground">
+                    <span className="flex items-center gap-1"><Calendar className="h-3.5 w-3.5" />{format(new Date(p.b2bEvent.date), "MMM d, yyyy")}</span>
+                    <span className="flex items-center gap-1"><Clock className="h-3.5 w-3.5" />{p.b2bEvent.startTime} — {p.b2bEvent.endTime}</span>
+                    {p.b2bEvent.location && <span className="flex items-center gap-1"><MapPin className="h-3.5 w-3.5" />{p.b2bEvent.location}</span>}
                   </div>
-                  <div className="flex items-center gap-3">
-                    <div className="text-right">
-                      <p className="text-2xl font-bold text-primary">{p._count.meetingsAsA}</p>
-                      <p className="text-xs text-muted-foreground">meetings</p>
-                    </div>
-                    <ChevronRight className="h-5 w-5 text-muted-foreground" />
+                </Link>
+                <div className="flex items-center gap-3">
+                  <div className="text-right">
+                    <p className="text-2xl font-bold text-primary">{p._count.meetingsAsA}</p>
+                    <p className="text-xs text-muted-foreground">meetings</p>
                   </div>
+                  <Link
+                    href={`/b2b/university/${p.scheduleToken}`}
+                    className="inline-flex items-center gap-1.5 bg-red-600 hover:bg-red-700 text-white text-sm font-medium px-3 py-2 rounded-lg transition-colors whitespace-nowrap"
+                  >
+                    <Radio className="h-3.5 w-3.5 animate-pulse" />
+                    Go Live
+                  </Link>
                 </div>
               </div>
-            </Link>
+            </div>
           ))}
         </div>
       )}

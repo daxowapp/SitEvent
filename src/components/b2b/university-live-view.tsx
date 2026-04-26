@@ -1,16 +1,19 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Textarea } from "@/components/ui/textarea";
 import {
   GraduationCap, Clock, Timer, CheckCircle2, Users,
-  Square, Loader2, Volume2, VolumeX,
+  Square, Loader2, Volume2, VolumeX, FileText, Send,
+  Mail, Save, ChevronDown, ChevronUp,
 } from "lucide-react";
 import { endMeeting } from "@/app/actions/b2b-live";
+import { saveMeetingNotes, emailNotesToUniversity, sendFilesToParticipant } from "@/app/actions/b2b-public";
 import { toast } from "sonner";
 
 type UniversityData = NonNullable<
@@ -102,8 +105,17 @@ function MeetingCountdown({
 
 export function UniversityLiveView({ data, token }: { data: UniversityData; token: string }) {
   const router = useRouter();
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState("");
   const [soundEnabled, setSoundEnabled] = useState(true);
+  const [notes, setNotes] = useState(data.activeMeeting?.notesA || "");
+  const [expandedMeeting, setExpandedMeeting] = useState<string | null>(null);
+  const [editingNotes, setEditingNotes] = useState<Record<string, string>>({});
+  const saveTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Update notes when active meeting changes
+  useEffect(() => {
+    setNotes(data.activeMeeting?.notesA || "");
+  }, [data.activeMeeting?.id]);
 
   // Auto-refresh every 5 seconds
   useEffect(() => {
@@ -111,13 +123,58 @@ export function UniversityLiveView({ data, token }: { data: UniversityData; toke
     return () => clearInterval(interval);
   }, [router]);
 
+  // Auto-save notes with debounce
+  const autoSaveNotes = useCallback((meetingId: string, value: string) => {
+    if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
+    saveTimerRef.current = setTimeout(async () => {
+      await saveMeetingNotes(token, meetingId, value);
+    }, 1500);
+  }, [token]);
+
+  const handleNotesChange = (value: string) => {
+    setNotes(value);
+    if (data.activeMeeting) {
+      autoSaveNotes(data.activeMeeting.id, value);
+    }
+  };
+
+  const handleSaveNotes = async (meetingId: string, noteText: string) => {
+    setLoading(`save-${meetingId}`);
+    const result = await saveMeetingNotes(token, meetingId, noteText);
+    if (result.error) toast.error(result.error);
+    else toast.success("Notes saved!");
+    setLoading("");
+  };
+
   const handleEndMeeting = async () => {
-    if (!data.activeMeeting || loading) return;
-    setLoading(true);
+    if (!data.activeMeeting || loading.startsWith("end")) return;
+    // Save notes before ending
+    if (notes.trim()) {
+      await saveMeetingNotes(token, data.activeMeeting.id, notes);
+    }
+    setLoading("end");
     const result = await endMeeting(data.activeMeeting.id);
     if (result.error) toast.error(result.error);
     else toast.success(result.message);
-    setLoading(false);
+    setLoading("");
+    setNotes("");
+    router.refresh();
+  };
+
+  const handleEmailNotes = async () => {
+    setLoading("email");
+    const result = await emailNotesToUniversity(token);
+    if (result.error) toast.error(result.error);
+    else toast.success(result.message);
+    setLoading("");
+  };
+
+  const handleSendFiles = async (meetingId: string) => {
+    setLoading(`files-${meetingId}`);
+    const result = await sendFilesToParticipant(token, meetingId);
+    if (result.error) toast.error(result.error);
+    else toast.success(result.message);
+    setLoading("");
     router.refresh();
   };
 
@@ -152,14 +209,13 @@ export function UniversityLiveView({ data, token }: { data: UniversityData; toke
       </div>
 
       {/* MAIN CONTENT */}
-      <div className="flex-1 flex items-center justify-center p-6">
-        <div className="w-full max-w-lg">
+      <div className="flex-1 p-6">
+        <div className="w-full max-w-2xl mx-auto space-y-6">
           {data.activeMeeting ? (
             <Card className="border-2 border-emerald-500/50 bg-emerald-950/20">
-              <CardContent className="p-8 space-y-6 text-center">
-                <Badge className="bg-emerald-600 text-white text-xs">NOW MEETING</Badge>
-
-                <div>
+              <CardContent className="p-6 space-y-5">
+                <div className="text-center">
+                  <Badge className="bg-emerald-600 text-white text-xs mb-3">NOW MEETING</Badge>
                   <h2 className="text-3xl font-bold text-white mb-1">
                     {data.activeMeeting.participantB.name}
                   </h2>
@@ -183,19 +239,50 @@ export function UniversityLiveView({ data, token }: { data: UniversityData; toke
                   />
                 )}
 
-                <Button
-                  size="lg"
-                  variant="outline"
-                  className="w-full border-red-500/50 text-red-400 hover:bg-red-500/20 gap-2"
-                  onClick={handleEndMeeting}
-                  disabled={loading}
-                >
-                  {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Square className="h-4 w-4" />}
-                  End Meeting Early
-                </Button>
+                {/* NOTES */}
+                <div className="space-y-2">
+                  <label className="text-xs font-semibold text-gray-400 uppercase tracking-wider flex items-center gap-1.5">
+                    <FileText className="h-3.5 w-3.5" />Notes
+                  </label>
+                  <Textarea
+                    value={notes}
+                    onChange={(e) => handleNotesChange(e.target.value)}
+                    placeholder="Add your meeting notes here... (auto-saves)"
+                    className="bg-gray-800 border-gray-700 text-white placeholder-gray-500 min-h-[80px] resize-none"
+                  />
+                  <p className="text-[10px] text-gray-600">Auto-saves as you type</p>
+                </div>
+
+                <div className="flex gap-2">
+                  {/* SEND FILES */}
+                  {data.universityFiles.length > 0 && (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="flex-1 border-blue-500/50 text-blue-400 hover:bg-blue-500/20 gap-1.5 text-xs"
+                      onClick={() => handleSendFiles(data.activeMeeting!.id)}
+                      disabled={loading === `files-${data.activeMeeting!.id}`}
+                    >
+                      {loading === `files-${data.activeMeeting!.id}` ? <Loader2 className="h-3 w-3 animate-spin" /> : <Send className="h-3 w-3" />}
+                      Send Files ({data.universityFiles.length})
+                    </Button>
+                  )}
+
+                  {/* END MEETING */}
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="flex-1 border-red-500/50 text-red-400 hover:bg-red-500/20 gap-1.5 text-xs"
+                    onClick={handleEndMeeting}
+                    disabled={loading === "end"}
+                  >
+                    {loading === "end" ? <Loader2 className="h-3 w-3 animate-spin" /> : <Square className="h-3 w-3" />}
+                    End Meeting
+                  </Button>
+                </div>
 
                 {data.waitingCount > 0 && (
-                  <p className="text-sm text-amber-400">
+                  <p className="text-sm text-amber-400 text-center">
                     <Clock className="h-3.5 w-3.5 inline mr-1" />
                     {data.waitingCount} participant{data.waitingCount > 1 ? "s" : ""} waiting
                   </p>
@@ -221,35 +308,104 @@ export function UniversityLiveView({ data, token }: { data: UniversityData; toke
               </CardContent>
             </Card>
           )}
+
+          {/* EMAIL ALL NOTES */}
+          {data.completedMeetings.length > 0 && (
+            <Button
+              variant="outline"
+              className="w-full border-purple-500/50 text-purple-400 hover:bg-purple-500/20 gap-2"
+              onClick={handleEmailNotes}
+              disabled={loading === "email"}
+            >
+              {loading === "email" ? <Loader2 className="h-4 w-4 animate-spin" /> : <Mail className="h-4 w-4" />}
+              Email All Notes to Me
+            </Button>
+          )}
+
+          {/* COMPLETED MEETINGS */}
+          {data.completedMeetings.length > 0 && (
+            <div>
+              <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3 flex items-center gap-1.5">
+                <CheckCircle2 className="h-3.5 w-3.5 text-purple-400" />Completed ({data.completedMeetings.length})
+              </h3>
+              <div className="space-y-2">
+                {data.completedMeetings.map((m) => {
+                  const duration = m.actualStart && m.actualEnd
+                    ? Math.round((new Date(m.actualEnd).getTime() - new Date(m.actualStart).getTime()) / 60000)
+                    : null;
+                  const isExpanded = expandedMeeting === m.id;
+                  const editNote = editingNotes[m.id] ?? m.notesA;
+
+                  return (
+                    <div key={m.id} className="bg-gray-900 border border-gray-800 rounded-lg overflow-hidden">
+                      <button
+                        className="w-full flex items-center justify-between px-4 py-3 hover:bg-gray-800/50 transition-colors"
+                        onClick={() => setExpandedMeeting(isExpanded ? null : m.id)}
+                      >
+                        <div className="flex items-center gap-3">
+                          <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500 shrink-0" />
+                          <div className="text-left">
+                            <span className="text-sm text-gray-300">{m.participantB.name}</span>
+                            {m.notesA && <FileText className="h-3 w-3 text-blue-400 inline ml-2" />}
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs text-gray-500">
+                            {duration && `${duration}min`}
+                          </span>
+                          {isExpanded ? <ChevronUp className="h-3.5 w-3.5 text-gray-500" /> : <ChevronDown className="h-3.5 w-3.5 text-gray-500" />}
+                        </div>
+                      </button>
+
+                      {isExpanded && (
+                        <div className="border-t border-gray-800 px-4 py-3 space-y-3">
+                          {m.participantB.organization && (
+                            <p className="text-xs text-gray-400">{m.participantB.organization} {m.participantB.country && `· ${m.participantB.country}`}</p>
+                          )}
+
+                          {/* Edit notes */}
+                          <Textarea
+                            value={editNote}
+                            onChange={(e) => setEditingNotes((prev) => ({ ...prev, [m.id]: e.target.value }))}
+                            placeholder="Add notes for this meeting..."
+                            className="bg-gray-800 border-gray-700 text-white placeholder-gray-500 min-h-[60px] text-sm resize-none"
+                          />
+
+                          <div className="flex gap-2">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="border-blue-500/50 text-blue-400 hover:bg-blue-500/20 gap-1 text-xs flex-1"
+                              onClick={() => handleSaveNotes(m.id, editNote)}
+                              disabled={loading === `save-${m.id}`}
+                            >
+                              {loading === `save-${m.id}` ? <Loader2 className="h-3 w-3 animate-spin" /> : <Save className="h-3 w-3" />}
+                              Save Notes
+                            </Button>
+
+                            {data.universityFiles.length > 0 && (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className={`gap-1 text-xs flex-1 ${m.documentsSent ? "border-emerald-500/50 text-emerald-400" : "border-gray-600 text-gray-400 hover:bg-gray-700"}`}
+                                onClick={() => handleSendFiles(m.id)}
+                                disabled={loading === `files-${m.id}` || m.documentsSent}
+                              >
+                                {loading === `files-${m.id}` ? <Loader2 className="h-3 w-3 animate-spin" /> : m.documentsSent ? <CheckCircle2 className="h-3 w-3" /> : <Send className="h-3 w-3" />}
+                                {m.documentsSent ? "Files Sent ✓" : "Send Files"}
+                              </Button>
+                            )}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
         </div>
       </div>
-
-      {/* COMPLETED MEETINGS */}
-      {data.completedMeetings.length > 0 && (
-        <div className="border-t border-gray-800 bg-gray-900 px-6 py-4">
-          <div className="max-w-2xl mx-auto">
-            <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3 flex items-center gap-1.5">
-              <CheckCircle2 className="h-3.5 w-3.5 text-purple-400" />Completed ({data.completedMeetings.length})
-            </h3>
-            <div className="space-y-1.5">
-              {data.completedMeetings.map((m) => {
-                const duration = m.actualStart && m.actualEnd
-                  ? Math.round((new Date(m.actualEnd).getTime() - new Date(m.actualStart).getTime()) / 60000)
-                  : null;
-                return (
-                  <div key={m.id} className="flex items-center justify-between text-sm py-1.5">
-                    <span className="text-gray-300">{m.participantB.name}</span>
-                    <span className="text-xs text-gray-500">
-                      {duration && `${duration}min · `}
-                      {m.actualEnd && format(new Date(m.actualEnd), "HH:mm")}
-                    </span>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
