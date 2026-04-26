@@ -2,7 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
-2026-04-24 - Document Validation with QR - Added a complete document validation system. Admins can register official letters/documents, auto-generate QR codes with unique reference numbers (LTR-YYYY-NNNN), and recipients can scan the QR to verify authenticity on a public /verify page. Features: create/revoke/delete documents, download QR as PNG, manual lookup by reference number, and expiry/revocation handling. New `ValidatedDocument` Prisma model, 3 API routes, admin Documents page with sidebar navigation, and a standalone public verification page with animated valid/invalid/expired states.
+2026-04-26 - B2B Integration in Event Form - Merged B2B matchmaking configuration into the main event creation/edit form. Admins can now toggle B2B mode on any existing event with configurable time slots, slot duration, and break periods. When enabled, a linked B2BEvent is auto-created and accessible via a "Manage B2B" button. Added `eventId` foreign key from B2BEvent → Event. New component: `B2BSection`. New server actions: `enableB2BForEvent`, `disableB2BForEvent`, `getB2BForEvent`.
+
+2026-04-25 - B2B Matchmaking System - Implemented a full Macrom-style B2B meeting scheduler. Admin can create B2B events with configurable time slots and break periods, manage Side A (Universities from existing database) and Side B (Agents/Schools/Companies via manual entry or CSV import), and auto-generate conflict-free meeting schedules using a round-robin algorithm. Universities access their B2B schedule via the existing portal with meeting notes and document sharing. Side B participants view schedules via public token-based links (no login required). Features: schedule generation/regeneration, CSV export, meeting status tracking, capacity validation, and table number assignment. New models: B2BEvent, B2BParticipant, B2BMeeting with B2BMeetingStatus enum.
+
 
 2026-04-23 - Timezone Alignment Fix - Fixed an issue where the registration confirmation email and success page displayed dates and times in server timezone (UTC) instead of the actual local timezone of the event. Replaced `format()` with `formatInTimeZone()` from `date-fns-tz` to ensure the dates render accurately based on `event.timezone`.
 

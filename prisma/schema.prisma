@@ -69,6 +69,13 @@ enum GiftTier {
   GOLD
 }
 
+enum B2BMeetingStatus {
+  SCHEDULED
+  COMPLETED
+  CANCELLED
+  NO_SHOW
+}
+
 // ============================================
 // CORE MODELS
 // ============================================
@@ -182,6 +189,7 @@ model Event {
   boothVisits   BoothVisit[]
   pointsLedger  RedPointsLedger[]
   giftRedemptions GiftRedemption[]
+  b2bEvent      B2BEvent?
 }
 
 model EventSession {
@@ -221,6 +229,7 @@ model University {
   favorites    FavoriteStudent[]
   files        UniversityFile[]
   boothVisits  BoothVisit[]
+  b2bParticipations B2BParticipant[]
   
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
@@ -396,6 +405,7 @@ model AdminUser {
   checkIns            CheckIn[]
   giftRedemptions     GiftRedemption[]  // Gifts redeemed by this admin/staff
   validatedDocuments  ValidatedDocument[]
+  b2bEvents           B2BEvent[]
 }
 
 // ============================================
@@ -542,4 +552,102 @@ model ValidatedDocument {
 
   @@index([token])
   @@index([referenceNumber])
+}
+
+// ============================================
+// B2B MATCHMAKING SYSTEM
+// ============================================
+
+model B2BEvent {
+  id                  String    @id @default(cuid())
+  name                String
+  slug                String    @unique
+  date                DateTime                    // Event date
+  startTime           String                      // "10:00" — HH:mm format
+  endTime             String                      // "16:00" — HH:mm format
+  slotDuration        Int       @default(20)      // Minutes per meeting
+  breakStart          String?                     // "12:00" — lunch break start
+  breakEnd            String?                     // "13:00" — lunch break end
+  location            String?
+  description         String?   @db.Text
+  isScheduleGenerated Boolean   @default(false)
+
+  // Link to main Event (optional)
+  eventId             String?   @unique
+  event               Event?    @relation(fields: [eventId], references: [id], onDelete: SetNull)
+
+  createdById         String
+  createdBy           AdminUser @relation(fields: [createdById], references: [id])
+
+  participants        B2BParticipant[]
+  meetings            B2BMeeting[]
+
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+}
+
+model B2BParticipant {
+  id              String    @id @default(cuid())
+  b2bEventId      String
+  b2bEvent        B2BEvent  @relation(fields: [b2bEventId], references: [id], onDelete: Cascade)
+
+  side            String                      // "A" or "B"
+
+  // For Side A — link to existing University
+  universityId    String?
+  university      University? @relation(fields: [universityId], references: [id])
+
+  // For Side B — standalone data (no account)
+  name            String                      // Company/Agent/School name
+  contactPerson   String?
+  contactEmail    String?
+  contactPhone    String?
+  organization    String?                     // Type: "Agent", "School", "Company"
+  country         String?
+  notes           String?   @db.Text
+
+  // Public schedule access token (Side B only)
+  scheduleToken   String?   @unique @default(cuid())
+
+  meetingsAsA     B2BMeeting[] @relation("MeetingSideA")
+  meetingsAsB     B2BMeeting[] @relation("MeetingSideB")
+
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@unique([b2bEventId, universityId])
+  @@index([b2bEventId, side])
+}
+
+model B2BMeeting {
+  id              String           @id @default(cuid())
+  b2bEventId      String
+  b2bEvent        B2BEvent         @relation(fields: [b2bEventId], references: [id], onDelete: Cascade)
+
+  participantAId  String                       // Side A (University)
+  participantA    B2BParticipant   @relation("MeetingSideA", fields: [participantAId], references: [id], onDelete: Cascade)
+  participantBId  String                       // Side B (Agent/School/Company)
+  participantB    B2BParticipant   @relation("MeetingSideB", fields: [participantBId], references: [id], onDelete: Cascade)
+
+  timeSlot        DateTime                     // Exact start time of this meeting
+  endTime         DateTime                     // Exact end time
+  tableNumber     Int?                         // Physical table assignment
+
+  status          B2BMeetingStatus @default(SCHEDULED)
+
+  // Meeting notes (Side A can add)
+  notesA          String?   @db.Text           // University notes
+  notesB          String?   @db.Text           // Side B notes (future)
+
+  // Document sharing tracking
+  documentsSent   Boolean   @default(false)
+  documentsSentAt DateTime?
+
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@unique([b2bEventId, participantAId, participantBId])  // No duplicate meetings
+  @@unique([b2bEventId, participantAId, timeSlot])        // No double-booking Side A
+  @@unique([b2bEventId, participantBId, timeSlot])        // No double-booking Side B
+  @@index([b2bEventId])
 }

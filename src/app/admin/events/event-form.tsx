@@ -20,6 +20,7 @@ import { TranslatableInput, TranslatableTextarea } from "@/components/ui/transla
 import { duplicateEvent } from "@/app/actions/events";
 import { ALL_TIMEZONES } from "@/lib/timezones";
 import { Switch } from "@/components/ui/switch";
+import { B2BSection } from "@/components/admin/b2b/b2b-event-section";
 
 type Translations = Partial<Record<'en' | 'tr' | 'ar', string>>;
 
@@ -737,6 +738,13 @@ export function EventForm({ initialData, onSubmit, countries = [], eventId }: Ev
                     </div>
                 )}
             </div>
+
+            {/* B2B Matchmaking */}
+            {eventId && (
+                <div className="space-y-4">
+                    <B2BSection eventId={eventId} />
+                </div>
+            )}
 
             {/* Actions */}
             <div className="flex gap-3 pt-4">

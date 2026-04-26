@@ -758,3 +758,74 @@ The Document Validation system allows admins to register official letters/docume
 | Update design tokens | `src/app/globals.css` |
 | Configure image domains | `next.config.ts` |
 | Update Tailwind theme | `tailwind.config.ts` |
+| Manage B2B matchmaking | `src/app/actions/b2b.ts` + `src/lib/b2b-scheduler.ts` |
+
+---
+
+## 19. B2B Matchmaking System
+
+### Overview
+A Macrom-style B2B meeting scheduler that automatically generates conflict-free meeting schedules between **Side A (Universities)** and **Side B (Agents/Schools/Companies)** for B2B events.
+
+### Database Models
+| Model | Purpose |
+|---|---|
+| `B2BEvent` | B2B event with date, time range, slot duration, break periods. Optional `eventId` links to main `Event` |
+| `B2BParticipant` | Participant on Side A (linked to University) or Side B (standalone) |
+| `B2BMeeting` | Individual meeting with time slot, table number, status, notes |
+
+### Event ↔ B2B Integration
+- `B2BEvent.eventId` (optional, unique) — links a B2B event to a main `Event`
+- `Event.b2bEvent` — reverse one-to-one relation
+- When admin toggles B2B on a main event, `enableB2BForEvent()` auto-creates a linked `B2BEvent`
+- When admin disables B2B, `disableB2BForEvent()` removes the linked B2BEvent (only if no meetings exist)
+- `B2BSection` component (`src/components/admin/b2b/b2b-event-section.tsx`) renders in the main event edit form
+
+### Enum: `B2BMeetingStatus`
+`SCHEDULED`, `COMPLETED`, `CANCELLED`, `NO_SHOW`
+
+### Scheduling Algorithm (`src/lib/b2b-scheduler.ts`)
+- **Round-robin** assignment ensuring each Side A meets each Side B exactly once
+- Generates time slots from event start/end times, excluding break periods
+- Validates capacity before generation (enough slots for all meetings)
+- No duplicate meetings, no double-booking per time slot
+- Table numbers assigned incrementally per slot
+
+### Key Files
+| File | Purpose |
+|---|---|
+| `src/lib/b2b-scheduler.ts` | Core scheduling algorithm (generateTimeSlots, generateSchedule, validateCapacity) |
+| `src/app/actions/b2b.ts` | All B2B server actions (CRUD, schedule generation, notes, import, event integration) |
+| `src/lib/validations.ts` | Zod schemas: `b2bEventSchema`, `b2bParticipantSchema` |
+| `src/components/admin/b2b/b2b-event-section.tsx` | B2B toggle section embedded in main event form |
+| `src/components/admin/b2b/` | Admin B2B components (event form, detail client, etc.) |
+| `src/components/university/b2b-university-schedule.tsx` | University B2B schedule view |
+
+### Routes
+| Route | Purpose |
+|---|---|
+| `/admin/b2b` | B2B events list |
+| `/admin/b2b/new` | Create new standalone B2B event |
+| `/admin/b2b/[id]` | Event detail (participants, schedule, public links) |
+| `/admin/events/[id]` | Main event edit — includes B2B toggle section |
+| `/[locale]/university/b2b` | University B2B events list |
+| `/[locale]/university/b2b/[eventId]` | University meeting schedule with notes |
+| `/b2b/schedule/[token]` | Public schedule for Side B (no auth) |
+
+### API Endpoints
+| Endpoint | Purpose |
+|---|---|
+| `GET /api/b2b/schedule?token=xxx` | Public schedule fetch for Side B |
+| `GET /api/admin/b2b/[id]/universities` | Available universities for event |
+| `GET /api/admin/b2b/[id]/export?format=csv` | Export schedule as CSV |
+
+### Admin Workflow
+1. **Option A — Via Event Form**: Edit an existing event → toggle B2B on → configure time slots → save → click "Manage B2B"
+2. **Option B — Standalone**: Create B2B event directly at `/admin/b2b/new`
+3. Add Side A — select from existing universities
+4. Add Side B — manual entry or CSV import (headers: name, contact_person, email, phone, type, country)
+5. Click "Generate Schedule" — algorithm creates all meetings
+6. Preview schedule in table view, update meeting statuses
+7. Share public links with Side B participants
+8. Export to CSV for offline use
+

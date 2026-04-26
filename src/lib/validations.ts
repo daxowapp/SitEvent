@@ -94,3 +94,35 @@ export const exhibitorSchema = z.object({
 });
 
 export type ExhibitorFormData = z.infer<typeof exhibitorSchema>;
+
+// B2B Event schema (admin)
+export const b2bEventSchema = z.object({
+    name: z.string().min(3, "Event name must be at least 3 characters"),
+    slug: z
+        .string()
+        .min(3, "Slug must be at least 3 characters")
+        .regex(/^[a-z0-9-]+$/, "Slug can only contain lowercase letters, numbers, and hyphens"),
+    date: z.string().datetime(),
+    startTime: z.string().regex(/^\d{2}:\d{2}$/, "Must be in HH:mm format"),
+    endTime: z.string().regex(/^\d{2}:\d{2}$/, "Must be in HH:mm format"),
+    slotDuration: z.number().int().min(5).max(120).default(20),
+    breakStart: z.string().regex(/^\d{2}:\d{2}$/).optional().or(z.literal("")),
+    breakEnd: z.string().regex(/^\d{2}:\d{2}$/).optional().or(z.literal("")),
+    location: z.string().optional(),
+    description: z.string().optional(),
+});
+
+export type B2BEventFormData = z.infer<typeof b2bEventSchema>;
+
+// B2B Participant schema
+export const b2bParticipantSchema = z.object({
+    name: z.string().min(2, "Name must be at least 2 characters"),
+    contactPerson: z.string().optional(),
+    contactEmail: z.string().email().optional().or(z.literal("")),
+    contactPhone: z.string().optional(),
+    organization: z.string().optional(),
+    country: z.string().optional(),
+    notes: z.string().optional(),
+});
+
+export type B2BParticipantFormData = z.infer<typeof b2bParticipantSchema>;

@@ -22,12 +22,14 @@ import {
     GraduationCap,
     Gift,
     FileCheck,
+    Handshake,
 } from "lucide-react";
 
 const navItems = [
     { name: "Dashboard", href: "/admin", icon: LayoutDashboard, roles: ["SUPER_ADMIN", "EVENT_MANAGER"] },
     { name: "Analytics", href: "/admin/analytics", icon: BarChart3, roles: ["SUPER_ADMIN", "EVENT_MANAGER"] },
     { name: "Events", href: "/admin/events", icon: CalendarIcon, roles: ["SUPER_ADMIN", "EVENT_MANAGER"] },
+    { name: "B2B Matchmaking", href: "/admin/b2b", icon: Handshake, roles: ["SUPER_ADMIN", "EVENT_MANAGER"] },
     { name: "Registrations", href: "/admin/registrations", icon: UsersIcon, roles: ["SUPER_ADMIN", "EVENT_MANAGER"] },
     { name: "Scan QR", href: "/admin/scan", icon: CameraIcon, roles: ["SUPER_ADMIN", "EVENT_MANAGER", "EVENT_STAFF", "USHER"] },
     { name: "Help Desk", href: "/admin/helpdesk", icon: Gift, roles: ["SUPER_ADMIN", "EVENT_MANAGER", "EVENT_STAFF"] },
