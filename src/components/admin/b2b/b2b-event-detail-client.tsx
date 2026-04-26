@@ -21,7 +21,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
-  Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger,
+  Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger,
 } from "@/components/ui/dialog";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
@@ -477,7 +477,7 @@ export function B2BEventDetailClient({ event }: { event: EventData }) {
       {/* ADD UNIVERSITY DIALOG */}
       <Dialog open={showAddUni} onOpenChange={setShowAddUni}>
         <DialogContent>
-          <DialogHeader><DialogTitle>Add University</DialogTitle></DialogHeader>
+          <DialogHeader><DialogTitle>Add University</DialogTitle><DialogDescription>Select a university to add to Side A</DialogDescription></DialogHeader>
           {availableUnis.length === 0 ? (
             <p className="text-sm text-muted-foreground text-center py-4">All universities are already added or none found.</p>
           ) : (
@@ -500,7 +500,7 @@ export function B2BEventDetailClient({ event }: { event: EventData }) {
       {/* ADD PARTICIPANT B DIALOG */}
       <Dialog open={showAddB} onOpenChange={setShowAddB}>
         <DialogContent>
-          <DialogHeader><DialogTitle>Add Participant (Side B)</DialogTitle></DialogHeader>
+          <DialogHeader><DialogTitle>Add Participant (Side B)</DialogTitle><DialogDescription>Add an agent, school, or company</DialogDescription></DialogHeader>
           <form onSubmit={handleAddParticipantB} className="space-y-4">
             <div className="space-y-2"><Label htmlFor="pb-name">Name *</Label><Input id="pb-name" name="name" required placeholder="Company or Agent name" /></div>
             <div className="grid grid-cols-2 gap-3">
@@ -529,7 +529,7 @@ export function B2BEventDetailClient({ event }: { event: EventData }) {
       {/* IMPORT CSV DIALOG */}
       <Dialog open={showImport} onOpenChange={setShowImport}>
         <DialogContent>
-          <DialogHeader><DialogTitle>Import Participants from CSV</DialogTitle></DialogHeader>
+          <DialogHeader><DialogTitle>Import Participants from CSV</DialogTitle><DialogDescription>Upload a CSV file with participant data</DialogDescription></DialogHeader>
           <form onSubmit={handleImport} className="space-y-4">
             <div className="rounded-lg border-2 border-dashed p-6 text-center">
               <FileSpreadsheet className="h-10 w-10 mx-auto text-muted-foreground/50" />
@@ -546,7 +546,7 @@ export function B2BEventDetailClient({ event }: { event: EventData }) {
       {/* EDIT EVENT DIALOG */}
       <Dialog open={showEditEvent} onOpenChange={setShowEditEvent}>
         <DialogContent className="max-w-md">
-          <DialogHeader><DialogTitle>Edit B2B Event</DialogTitle></DialogHeader>
+          <DialogHeader><DialogTitle>Edit B2B Event</DialogTitle><DialogDescription>Update event settings and schedule parameters</DialogDescription></DialogHeader>
           <form onSubmit={handleEditEvent} className="space-y-4">
             <div className="space-y-2"><Label>Event Name</Label><Input name="name" defaultValue={event.name} required /></div>
             <div className="space-y-2"><Label>Slug</Label><Input name="slug" defaultValue={event.slug} required /></div>
@@ -571,7 +571,7 @@ export function B2BEventDetailClient({ event }: { event: EventData }) {
       {/* EDIT PARTICIPANT DIALOG */}
       <Dialog open={!!editingParticipant} onOpenChange={(open) => !open && setEditingParticipant(null)}>
         <DialogContent>
-          <DialogHeader><DialogTitle>Edit Participant</DialogTitle></DialogHeader>
+          <DialogHeader><DialogTitle>Edit Participant</DialogTitle><DialogDescription>Update participant details and arrival time</DialogDescription></DialogHeader>
           {editingParticipant && (
             <form onSubmit={handleEditParticipant} className="space-y-4">
               <div className="space-y-2"><Label>Name *</Label><Input name="name" defaultValue={editingParticipant.name} required /></div>
