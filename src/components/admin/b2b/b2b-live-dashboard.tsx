@@ -416,7 +416,10 @@ export function B2BLiveDashboard({ data }: { data: LiveData }) {
             <div>
               <p className="text-sm font-semibold text-amber-300">🍽 Lunch Break Active</p>
               <p className="text-xs text-amber-400/70">
-                No meetings assigned · Break ends at {data.event.breakEnd}
+                No meetings assigned · Break ends at{" "}
+                {data.event.breakEnd?.includes("T")
+                  ? new Date(data.event.breakEnd).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+                  : data.event.breakEnd}
                 {data.event.breakEnd && (
                   <> — <BreakCountdown breakEndsAt={data.event.breakEnd} /></>
                 )}

@@ -51,10 +51,19 @@ export async function getLiveDashboard(eventId: string) {
   const breakBufferMs = (event.breakBetweenMeetings ?? 5) * 60 * 1000;
   const nowMs = Date.now();
 
-  // Check main break status
+  // Check main break status — supports both HH:mm and ISO formats
   const nowDate = new Date();
-  const hhmm = `${nowDate.getHours().toString().padStart(2, "0")}:${nowDate.getMinutes().toString().padStart(2, "0")}`;
-  const isMainBreak = !!(event.breakStart && event.breakEnd && hhmm >= event.breakStart && hhmm < event.breakEnd);
+  let isMainBreak = false;
+  if (event.breakStart && event.breakEnd) {
+    if (event.breakEnd.includes("T")) {
+      // ISO format (dynamic break from live dashboard)
+      isMainBreak = nowDate >= new Date(event.breakStart) && nowDate < new Date(event.breakEnd);
+    } else {
+      // HH:mm format (pre-configured break)
+      const hhmm = `${nowDate.getHours().toString().padStart(2, "0")}:${nowDate.getMinutes().toString().padStart(2, "0")}`;
+      isMainBreak = hhmm >= event.breakStart && hhmm < event.breakEnd;
+    }
+  }
 
   // Build university status cards with break awareness
   const universityCards = sideA.map((uni) => {
@@ -167,12 +176,20 @@ async function autoAssign(eventId: string) {
   });
   if (!event) return null;
 
-  // Check if we're in the main break period
+  // Check if we're in the main break period — supports both HH:mm and ISO
   if (event.breakStart && event.breakEnd) {
     const nowDate = new Date();
-    const hhmm = `${nowDate.getHours().toString().padStart(2, "0")}:${nowDate.getMinutes().toString().padStart(2, "0")}`;
-    if (hhmm >= event.breakStart && hhmm < event.breakEnd) {
-      return null; // During main break — no assignments
+    if (event.breakEnd.includes("T")) {
+      // ISO format (dynamic break)
+      if (nowDate >= new Date(event.breakStart) && nowDate < new Date(event.breakEnd)) {
+        return null;
+      }
+    } else {
+      // HH:mm format (pre-configured)
+      const hhmm = `${nowDate.getHours().toString().padStart(2, "0")}:${nowDate.getMinutes().toString().padStart(2, "0")}`;
+      if (hhmm >= event.breakStart && hhmm < event.breakEnd) {
+        return null;
+      }
     }
   }
 
@@ -439,19 +456,17 @@ export async function startMainBreak(eventId: string, durationMinutes: number) {
   const now = new Date();
   const end = new Date(now.getTime() + durationMinutes * 60 * 1000);
 
-  const fmt = (d: Date) =>
-    `${d.getHours().toString().padStart(2, "0")}:${d.getMinutes().toString().padStart(2, "0")}`;
-
+  // Store as ISO strings so timezone is preserved correctly
   await prisma.b2BEvent.update({
     where: { id: eventId },
     data: {
-      breakStart: fmt(now),
-      breakEnd: fmt(end),
+      breakStart: now.toISOString(),
+      breakEnd: end.toISOString(),
     },
   });
 
   revalidatePath(`/admin/b2b/${eventId}/live`);
-  return { success: true, message: `Break started — ends at ${fmt(end)}` };
+  return { success: true, message: `Break started — ${durationMinutes} minutes` };
 }
 
 /**
