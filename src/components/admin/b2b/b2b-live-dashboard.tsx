@@ -16,7 +16,7 @@ import {
 import {
   ArrowLeft, Clock, Users, GraduationCap, UserCheck, UserX,
   Loader2, RotateCcw, Radio, Square, Timer, CheckCircle2,
-  AlertTriangle, Undo2, Volume2, VolumeX,
+  AlertTriangle, Undo2, Volume2, VolumeX, Link2, Copy,
 } from "lucide-react";
 import {
   checkInParticipant, endMeeting, undoCheckIn, resetLiveSession,
@@ -231,6 +231,12 @@ export function B2BLiveDashboard({ data }: { data: LiveData }) {
 
   const { stats } = data;
 
+  const copyLink = useCallback((path: string) => {
+    const url = `${window.location.origin}${path}`;
+    navigator.clipboard.writeText(url);
+    toast.success("Link copied!");
+  }, []);
+
   return (
     <div className="min-h-screen bg-gray-950 text-white p-4 md:p-6">
       {/* HEADER */}
@@ -330,9 +336,18 @@ export function B2BLiveDashboard({ data }: { data: LiveData }) {
                       <p className="font-semibold text-white text-sm">
                         {card.participant.university?.name || card.participant.name}
                       </p>
-                      <p className="text-xs text-gray-400">
-                        Table {idx + 1} · {card.completedCount} meetings
-                      </p>
+                      <div className="flex items-center gap-1.5">
+                        <p className="text-xs text-gray-400">
+                          Table {idx + 1} · {card.completedCount} meetings
+                        </p>
+                        <button
+                          className="text-gray-500 hover:text-blue-400 transition-colors"
+                          onClick={() => copyLink(`/b2b/university/${card.participant.scheduleToken}`)}
+                          title="Copy university link"
+                        >
+                          <Link2 className="h-3 w-3" />
+                        </button>
+                      </div>
                     </div>
                     <Badge
                       variant="outline"
@@ -466,19 +481,28 @@ export function B2BLiveDashboard({ data }: { data: LiveData }) {
                       <p className="text-sm font-medium text-white">{p.name}</p>
                       {p.organization && <p className="text-xs text-gray-400">{p.organization} {p.country && `· ${p.country}`}</p>}
                     </div>
-                    <Button
-                      size="sm"
-                      className="bg-blue-600 hover:bg-blue-700 gap-1.5 text-xs h-8"
-                      onClick={() => handleCheckIn(p.id)}
-                      disabled={loading === `checkin-${p.id}`}
-                    >
-                      {loading === `checkin-${p.id}` ? (
-                        <Loader2 className="h-3 w-3 animate-spin" />
-                      ) : (
-                        <UserCheck className="h-3 w-3" />
-                      )}
-                      Check In
-                    </Button>
+                    <div className="flex items-center gap-1">
+                      <button
+                        className="text-gray-500 hover:text-blue-400 transition-colors p-1"
+                        onClick={() => copyLink(`/b2b/participant/${p.scheduleToken}`)}
+                        title="Copy participant link"
+                      >
+                        <Link2 className="h-3 w-3" />
+                      </button>
+                      <Button
+                        size="sm"
+                        className="bg-blue-600 hover:bg-blue-700 gap-1.5 text-xs h-8"
+                        onClick={() => handleCheckIn(p.id)}
+                        disabled={loading === `checkin-${p.id}`}
+                      >
+                        {loading === `checkin-${p.id}` ? (
+                          <Loader2 className="h-3 w-3 animate-spin" />
+                        ) : (
+                          <UserCheck className="h-3 w-3" />
+                        )}
+                        Check In
+                      </Button>
+                    </div>
                   </div>
                 ))}
               </div>
