@@ -3,6 +3,15 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { format } from "date-fns";
+
+// UTC-safe time formatter (avoids local timezone offset)
+function fmtUTC(date: Date, fmt: string): string {
+  const d = new Date(date);
+  if (fmt === "HH:mm") {
+    return `${String(d.getUTCHours()).padStart(2, "0")}:${String(d.getUTCMinutes()).padStart(2, "0")}`;
+  }
+  return format(d, fmt);
+}
 import { toast } from "sonner";
 import Link from "next/link";
 import {
@@ -356,7 +365,7 @@ export function B2BEventDetailClient({ event }: { event: EventData }) {
                             <td className="p-3 font-medium align-top whitespace-nowrap" rowSpan={meetings.length}>
                               <div className="flex items-center gap-1.5">
                                 <Clock className="h-3.5 w-3.5 text-primary" />
-                                {format(new Date(m.timeSlot), "HH:mm")} — {format(new Date(m.endTime), "HH:mm")}
+                                {fmtUTC(new Date(m.timeSlot), "HH:mm")} — {fmtUTC(new Date(m.endTime), "HH:mm")}
                               </div>
                             </td>
                           )}

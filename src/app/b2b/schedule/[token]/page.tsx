@@ -1,9 +1,21 @@
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/db";
-import { format } from "date-fns";
 import {
   Calendar, Clock, MapPin, GraduationCap, Handshake,
 } from "lucide-react";
+
+// Format a UTC date's hours/minutes as HH:mm (ignoring local timezone)
+function formatUTCTime(date: Date): string {
+  const d = new Date(date);
+  return `${String(d.getUTCHours()).padStart(2, "0")}:${String(d.getUTCMinutes()).padStart(2, "0")}`;
+}
+
+function formatUTCDate(date: Date): string {
+  const d = new Date(date);
+  const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+  const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+  return `${days[d.getUTCDay()]}, ${months[d.getUTCMonth()]} ${d.getUTCDate()}, ${d.getUTCFullYear()}`;
+}
 
 export default async function PublicB2BSchedulePage({
   params,
@@ -53,7 +65,7 @@ export default async function PublicB2BSchedulePage({
           <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground mt-3">
             <span className="flex items-center gap-1.5">
               <Calendar className="h-4 w-4" />
-              {format(new Date(event.date), "EEEE, MMMM d, yyyy")}
+              {formatUTCDate(new Date(event.date))}
             </span>
             <span className="flex items-center gap-1.5">
               <Clock className="h-4 w-4" />
@@ -91,17 +103,10 @@ export default async function PublicB2BSchedulePage({
               {participant.meetingsAsB.length} meetings scheduled
             </p>
 
-            {participant.meetingsAsB.map((meeting, idx) => {
+            {participant.meetingsAsB.map((meeting) => {
               const uniName = meeting.participantA.university?.name || meeting.participantA.name;
               const uniLogo = meeting.participantA.university?.logoUrl;
               const uniCountry = meeting.participantA.university?.country;
-
-              const statusColors: Record<string, string> = {
-                SCHEDULED: "bg-blue-50 text-blue-700 border-blue-200",
-                COMPLETED: "bg-emerald-50 text-emerald-700 border-emerald-200",
-                CANCELLED: "bg-red-50 text-red-700 border-red-200",
-                NO_SHOW: "bg-gray-50 text-gray-700 border-gray-200",
-              };
 
               return (
                 <div
@@ -114,10 +119,10 @@ export default async function PublicB2BSchedulePage({
                     {/* Time column */}
                     <div className="bg-primary/5 border-r px-4 py-5 flex flex-col items-center justify-center min-w-[90px]">
                       <p className="text-lg font-bold text-primary">
-                        {format(new Date(meeting.timeSlot), "HH:mm")}
+                        {formatUTCTime(new Date(meeting.timeSlot))}
                       </p>
                       <p className="text-xs text-muted-foreground">
-                        {format(new Date(meeting.endTime), "HH:mm")}
+                        {formatUTCTime(new Date(meeting.endTime))}
                       </p>
                       {meeting.tableNumber && (
                         <span className="mt-2 text-[10px] bg-primary/10 text-primary px-1.5 py-0.5 rounded font-medium">

@@ -2,6 +2,14 @@
 
 import { useState } from "react";
 import { format } from "date-fns";
+
+function fmtUTC(date: Date, fmt: string): string {
+  const d = new Date(date);
+  if (fmt === "HH:mm") {
+    return `${String(d.getUTCHours()).padStart(2, "0")}:${String(d.getUTCMinutes()).padStart(2, "0")}`;
+  }
+  return format(d, fmt);
+}
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -86,10 +94,10 @@ export function B2BUniversityScheduleClient({
                 <div className="flex items-center gap-4">
                   <div className="text-center min-w-[80px]">
                     <p className="text-lg font-bold text-primary">
-                      {format(new Date(m.timeSlot), "HH:mm")}
+                      {fmtUTC(new Date(m.timeSlot), "HH:mm")}
                     </p>
                     <p className="text-xs text-muted-foreground">
-                      {format(new Date(m.endTime), "HH:mm")}
+                      {fmtUTC(new Date(m.endTime), "HH:mm")}
                     </p>
                   </div>
                   <div className="border-l pl-4">

@@ -95,10 +95,10 @@ export function generateTimeSlots(
     }
 
     const slotStart = new Date(eventDate);
-    slotStart.setHours(Math.floor(currentMinutes / 60), currentMinutes % 60, 0, 0);
+    slotStart.setUTCHours(Math.floor(currentMinutes / 60), currentMinutes % 60, 0, 0);
 
     const slotEnd = new Date(eventDate);
-    slotEnd.setHours(Math.floor(slotEndMinutes / 60), slotEndMinutes % 60, 0, 0);
+    slotEnd.setUTCHours(Math.floor(slotEndMinutes / 60), slotEndMinutes % 60, 0, 0);
 
     slots.push({
       start: slotStart,
