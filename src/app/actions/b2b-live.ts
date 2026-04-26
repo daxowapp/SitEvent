@@ -145,90 +145,136 @@ async function autoAssign(eventId: string) {
   const idleUnis = sideA.filter((u) => !busyUniIds.has(u.id));
   if (idleUnis.length === 0) return null; // All busy
 
-  // Get next waiting participant
-  const nextWaiting = await prisma.b2BParticipant.findFirst({
+  // Get ALL waiting participants (not just the first one)
+  const allWaiting = await prisma.b2BParticipant.findMany({
     where: { b2bEventId: eventId, side: "B", liveStatus: "WAITING" },
     orderBy: { arrivedAt: "asc" },
   });
-  if (!nextWaiting) return null; // No one waiting
+  if (allWaiting.length === 0) return null; // No one waiting
 
-  // Get ALL meetings for this participant (including old SCHEDULED ones)
-  // to avoid duplicate pair constraint violations
-  const alreadyMet = await prisma.b2BMeeting.findMany({
+  // Get last completed meeting time for each waiting participant
+  // to prioritize those who have been waiting the longest
+  const waitingIds = allWaiting.map((w) => w.id);
+  const lastMeetings = await prisma.b2BMeeting.findMany({
     where: {
       b2bEventId: eventId,
-      participantBId: nextWaiting.id,
+      participantBId: { in: waitingIds },
+      status: "COMPLETED",
     },
-    select: { participantAId: true },
+    select: { participantBId: true, actualEnd: true },
+    orderBy: { actualEnd: "desc" },
   });
-  const metUniIds = new Set(alreadyMet.map((m) => m.participantAId));
 
-  // Get completed meeting counts per university
-  const uniMeetingCounts = await prisma.b2BMeeting.groupBy({
-    by: ["participantAId"],
-    where: {
-      b2bEventId: eventId,
-      status: { in: ["COMPLETED", "IN_PROGRESS"] },
-    },
-    _count: true,
+  // Build map: participantId -> last meeting end time
+  const lastMeetingEndMap = new Map<string, Date>();
+  for (const m of lastMeetings) {
+    if (!lastMeetingEndMap.has(m.participantBId) && m.actualEnd) {
+      lastMeetingEndMap.set(m.participantBId, m.actualEnd);
+    }
+  }
+
+  // Sort waiting participants by priority:
+  // 1. Those who NEVER had a meeting (fresh arrivals) — by arrival time
+  // 2. Those whose last meeting ended longest ago
+  // This ensures no one waits 2+ sessions while others keep going
+  const sortedWaiting = [...allWaiting].sort((a, b) => {
+    const aLast = lastMeetingEndMap.get(a.id);
+    const bLast = lastMeetingEndMap.get(b.id);
+
+    // Never-had-meeting participants go first (sorted by arrival)
+    if (!aLast && !bLast) {
+      return new Date(a.arrivedAt || 0).getTime() - new Date(b.arrivedAt || 0).getTime();
+    }
+    if (!aLast) return -1; // a never met, prioritize
+    if (!bLast) return 1;  // b never met, prioritize
+
+    // Both had meetings — whoever finished earliest goes first (waited longer)
+    return aLast.getTime() - bLast.getTime();
   });
-  const countMap = new Map(
-    uniMeetingCounts.map((c) => [c.participantAId, c._count])
-  );
 
-  // Find best university: idle, hasn't met this participant, fewest meetings
-  const candidates = idleUnis
-    .filter((u) => !metUniIds.has(u.id))
-    .sort((a, b) => (countMap.get(a.id) || 0) - (countMap.get(b.id) || 0));
+  // Try each waiting participant in priority order until we find a match
+  for (const nextWaiting of sortedWaiting) {
+    // Get ALL meetings for this participant (including old SCHEDULED ones)
+    // to avoid duplicate pair constraint violations
+    const alreadyMet = await prisma.b2BMeeting.findMany({
+      where: {
+        b2bEventId: eventId,
+        participantBId: nextWaiting.id,
+      },
+      select: { participantAId: true },
+    });
+    const metUniIds = new Set(alreadyMet.map((m) => m.participantAId));
 
-  if (candidates.length === 0) {
-    // This participant has already met all idle universities
-    // Mark them as DONE if they've met everyone
+    // If they've met everyone, mark DONE and continue to next
     if (metUniIds.size >= sideA.length) {
       await prisma.b2BParticipant.update({
         where: { id: nextWaiting.id },
         data: { liveStatus: "DONE" },
       });
-      // Try to assign the NEXT waiting participant instead
-      return autoAssign(eventId);
+      continue;
     }
-    return null; // Wait for a university they haven't met
+
+    // Get completed meeting counts per university
+    const uniMeetingCounts = await prisma.b2BMeeting.groupBy({
+      by: ["participantAId"],
+      where: {
+        b2bEventId: eventId,
+        status: { in: ["COMPLETED", "IN_PROGRESS"] },
+      },
+      _count: true,
+    });
+    const countMap = new Map(
+      uniMeetingCounts.map((c) => [c.participantAId, c._count])
+    );
+
+    // Find best university: idle, hasn't met this participant, fewest meetings
+    const candidates = idleUnis
+      .filter((u) => !metUniIds.has(u.id))
+      .sort((a, b) => (countMap.get(a.id) || 0) - (countMap.get(b.id) || 0));
+
+    if (candidates.length === 0) {
+      // All unmet universities are busy — skip to next participant
+      continue;
+    }
+
+    const bestUni = candidates[0];
+    const now = new Date();
+    const endTime = new Date(now.getTime() + 15 * 60 * 1000); // Default 15 min
+
+    // Get event slot duration
+    const event = await prisma.b2BEvent.findUnique({
+      where: { id: eventId },
+      select: { slotDuration: true },
+    });
+    if (event) {
+      endTime.setTime(now.getTime() + event.slotDuration * 60 * 1000);
+    }
+
+    // Create meeting
+    const meeting = await prisma.b2BMeeting.create({
+      data: {
+        b2bEventId: eventId,
+        participantAId: bestUni.id,
+        participantBId: nextWaiting.id,
+        timeSlot: now,
+        endTime,
+        status: "IN_PROGRESS",
+        actualStart: now,
+        tableNumber: sideA.indexOf(bestUni) + 1,
+      },
+    });
+
+    // Update participant status
+    await prisma.b2BParticipant.update({
+      where: { id: nextWaiting.id },
+      data: { liveStatus: "IN_MEETING", queuePosition: null },
+    });
+
+    return meeting;
   }
 
-  const bestUni = candidates[0];
-  const now = new Date();
-  const endTime = new Date(now.getTime() + 15 * 60 * 1000); // Default 15 min
-
-  // Get event slot duration
-  const event = await prisma.b2BEvent.findUnique({
-    where: { id: eventId },
-    select: { slotDuration: true },
-  });
-  if (event) {
-    endTime.setTime(now.getTime() + event.slotDuration * 60 * 1000);
-  }
-
-  // Create meeting
-  const meeting = await prisma.b2BMeeting.create({
-    data: {
-      b2bEventId: eventId,
-      participantAId: bestUni.id,
-      participantBId: nextWaiting.id,
-      timeSlot: now,
-      endTime,
-      status: "IN_PROGRESS",
-      actualStart: now,
-      tableNumber: sideA.indexOf(bestUni) + 1,
-    },
-  });
-
-  // Update participant status
-  await prisma.b2BParticipant.update({
-    where: { id: nextWaiting.id },
-    data: { liveStatus: "IN_MEETING", queuePosition: null },
-  });
-
-  return meeting;
+  // No matches found for any waiting participant
+  return null;
 }
 
 /**
