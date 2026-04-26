@@ -250,7 +250,7 @@ async function batchAutoAssign(eventId: string) {
 // CHECK-IN
 // ============================================
 
-export async function checkInParticipant(participantId: string) {
+export async function checkInParticipant(participantId: string, email?: string) {
   await requireB2BAdmin();
 
   try {
@@ -272,13 +272,14 @@ export async function checkInParticipant(participantId: string) {
       select: { queuePosition: true },
     });
 
-    // Mark as WAITING
+    // Mark as WAITING + save email if provided
     await prisma.b2BParticipant.update({
       where: { id: participantId },
       data: {
         liveStatus: "WAITING",
         arrivedAt: new Date(),
         queuePosition: (maxQueue?.queuePosition || 0) + 1,
+        ...(email ? { contactEmail: email } : {}),
       },
     });
 

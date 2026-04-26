@@ -14,9 +14,12 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import {
+  Dialog, DialogContent, DialogHeader, DialogTitle,
+} from "@/components/ui/dialog";
+import {
   ArrowLeft, Clock, Users, GraduationCap, UserCheck, UserX,
   Loader2, RotateCcw, Radio, Square, Timer, CheckCircle2,
-  AlertTriangle, Undo2, Volume2, VolumeX, Link2, Copy, UserMinus, UsersRound, UserPlus,
+  AlertTriangle, Undo2, Volume2, VolumeX, Link2, Copy, UserMinus, UsersRound, UserPlus, QrCode, Mail,
 } from "lucide-react";
 import {
   checkInParticipant, endMeeting, undoCheckIn, resetLiveSession,
@@ -183,6 +186,9 @@ export function B2BLiveDashboard({ data }: { data: LiveData }) {
   const router = useRouter();
   const [loading, setLoading] = useState("");
   const [soundEnabled, setSoundEnabled] = useState(true);
+  const [emailPrompt, setEmailPrompt] = useState<{ id: string; name: string } | null>(null);
+  const [promptEmail, setPromptEmail] = useState("");
+  const [qrModal, setQrModal] = useState<{ name: string; url: string } | null>(null);
 
   // Auto-refresh every 5 seconds
   useEffect(() => {
@@ -190,7 +196,14 @@ export function B2BLiveDashboard({ data }: { data: LiveData }) {
     return () => clearInterval(interval);
   }, [router]);
 
-  const handleCheckIn = useCallback(async (id: string) => {
+  const handleCheckIn = useCallback(async (id: string, existingEmail?: string | null) => {
+    // If no email, show prompt first
+    if (!existingEmail) {
+      const p = data.notArrived.find((p) => p.id === id);
+      setEmailPrompt({ id, name: p?.name || "Participant" });
+      setPromptEmail("");
+      return;
+    }
     setLoading(`checkin-${id}`);
     const result = await checkInParticipant(id);
     if (result.error) toast.error(result.error);
@@ -200,7 +213,22 @@ export function B2BLiveDashboard({ data }: { data: LiveData }) {
     }
     setLoading("");
     router.refresh();
-  }, [router, soundEnabled]);
+  }, [router, soundEnabled, data.notArrived]);
+
+  const handleEmailCheckIn = useCallback(async () => {
+    if (!emailPrompt || !promptEmail.trim()) return;
+    setLoading(`checkin-${emailPrompt.id}`);
+    setEmailPrompt(null);
+    const result = await checkInParticipant(emailPrompt.id, promptEmail.trim());
+    if (result.error) toast.error(result.error);
+    else {
+      toast.success(result.message);
+      if (soundEnabled) playNotificationSound();
+    }
+    setLoading("");
+    setPromptEmail("");
+    router.refresh();
+  }, [emailPrompt, promptEmail, router, soundEnabled]);
 
   const handleEndMeeting = useCallback(async (id: string) => {
     if (loading.startsWith("end-")) return; // Prevent double-trigger
@@ -507,6 +535,60 @@ export function B2BLiveDashboard({ data }: { data: LiveData }) {
             )}
           </div>
 
+          {/* ALREADY CHECKED IN */}
+          {(data.inMeeting.length > 0 || data.waitingQueue.length > 0) && (
+            <div>
+              <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-wider flex items-center gap-2 mb-3">
+                <Users className="h-4 w-4 text-cyan-400" />Checked In ({data.inMeeting.length + data.waitingQueue.length})
+              </h2>
+              <div className="space-y-1.5 max-h-[300px] overflow-y-auto">
+                {[...data.inMeeting, ...data.waitingQueue].map((p) => {
+                  const isInMeeting = p.liveStatus === "IN_MEETING";
+                  return (
+                    <div
+                      key={p.id}
+                      className={`flex items-center justify-between rounded-lg px-3 py-2 ${
+                        isInMeeting
+                          ? "bg-emerald-950/30 border border-emerald-800/40"
+                          : "bg-gray-900 border border-gray-800"
+                      }`}
+                    >
+                      <div className="flex items-center gap-2">
+                        <div className={`h-2 w-2 rounded-full ${isInMeeting ? "bg-emerald-400 animate-pulse" : "bg-amber-400"}`} />
+                        <div>
+                          <p className="text-sm font-medium text-white">{p.name}</p>
+                          <p className="text-[10px] text-gray-500">
+                            {isInMeeting ? "In meeting" : "Waiting"}
+                            {p.contactEmail && ` · ${p.contactEmail}`}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <button
+                          className="text-gray-500 hover:text-cyan-400 transition-colors p-1"
+                          onClick={() => {
+                            const url = `${window.location.origin}/b2b/participant/${p.scheduleToken}`;
+                            setQrModal({ name: p.name, url });
+                          }}
+                          title="Show QR code"
+                        >
+                          <QrCode className="h-3.5 w-3.5" />
+                        </button>
+                        <button
+                          className="text-gray-500 hover:text-blue-400 transition-colors p-1"
+                          onClick={() => copyLink(`/b2b/participant/${p.scheduleToken}`)}
+                          title="Copy link"
+                        >
+                          <Link2 className="h-3 w-3" />
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
           {/* CHECK-IN PANEL */}
           <div>
             <div className="flex items-center justify-between mb-3">
@@ -559,7 +641,7 @@ export function B2BLiveDashboard({ data }: { data: LiveData }) {
                       <Button
                         size="sm"
                         className="bg-blue-600 hover:bg-blue-700 gap-1.5 text-xs h-8"
-                        onClick={() => handleCheckIn(p.id)}
+                        onClick={() => handleCheckIn(p.id, p.contactEmail)}
                         disabled={loading === `checkin-${p.id}`}
                       >
                         {loading === `checkin-${p.id}` ? (
@@ -676,6 +758,72 @@ export function B2BLiveDashboard({ data }: { data: LiveData }) {
           </div>
         </div>
       )}
+
+      {/* EMAIL PROMPT DIALOG */}
+      <Dialog open={!!emailPrompt} onOpenChange={(open) => !open && setEmailPrompt(null)}>
+        <DialogContent className="bg-gray-900 border-gray-700 text-white max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Mail className="h-4 w-4 text-amber-400" />
+              Email Required
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3">
+            <p className="text-sm text-gray-400">
+              <strong className="text-white">{emailPrompt?.name}</strong> doesn&apos;t have an email. Universities need it to send files.
+            </p>
+            <input
+              type="email"
+              value={promptEmail}
+              onChange={(e) => setPromptEmail(e.target.value)}
+              placeholder="Enter email address"
+              autoFocus
+              className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2.5 text-sm text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              onKeyDown={(e) => e.key === "Enter" && handleEmailCheckIn()}
+            />
+            <Button
+              className="w-full bg-blue-600 hover:bg-blue-700 gap-2"
+              onClick={handleEmailCheckIn}
+              disabled={!promptEmail.trim() || loading.startsWith("checkin-")}
+            >
+              {loading.startsWith("checkin-") ? <Loader2 className="h-4 w-4 animate-spin" /> : <UserCheck className="h-4 w-4" />}
+              Check In
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* QR CODE MODAL */}
+      <Dialog open={!!qrModal} onOpenChange={(open) => !open && setQrModal(null)}>
+        <DialogContent className="bg-gray-900 border-gray-700 text-white max-w-xs">
+          <DialogHeader>
+            <DialogTitle className="text-center">{qrModal?.name}</DialogTitle>
+          </DialogHeader>
+          <div className="flex flex-col items-center gap-4">
+            {qrModal && (
+              <img
+                src={`https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(qrModal.url)}`}
+                alt="QR Code"
+                className="w-[250px] h-[250px] rounded-lg bg-white p-2"
+              />
+            )}
+            <p className="text-xs text-gray-500 text-center">Scan to open live status page</p>
+            <Button
+              variant="outline"
+              size="sm"
+              className="gap-1.5 text-xs border-gray-600"
+              onClick={() => {
+                if (qrModal) {
+                  navigator.clipboard.writeText(qrModal.url);
+                  toast.success("Link copied!");
+                }
+              }}
+            >
+              <Copy className="h-3 w-3" />Copy Link
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
