@@ -600,7 +600,13 @@ export async function getB2BEvent(eventId: string) {
 }
 
 export async function getUniversitiesForB2B(eventId: string) {
-  // Get universities not already in this B2B event
+  // Get B2B event to check if it's linked to a main event
+  const b2bEvent = await prisma.b2BEvent.findUnique({
+    where: { id: eventId },
+    select: { eventId: true },
+  });
+
+  // Get universities already added to this B2B event
   const existing = await prisma.b2BParticipant.findMany({
     where: { b2bEventId: eventId, side: "A" },
     select: { universityId: true },
@@ -610,6 +616,35 @@ export async function getUniversitiesForB2B(eventId: string) {
     .map((p) => p.universityId)
     .filter((id): id is string => id !== null);
 
+  // If linked to a main event, only show universities participating in that event
+  if (b2bEvent?.eventId) {
+    const eventParticipants = await prisma.eventParticipating.findMany({
+      where: { eventId: b2bEvent.eventId },
+      select: { universityId: true },
+    });
+
+    const participatingIds = eventParticipants.map((p) => p.universityId);
+    // Filter: must be in event participants AND not already in B2B
+    const eligibleIds = participatingIds.filter((id) => !existingIds.includes(id));
+
+    if (eligibleIds.length === 0) return [];
+
+    return prisma.university.findMany({
+      where: {
+        isActive: true,
+        id: { in: eligibleIds },
+      },
+      select: {
+        id: true,
+        name: true,
+        logoUrl: true,
+        country: true,
+      },
+      orderBy: { name: "asc" },
+    });
+  }
+
+  // Standalone B2B event: show all active universities
   return prisma.university.findMany({
     where: {
       isActive: true,
