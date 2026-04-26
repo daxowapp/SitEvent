@@ -19,11 +19,12 @@ import {
 import {
   ArrowLeft, Clock, Users, GraduationCap, UserCheck, UserX,
   Loader2, RotateCcw, Radio, Square, Timer, CheckCircle2,
-  AlertTriangle, Undo2, Volume2, VolumeX, Link2, Copy, UserMinus, UsersRound, UserPlus, QrCode, Mail, Coffee,
+  AlertTriangle, Undo2, Volume2, VolumeX, Link2, Copy, UserMinus, UsersRound, UserPlus, QrCode, Mail, Coffee, Zap, Minus, Plus,
 } from "lucide-react";
 import {
   checkInParticipant, endMeeting, undoCheckIn, resetLiveSession,
   markParticipantDone, bulkCheckIn, walkInCheckIn, tickAutoAssign,
+  forceAssignAll, updateBreakBuffer,
 } from "@/app/actions/b2b-live";
 
 type LiveData = NonNullable<
@@ -415,6 +416,62 @@ export function B2BLiveDashboard({ data }: { data: LiveData }) {
         </div>
       )}
 
+      {/* BREAK CONTROLS TOOLBAR */}
+      <div className="mb-4 flex flex-wrap items-center gap-3">
+        {/* Break time adjuster */}
+        <div className="flex items-center gap-2 bg-gray-900 border border-gray-800 rounded-xl px-4 py-2">
+          <Coffee className="h-4 w-4 text-amber-400" />
+          <span className="text-xs text-gray-400">Break Buffer:</span>
+          <button
+            className="h-6 w-6 flex items-center justify-center rounded bg-gray-800 hover:bg-gray-700 text-gray-300 transition-colors disabled:opacity-50"
+            onClick={async () => {
+              const newVal = Math.max(0, (data.event.breakBetweenMeetings ?? 5) - 1);
+              const result = await updateBreakBuffer(data.event.id, newVal);
+              if (result.error) toast.error(result.error);
+              else { toast.success(result.message); router.refresh(); }
+            }}
+            disabled={loading === "break" || (data.event.breakBetweenMeetings ?? 5) <= 0}
+          >
+            <Minus className="h-3 w-3" />
+          </button>
+          <span className="text-sm font-bold text-white min-w-[2rem] text-center">
+            {data.event.breakBetweenMeetings ?? 5}m
+          </span>
+          <button
+            className="h-6 w-6 flex items-center justify-center rounded bg-gray-800 hover:bg-gray-700 text-gray-300 transition-colors disabled:opacity-50"
+            onClick={async () => {
+              const newVal = Math.min(30, (data.event.breakBetweenMeetings ?? 5) + 1);
+              const result = await updateBreakBuffer(data.event.id, newVal);
+              if (result.error) toast.error(result.error);
+              else { toast.success(result.message); router.refresh(); }
+            }}
+            disabled={loading === "break" || (data.event.breakBetweenMeetings ?? 5) >= 30}
+          >
+            <Plus className="h-3 w-3" />
+          </button>
+        </div>
+
+        {/* Force assign button */}
+        {stats.idleNow + stats.onBreak > 0 && stats.waiting > 0 && (
+          <Button
+            variant="outline"
+            size="sm"
+            className="border-amber-500/50 text-amber-400 hover:bg-amber-500/20 gap-1.5"
+            onClick={async () => {
+              setLoading("force");
+              const result = await forceAssignAll(data.event.id);
+              if (result.error) toast.error(result.error);
+              else toast.success(result.message);
+              setLoading("");
+              router.refresh();
+            }}
+            disabled={loading === "force"}
+          >
+            {loading === "force" ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Zap className="h-3.5 w-3.5" />}
+            Force Assign Now
+          </Button>
+        )}
+      </div>
       {/* STATS BAR */}
       <div className="grid grid-cols-2 md:grid-cols-7 gap-3 mb-6">
         {[

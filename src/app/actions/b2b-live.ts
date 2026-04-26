@@ -374,6 +374,60 @@ export async function tickAutoAssign(eventId: string) {
   }
 }
 
+/**
+ * Exported wrapper so b2b-public.ts can trigger auto-assign
+ * after ending a meeting from the university side.
+ */
+export async function autoAssignFromPublic(eventId: string) {
+  return batchAutoAssign(eventId);
+}
+
+/**
+ * Force assign all — bypasses break buffers. For admin emergency use.
+ */
+export async function forceAssignAll(eventId: string) {
+  await requireB2BAdmin();
+
+  // Temporarily set break to 0, assign, then restore
+  const event = await prisma.b2BEvent.findUnique({ where: { id: eventId } });
+  if (!event) return { error: "Event not found" };
+
+  const originalBreak = event.breakBetweenMeetings;
+
+  await prisma.b2BEvent.update({
+    where: { id: eventId },
+    data: { breakBetweenMeetings: 0 },
+  });
+
+  const assigned = await batchAutoAssign(eventId);
+
+  // Restore original break setting
+  await prisma.b2BEvent.update({
+    where: { id: eventId },
+    data: { breakBetweenMeetings: originalBreak },
+  });
+
+  revalidatePath(`/admin/b2b/${eventId}/live`);
+  return { success: true, assigned, message: `Force-assigned ${assigned} meeting(s)` };
+}
+
+/**
+ * Update break buffer time from the live dashboard.
+ */
+export async function updateBreakBuffer(eventId: string, minutes: number) {
+  await requireB2BAdmin();
+
+  if (minutes < 0 || minutes > 30) return { error: "Break must be 0-30 minutes" };
+
+  await prisma.b2BEvent.update({
+    where: { id: eventId },
+    data: { breakBetweenMeetings: minutes },
+  });
+
+  revalidatePath(`/admin/b2b/${eventId}/live`);
+  return { success: true, message: `Break set to ${minutes} minutes` };
+}
+
 // ============================================
 // CHECK-IN
 // ============================================

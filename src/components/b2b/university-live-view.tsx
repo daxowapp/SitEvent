@@ -10,8 +10,7 @@ import {
   Mail, Save, ChevronDown, ChevronUp, Radio, Coffee,
   UserCheck, Sparkles,
 } from "lucide-react";
-import { endMeeting } from "@/app/actions/b2b-live";
-import { saveMeetingNotes, emailNotesToUniversity, sendFilesToParticipant } from "@/app/actions/b2b-public";
+import { saveMeetingNotes, emailNotesToUniversity, sendFilesToParticipant, endMeetingByToken } from "@/app/actions/b2b-public";
 import { toast } from "sonner";
 
 type UniversityData = NonNullable<
@@ -173,7 +172,7 @@ export function UniversityLiveView({ data, token }: { data: UniversityData; toke
     if (!data.activeMeeting || loading.startsWith("end")) return;
     if (notes.trim()) await saveMeetingNotes(token, data.activeMeeting.id, notes);
     setLoading("end");
-    const result = await endMeeting(data.activeMeeting.id);
+    const result = await endMeetingByToken(token, data.activeMeeting.id);
     if (result.error) toast.error(result.error);
     else toast.success(result.message);
     setLoading("");

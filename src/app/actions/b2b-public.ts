@@ -105,6 +105,65 @@ export async function saveMeetingNotes(token: string, meetingId: string, notes: 
 }
 
 // ============================================
+// END MEETING BY TOKEN (university side, no admin auth)
+// ============================================
+
+export async function endMeetingByToken(token: string, meetingId: string) {
+  // Verify token owns this meeting
+  const participant = await prisma.b2BParticipant.findUnique({
+    where: { scheduleToken: token },
+  });
+  if (!participant || participant.side !== "A") return { error: "Unauthorized" };
+
+  const meeting = await prisma.b2BMeeting.findUnique({
+    where: { id: meetingId },
+    include: { participantB: true },
+  });
+  if (!meeting || meeting.participantAId !== participant.id) return { error: "Unauthorized" };
+  if (meeting.status !== "IN_PROGRESS") return { error: "Meeting is not in progress" };
+
+  const now = new Date();
+
+  // Complete the meeting
+  await prisma.b2BMeeting.update({
+    where: { id: meetingId },
+    data: { status: "COMPLETED", actualEnd: now },
+  });
+
+  // Check if participant B has met all universities
+  const totalUnis = await prisma.b2BParticipant.count({
+    where: { b2bEventId: meeting.b2bEventId, side: "A" },
+  });
+  const metCount = await prisma.b2BMeeting.count({
+    where: {
+      b2bEventId: meeting.b2bEventId,
+      participantBId: meeting.participantBId,
+      status: "COMPLETED",
+    },
+  });
+
+  // Update participant B status
+  await prisma.b2BParticipant.update({
+    where: { id: meeting.participantBId },
+    data: {
+      liveStatus: metCount >= totalUnis ? "DONE" : "WAITING",
+      queuePosition: metCount >= totalUnis ? null : undefined,
+    },
+  });
+
+  // Auto-assign next (inline — can't import batchAutoAssign from b2b-live due to circular deps)
+  // The tickAutoAssign will also pick up any missed assignments within 10s
+  const { autoAssignFromPublic } = await import("./b2b-live");
+  const assigned = await autoAssignFromPublic(meeting.b2bEventId);
+
+  return {
+    success: true,
+    assigned,
+    message: assigned > 0 ? "Meeting ended — next participant assigned!" : "Meeting ended.",
+  };
+}
+
+// ============================================
 // EMAIL ALL NOTES TO UNIVERSITY
 // ============================================
 
