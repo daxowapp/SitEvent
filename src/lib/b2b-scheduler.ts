@@ -147,13 +147,13 @@ export function validateCapacity(
 }
 
 /**
- * Generate the meeting schedule using a round-robin algorithm.
+ * Generate the meeting schedule using a deterministic round-robin algorithm.
  * 
- * Algorithm:
- * 1. For each time slot, assign as many non-conflicting A-B pairs as possible.
- * 2. Each A meets each B exactly once.
- * 3. No participant appears in two meetings in the same time slot.
- * 4. Tables are assigned incrementally per slot.
+ * Formula: In time slot `s`, Side A participant `a` meets Side B participant
+ * at index `(s + a) % sideBCount`. This guarantees:
+ * - Each A meets each B exactly once
+ * - No participant appears in two meetings in the same time slot
+ * - Complete coverage with exactly max(sideA, sideB) slots
  */
 export function generateSchedule(
   sideAIds: string[],
@@ -172,70 +172,49 @@ export function generateSchedule(
   }
 
   const meetings: MeetingAssignment[] = [];
+  const N = sideAIds.length;
+  const M = sideBIds.length;
 
-  // Track which pairs have been scheduled
-  const scheduledPairs = new Set<string>();
+  // Determine which side is larger for the round-robin rotation
+  if (N <= M) {
+    // More Side B than Side A (typical: few universities, many agents)
+    // Each slot: N meetings (one per university)
+    // Total slots needed: M (each Side B gets matched with all universities)
+    for (let s = 0; s < M; s++) {
+      if (s >= timeSlots.length) break; // safety
+      const slot = timeSlots[s];
 
-  // Track which participants are busy in each slot
-  const slotBusyA = new Map<number, Set<string>>();
-  const slotBusyB = new Map<number, Set<string>>();
-
-  // Initialize busy maps
-  for (let i = 0; i < timeSlots.length; i++) {
-    slotBusyA.set(i, new Set());
-    slotBusyB.set(i, new Set());
-  }
-
-  // Build a queue of all needed pairs
-  const pairsNeeded: Array<{ aId: string; bId: string }> = [];
-  for (const aId of sideAIds) {
-    for (const bId of sideBIds) {
-      pairsNeeded.push({ aId, bId });
-    }
-  }
-
-  // Shuffle pairs for more balanced distribution
-  shuffleArray(pairsNeeded);
-
-  // Assign each pair to the earliest available slot
-  for (const pair of pairsNeeded) {
-    const pairKey = `${pair.aId}:${pair.bId}`;
-    if (scheduledPairs.has(pairKey)) continue;
-
-    let assigned = false;
-
-    for (let slotIdx = 0; slotIdx < timeSlots.length; slotIdx++) {
-      const busyA = slotBusyA.get(slotIdx)!;
-      const busyB = slotBusyB.get(slotIdx)!;
-
-      if (!busyA.has(pair.aId) && !busyB.has(pair.bId)) {
-        // Assign this pair to this slot
-        const slot = timeSlots[slotIdx];
-        const tableNumber = busyA.size + 1; // Table number = position in slot
+      for (let a = 0; a < N; a++) {
+        const bIndex = (s + a) % M;
 
         meetings.push({
-          participantAId: pair.aId,
-          participantBId: pair.bId,
+          participantAId: sideAIds[a],
+          participantBId: sideBIds[bIndex],
           timeSlot: slot.start,
           endTime: slot.end,
-          tableNumber,
+          tableNumber: a + 1,
         });
-
-        busyA.add(pair.aId);
-        busyB.add(pair.bId);
-        scheduledPairs.add(pairKey);
-        assigned = true;
-        break;
       }
     }
+  } else {
+    // More Side A than Side B (rare: many universities, few agents)
+    // Each slot: M meetings (one per Side B)
+    // Total slots needed: N
+    for (let s = 0; s < N; s++) {
+      if (s >= timeSlots.length) break;
+      const slot = timeSlots[s];
 
-    if (!assigned) {
-      return {
-        success: false,
-        meetings: [],
-        validation,
-        error: `Could not schedule meeting between participants. This may indicate a logical error in capacity validation.`,
-      };
+      for (let b = 0; b < M; b++) {
+        const aIndex = (s + b) % N;
+
+        meetings.push({
+          participantAId: sideAIds[aIndex],
+          participantBId: sideBIds[b],
+          timeSlot: slot.start,
+          endTime: slot.end,
+          tableNumber: b + 1,
+        });
+      }
     }
   }
 
@@ -251,14 +230,4 @@ export function generateSchedule(
     meetings,
     validation,
   };
-}
-
-/**
- * Fisher-Yates shuffle for balanced distribution
- */
-function shuffleArray<T>(array: T[]): void {
-  for (let i = array.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [array[i], array[j]] = [array[j], array[i]];
-  }
 }
