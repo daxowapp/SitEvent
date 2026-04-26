@@ -739,13 +739,6 @@ export function EventForm({ initialData, onSubmit, countries = [], eventId }: Ev
                 )}
             </div>
 
-            {/* B2B Matchmaking */}
-            {eventId && (
-                <div className="space-y-4">
-                    <B2BSection eventId={eventId} />
-                </div>
-            )}
-
             {/* Actions */}
             <div className="flex gap-3 pt-4">
                 <Button type="submit" disabled={isSubmitting}>

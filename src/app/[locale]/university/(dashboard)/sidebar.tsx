@@ -20,6 +20,7 @@ import {
     Calendar,
     FileText,
     Camera,
+    Handshake,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { LanguageSwitcher } from "@/components/public/language-switcher";
@@ -31,6 +32,7 @@ const getNavItems = (role?: string | null) => {
 
     if (role === "ADMIN") {
         items.push({ key: "myEvents", href: "/university/events", icon: Calendar });
+        items.push({ key: "b2bMeetings", href: "/university/b2b", icon: Handshake });
         items.push({ key: "analytics", href: "/university/analytics", icon: BarChart3 });
     }
 
