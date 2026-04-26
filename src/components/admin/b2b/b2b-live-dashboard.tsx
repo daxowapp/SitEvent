@@ -19,7 +19,7 @@ import {
 import {
   ArrowLeft, Clock, Users, GraduationCap, UserCheck, UserX,
   Loader2, RotateCcw, Radio, Square, Timer, CheckCircle2,
-  AlertTriangle, Undo2, Volume2, VolumeX, Link2, Copy, UserMinus, UsersRound, UserPlus, QrCode, Mail,
+  AlertTriangle, Undo2, Volume2, VolumeX, Link2, Copy, UserMinus, UsersRound, UserPlus, QrCode, Mail, Coffee,
 } from "lucide-react";
 import {
   checkInParticipant, endMeeting, undoCheckIn, resetLiveSession,
@@ -176,6 +176,44 @@ function WaitTimer({ arrivedAt }: { arrivedAt: Date | string }) {
   }, [arrivedAt]);
 
   return <span className="text-xs text-muted-foreground">waiting {elapsed}</span>;
+}
+
+// ============================================
+// BREAK COUNTDOWN
+// ============================================
+
+function BreakCountdown({ breakEndsAt }: { breakEndsAt: string }) {
+  const [remaining, setRemaining] = useState("");
+
+  useEffect(() => {
+    const tick = () => {
+      let endMs: number;
+      // If it's an HH:mm string (main break), convert to today's date
+      if (breakEndsAt.length <= 5) {
+        const [h, m] = breakEndsAt.split(":").map(Number);
+        const d = new Date();
+        d.setHours(h, m, 0, 0);
+        endMs = d.getTime();
+      } else {
+        endMs = new Date(breakEndsAt).getTime();
+      }
+      const diffMs = endMs - Date.now();
+      if (diffMs <= 0) {
+        setRemaining("ending...");
+      } else {
+        const mins = Math.floor(diffMs / 60000);
+        const secs = Math.floor((diffMs % 60000) / 1000);
+        setRemaining(`${mins}:${secs.toString().padStart(2, "0")}`);
+      }
+    };
+    tick();
+    const interval = setInterval(tick, 1000);
+    return () => clearInterval(interval);
+  }, [breakEndsAt]);
+
+  return (
+    <span className="font-mono text-amber-400 text-xs font-bold">{remaining}</span>
+  );
 }
 
 // ============================================
@@ -366,11 +404,23 @@ export function B2BLiveDashboard({ data }: { data: LiveData }) {
         </div>
       </div>
 
+      {/* MAIN BREAK BANNER */}
+      {data.isMainBreak && (
+        <div className="mb-4 flex items-center gap-3 bg-amber-500/10 border border-amber-500/30 rounded-xl px-5 py-3">
+          <Coffee className="h-5 w-5 text-amber-400 shrink-0" />
+          <div>
+            <p className="text-sm font-semibold text-amber-300">Main Break Active</p>
+            <p className="text-xs text-amber-400/70">No new meetings will be assigned until break ends at {data.event.breakEnd}</p>
+          </div>
+        </div>
+      )}
+
       {/* STATS BAR */}
-      <div className="grid grid-cols-2 md:grid-cols-6 gap-3 mb-6">
+      <div className="grid grid-cols-2 md:grid-cols-7 gap-3 mb-6">
         {[
           { label: "Universities", value: stats.totalUniversities, icon: GraduationCap, color: "text-blue-400" },
           { label: "Active Now", value: stats.activeNow, icon: Radio, color: "text-emerald-400" },
+          { label: "On Break", value: stats.onBreak, icon: Coffee, color: "text-amber-400" },
           { label: "Idle", value: stats.idleNow, icon: AlertTriangle, color: stats.idleNow > 0 && stats.waiting > 0 ? "text-red-400" : "text-gray-400" },
           { label: "Waiting", value: stats.waiting, icon: Clock, color: "text-amber-400" },
           { label: "Completed", value: stats.totalCompleted, icon: CheckCircle2, color: "text-purple-400" },
@@ -398,6 +448,8 @@ export function B2BLiveDashboard({ data }: { data: LiveData }) {
                 className={`border-2 transition-all ${
                   card.status === "IN_MEETING"
                     ? "border-emerald-500/50 bg-emerald-950/30"
+                    : card.status === "ON_BREAK"
+                    ? "border-amber-500/40 bg-amber-950/20"
                     : data.waitingQueue.length > 0
                     ? "border-red-500/50 bg-red-950/20 animate-pulse"
                     : "border-gray-700 bg-gray-900"
@@ -428,10 +480,12 @@ export function B2BLiveDashboard({ data }: { data: LiveData }) {
                       className={
                         card.status === "IN_MEETING"
                           ? "border-emerald-500 text-emerald-400 text-xs"
+                          : card.status === "ON_BREAK"
+                          ? "border-amber-500 text-amber-400 text-xs"
                           : "border-gray-600 text-gray-400 text-xs"
                       }
                     >
-                      {card.status === "IN_MEETING" ? "Active" : "Idle"}
+                      {card.status === "IN_MEETING" ? "Active" : card.status === "ON_BREAK" ? "☕ Break" : "Idle"}
                     </Badge>
                   </div>
 
@@ -478,12 +532,20 @@ export function B2BLiveDashboard({ data }: { data: LiveData }) {
                       </Button>
                     </div>
                   ) : (
-                    <div className="text-center py-4">
-                      <p className="text-sm text-gray-500">
-                        {data.waitingQueue.length > 0
-                          ? "⚡ Assigning next..."
-                          : "Waiting for participants"}
-                      </p>
+                    <div className="text-center py-4 space-y-1">
+                      {card.status === "ON_BREAK" && card.breakEndsAt ? (
+                        <>
+                          <Coffee className="h-5 w-5 text-amber-400 mx-auto mb-1" />
+                          <p className="text-xs text-amber-400 font-medium">Break Time</p>
+                          <p className="text-[10px] text-gray-500">Resumes in <BreakCountdown breakEndsAt={card.breakEndsAt} /></p>
+                        </>
+                      ) : (
+                        <p className="text-sm text-gray-500">
+                          {data.waitingQueue.length > 0
+                            ? "⚡ Assigning next..."
+                            : "Waiting for participants"}
+                        </p>
+                      )}
                     </div>
                   )}
                 </CardContent>

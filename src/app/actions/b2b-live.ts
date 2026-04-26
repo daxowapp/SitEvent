@@ -48,7 +48,15 @@ export async function getLiveDashboard(eventId: string) {
   const sideA = event.participants.filter((p) => p.side === "A");
   const sideB = event.participants.filter((p) => p.side === "B");
 
-  // Build university status cards
+  const breakBufferMs = (event.breakBetweenMeetings ?? 5) * 60 * 1000;
+  const nowMs = Date.now();
+
+  // Check main break status
+  const nowDate = new Date();
+  const hhmm = `${nowDate.getHours().toString().padStart(2, "0")}:${nowDate.getMinutes().toString().padStart(2, "0")}`;
+  const isMainBreak = !!(event.breakStart && event.breakEnd && hhmm >= event.breakStart && hhmm < event.breakEnd);
+
+  // Build university status cards with break awareness
   const universityCards = sideA.map((uni) => {
     const activeMeeting = event.meetings.find(
       (m) => m.participantAId === uni.id && m.status === "IN_PROGRESS"
@@ -57,11 +65,31 @@ export async function getLiveDashboard(eventId: string) {
       (m) => m.participantAId === uni.id && m.status === "COMPLETED"
     ).length;
 
+    // Find last completed meeting to determine break status
+    const lastCompleted = event.meetings
+      .filter((m) => m.participantAId === uni.id && m.status === "COMPLETED" && m.actualEnd)
+      .sort((a, b) => new Date(b.actualEnd!).getTime() - new Date(a.actualEnd!).getTime())[0];
+
+    let status: "IN_MEETING" | "ON_BREAK" | "IDLE" = "IDLE";
+    let breakEndsAt: string | null = null;
+
+    if (activeMeeting) {
+      status = "IN_MEETING";
+    } else if (isMainBreak) {
+      status = "ON_BREAK";
+      breakEndsAt = event.breakEnd!;
+    } else if (lastCompleted?.actualEnd && (nowMs - new Date(lastCompleted.actualEnd).getTime()) < breakBufferMs) {
+      status = "ON_BREAK";
+      const endsAt = new Date(new Date(lastCompleted.actualEnd).getTime() + breakBufferMs);
+      breakEndsAt = endsAt.toISOString();
+    }
+
     return {
       participant: uni,
       activeMeeting,
       completedCount,
-      status: activeMeeting ? ("IN_MEETING" as const) : ("IDLE" as const),
+      status,
+      breakEndsAt,
     };
   });
 
@@ -93,6 +121,7 @@ export async function getLiveDashboard(eventId: string) {
 
   const totalPossibleMeetings = sideA.length * sideB.length;
   const totalCompletedMeetings = completedMeetings.length;
+  const onBreakCount = universityCards.filter((c) => c.status === "ON_BREAK").length;
 
   return {
     event,
@@ -102,6 +131,7 @@ export async function getLiveDashboard(eventId: string) {
     inMeeting,
     done,
     completedMeetings,
+    isMainBreak,
     stats: {
       totalUniversities: sideA.length,
       totalParticipants: sideB.length,
@@ -112,6 +142,7 @@ export async function getLiveDashboard(eventId: string) {
         : 0,
       activeNow: universityCards.filter((c) => c.status === "IN_MEETING").length,
       idleNow: universityCards.filter((c) => c.status === "IDLE").length,
+      onBreak: onBreakCount,
       waiting: waitingQueue.length,
     },
   };
