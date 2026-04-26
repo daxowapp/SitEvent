@@ -428,6 +428,53 @@ export async function updateBreakBuffer(eventId: string, minutes: number) {
   return { success: true, message: `Break set to ${minutes} minutes` };
 }
 
+/**
+ * Start a main break (e.g., lunch). Sets breakStart=now, breakEnd=now+duration.
+ */
+export async function startMainBreak(eventId: string, durationMinutes: number) {
+  await requireB2BAdmin();
+
+  if (durationMinutes < 5 || durationMinutes > 120) return { error: "Break must be 5-120 minutes" };
+
+  const now = new Date();
+  const end = new Date(now.getTime() + durationMinutes * 60 * 1000);
+
+  const fmt = (d: Date) =>
+    `${d.getHours().toString().padStart(2, "0")}:${d.getMinutes().toString().padStart(2, "0")}`;
+
+  await prisma.b2BEvent.update({
+    where: { id: eventId },
+    data: {
+      breakStart: fmt(now),
+      breakEnd: fmt(end),
+    },
+  });
+
+  revalidatePath(`/admin/b2b/${eventId}/live`);
+  return { success: true, message: `Break started — ends at ${fmt(end)}` };
+}
+
+/**
+ * End the main break immediately.
+ */
+export async function endMainBreak(eventId: string) {
+  await requireB2BAdmin();
+
+  await prisma.b2BEvent.update({
+    where: { id: eventId },
+    data: {
+      breakStart: null,
+      breakEnd: null,
+    },
+  });
+
+  // Immediately try to assign
+  const assigned = await batchAutoAssign(eventId);
+
+  revalidatePath(`/admin/b2b/${eventId}/live`);
+  return { success: true, assigned, message: `Break ended! ${assigned > 0 ? `${assigned} meeting(s) assigned.` : "Assignments will start shortly."}` };
+}
+
 // ============================================
 // CHECK-IN
 // ============================================

@@ -19,12 +19,12 @@ import {
 import {
   ArrowLeft, Clock, Users, GraduationCap, UserCheck, UserX,
   Loader2, RotateCcw, Radio, Square, Timer, CheckCircle2,
-  AlertTriangle, Undo2, Volume2, VolumeX, Link2, Copy, UserMinus, UsersRound, UserPlus, QrCode, Mail, Coffee, Zap, Minus, Plus,
+  AlertTriangle, Undo2, Volume2, VolumeX, Link2, Copy, UserMinus, UsersRound, UserPlus, QrCode, Mail, Coffee, Zap, Minus, Plus, UtensilsCrossed, Play,
 } from "lucide-react";
 import {
   checkInParticipant, endMeeting, undoCheckIn, resetLiveSession,
   markParticipantDone, bulkCheckIn, walkInCheckIn, tickAutoAssign,
-  forceAssignAll, updateBreakBuffer,
+  forceAssignAll, updateBreakBuffer, startMainBreak, endMainBreak,
 } from "@/app/actions/b2b-live";
 
 type LiveData = NonNullable<
@@ -228,6 +228,7 @@ export function B2BLiveDashboard({ data }: { data: LiveData }) {
   const [emailPrompt, setEmailPrompt] = useState<{ id: string; name: string } | null>(null);
   const [promptEmail, setPromptEmail] = useState("");
   const [qrModal, setQrModal] = useState<{ name: string; url: string } | null>(null);
+  const [breakDuration, setBreakDuration] = useState(30);
 
   // Auto-refresh every 3 seconds for real-time updates
   useEffect(() => {
@@ -405,13 +406,73 @@ export function B2BLiveDashboard({ data }: { data: LiveData }) {
         </div>
       </div>
 
-      {/* MAIN BREAK BANNER */}
-      {data.isMainBreak && (
-        <div className="mb-4 flex items-center gap-3 bg-amber-500/10 border border-amber-500/30 rounded-xl px-5 py-3">
-          <Coffee className="h-5 w-5 text-amber-400 shrink-0" />
-          <div>
-            <p className="text-sm font-semibold text-amber-300">Main Break Active</p>
-            <p className="text-xs text-amber-400/70">No new meetings will be assigned until break ends at {data.event.breakEnd}</p>
+      {/* MAIN BREAK BANNER / CONTROLS */}
+      {data.isMainBreak ? (
+        <div className="mb-4 flex items-center justify-between bg-amber-500/10 border border-amber-500/30 rounded-xl px-5 py-4">
+          <div className="flex items-center gap-3">
+            <div className="h-10 w-10 rounded-xl bg-amber-500/20 flex items-center justify-center">
+              <UtensilsCrossed className="h-5 w-5 text-amber-400" />
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-amber-300">🍽 Lunch Break Active</p>
+              <p className="text-xs text-amber-400/70">
+                No meetings assigned · Break ends at {data.event.breakEnd}
+                {data.event.breakEnd && (
+                  <> — <BreakCountdown breakEndsAt={data.event.breakEnd} /></>
+                )}
+              </p>
+            </div>
+          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            className="border-emerald-500/50 text-emerald-400 hover:bg-emerald-500/20 gap-1.5"
+            onClick={async () => {
+              setLoading("endbreak");
+              const result = await endMainBreak(data.event.id);
+              if (result.error) toast.error(result.error);
+              else toast.success(result.message);
+              setLoading("");
+              router.refresh();
+            }}
+            disabled={loading === "endbreak"}
+          >
+            {loading === "endbreak" ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Play className="h-3.5 w-3.5" />}
+            End Break Now
+          </Button>
+        </div>
+      ) : (
+        <div className="mb-4 flex items-center gap-3">
+          <div className="flex items-center gap-2 bg-gray-900 border border-gray-800 rounded-xl px-4 py-2">
+            <UtensilsCrossed className="h-4 w-4 text-gray-500" />
+            <select
+              value={breakDuration}
+              onChange={(e) => setBreakDuration(Number(e.target.value))}
+              className="bg-gray-800 border-none text-white text-xs rounded px-2 py-1 focus:outline-none"
+            >
+              <option value={15}>15 min</option>
+              <option value={30}>30 min</option>
+              <option value={45}>45 min</option>
+              <option value={60}>60 min</option>
+              <option value={90}>90 min</option>
+            </select>
+            <Button
+              variant="outline"
+              size="sm"
+              className="border-amber-500/50 text-amber-400 hover:bg-amber-500/20 gap-1.5 text-xs"
+              onClick={async () => {
+                setLoading("startbreak");
+                const result = await startMainBreak(data.event.id, breakDuration);
+                if (result.error) toast.error(result.error);
+                else toast.success(result.message);
+                setLoading("");
+                router.refresh();
+              }}
+              disabled={loading === "startbreak"}
+            >
+              {loading === "startbreak" ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Coffee className="h-3.5 w-3.5" />}
+              Start Break
+            </Button>
           </div>
         </div>
       )}
