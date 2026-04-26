@@ -782,7 +782,7 @@ A Macrom-style B2B meeting scheduler that automatically generates conflict-free 
 - `B2BSection` component (`src/components/admin/b2b/b2b-event-section.tsx`) renders in the main event edit form
 
 ### Enum: `B2BMeetingStatus`
-`SCHEDULED`, `COMPLETED`, `CANCELLED`, `NO_SHOW`
+`SCHEDULED`, `IN_PROGRESS`, `COMPLETED`, `CANCELLED`, `NO_SHOW`
 
 ### Scheduling Algorithm (`src/lib/b2b-scheduler.ts`)
 - **Round-robin** assignment ensuring each Side A meets each Side B exactly once
@@ -796,9 +796,14 @@ A Macrom-style B2B meeting scheduler that automatically generates conflict-free 
 |---|---|
 | `src/lib/b2b-scheduler.ts` | Core scheduling algorithm (generateTimeSlots, generateSchedule, validateCapacity) |
 | `src/app/actions/b2b.ts` | All B2B server actions (CRUD, schedule generation, notes, import, event integration) |
+| `src/app/actions/b2b-live.ts` | Live queue actions (checkIn, endMeeting, autoAssign, markDone, bulkCheckIn, reset) |
+| `src/app/actions/b2b-public.ts` | Public view data (getUniversityLiveView, getParticipantLiveView) |
 | `src/lib/validations.ts` | Zod schemas: `b2bEventSchema`, `b2bParticipantSchema` |
 | `src/components/admin/b2b/b2b-event-section.tsx` | B2B toggle section embedded in main event form |
+| `src/components/admin/b2b/b2b-live-dashboard.tsx` | Live queue admin dashboard |
 | `src/components/admin/b2b/` | Admin B2B components (event form, detail client, etc.) |
+| `src/components/b2b/university-live-view.tsx` | University public live view |
+| `src/components/b2b/participant-live-view.tsx` | Participant public live view |
 | `src/components/university/b2b-university-schedule.tsx` | University B2B schedule view |
 
 ### Routes
@@ -807,10 +812,13 @@ A Macrom-style B2B meeting scheduler that automatically generates conflict-free 
 | `/admin/b2b` | B2B events list |
 | `/admin/b2b/new` | Create new standalone B2B event |
 | `/admin/b2b/[id]` | Event detail (participants, schedule, public links) |
+| `/admin/b2b/[id]/live` | **Live Queue Dashboard** — event-day real-time control |
 | `/admin/events/[id]` | Main event edit — includes B2B toggle section |
 | `/[locale]/university/b2b` | University B2B events list |
 | `/[locale]/university/b2b/[eventId]` | University meeting schedule with notes |
 | `/b2b/schedule/[token]` | Public schedule for Side B (no auth) |
+| `/b2b/university/[token]` | **University Live View** — meeting + countdown (no auth) |
+| `/b2b/participant/[token]` | **Participant Live View** — status + queue (no auth) |
 
 ### API Endpoints
 | Endpoint | Purpose |
@@ -824,8 +832,33 @@ A Macrom-style B2B meeting scheduler that automatically generates conflict-free 
 2. **Option B — Standalone**: Create B2B event directly at `/admin/b2b/new`
 3. Add Side A — select from existing universities
 4. Add Side B — manual entry or CSV import (headers: name, contact_person, email, phone, type, country)
-5. Click "Generate Schedule" — algorithm creates all meetings
-6. Preview schedule in table view, update meeting statuses
-7. Share public links with Side B participants
-8. Export to CSV for offline use
+5. Click **"Go Live"** → opens Live Queue Dashboard
+6. **Check in** participants as they arrive (one-by-one or bulk)
+7. System **auto-assigns** to idle university with fewest meetings
+8. Meetings **auto-end** when countdown timer expires (with notification chime)
+9. Admin can **end early**, **mark done** (early departure), or **undo check-in**
+10. Share university/participant live view links (copy button on each card)
+
+### Live Queue System — Auto-Assignment Algorithm
+1. Find all universities currently **IDLE** (no IN_PROGRESS meeting)
+2. Sort by fewest completed meetings (load balance)
+3. Find next **WAITING** participant (earliest arrival time)
+4. Skip if this pair already met (prevent duplicate meetings)
+5. If participant has met ALL universities → mark as **DONE**, try next
+6. Create meeting with status `IN_PROGRESS`, set `actualStart = now()`
+
+### B2BParticipant Live Fields
+| Field | Purpose |
+|---|---|
+| `liveStatus` | `NOT_ARRIVED`, `WAITING`, `IN_MEETING`, `DONE` |
+| `arrivedAt` | Timestamp of actual check-in |
+| `queuePosition` | Position in waiting queue |
+
+### B2BMeeting Live Fields
+| Field | Purpose |
+|---|---|
+| `actualStart` | When meeting actually began |
+| `actualEnd` | When meeting was ended |
+| `status: IN_PROGRESS` | Currently active meeting |
+
 

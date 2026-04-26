@@ -2,7 +2,19 @@
 
 All notable changes to this project will be documented in this file.
 
-2026-04-26 - B2B Integration in Event Form - Merged B2B matchmaking configuration into the main event creation/edit form. Admins can now toggle B2B mode on any existing event with configurable time slots, slot duration, and break periods. When enabled, a linked B2BEvent is auto-created and accessible via a "Manage B2B" button. Added `eventId` foreign key from B2BEvent → Event. New component: `B2BSection`. New server actions: `enableB2BForEvent`, `disableB2BForEvent`, `getB2BForEvent`.
+2026-04-27 - B2B Live Queue System - Replaced pre-scheduled B2B meetings with a real-time live queue system. Admin checks in participants as they arrive; the system auto-assigns them to idle universities prioritized by fewest completed meetings. Meetings auto-end when the countdown timer (slot duration) expires with a Web Audio API notification chime. Features: auto-assignment algorithm, countdown timers with progress bars, waiting queue with arrival time tracking, bulk check-in, mark-as-done (early departure), undo check-in, session reset, sound toggle. New page: `/admin/b2b/[id]/live`. New actions file: `b2b-live.ts`.
+
+2026-04-27 - University Live Dashboard - Public token-based page (`/b2b/university/[token]`) for each university to see their current meeting partner, countdown timer, auto-end with chime, end-meeting-early button, and completed meetings history. No login required. Auto-refreshes every 5 seconds.
+
+2026-04-27 - Participant Live View - Public token-based page (`/b2b/participant/[token]`) showing participant's real-time status (Not Arrived → Waiting with queue position → In Meeting with timer → Done), progress bar, and completed meetings list. Auto-refreshes every 5 seconds.
+
+2026-04-27 - B2B Edge Case Handling - Added Mark as Done (removes participant from queue, auto-ends meeting if in progress), Bulk Check In All (one click to check in all remaining participants), copy-link buttons for university and participant live view URLs. Fixed auto-end race conditions with server-side status guards.
+
+2026-04-26 - B2B Slot Duration Fix - Removed auto-adjust logic that was overriding user's chosen slot duration (e.g. reducing 15min to 9min). System now respects the set duration; late arrivals get fewer meetings instead.
+
+2026-04-26 - B2B Edit Dialogs - Added edit dialogs for B2B event settings (name, date, times, slot duration, breaks, location) and Side B participant details including arrival time.
+
+2026-04-26 - B2B Arrival Time Support - Added per-participant arrival time field for Side B. Scheduler respects arrival times and only assigns late arrivals to post-arrival slots. CSV import reads attendance_time/arrival_time columns.
 
 2026-04-25 - B2B Matchmaking System - Implemented a full Macrom-style B2B meeting scheduler. Admin can create B2B events with configurable time slots and break periods, manage Side A (Universities from existing database) and Side B (Agents/Schools/Companies via manual entry or CSV import), and auto-generate conflict-free meeting schedules using a round-robin algorithm. Universities access their B2B schedule via the existing portal with meeting notes and document sharing. Side B participants view schedules via public token-based links (no login required). Features: schedule generation/regeneration, CSV export, meeting status tracking, capacity validation, and table number assignment. New models: B2BEvent, B2BParticipant, B2BMeeting with B2BMeetingStatus enum.
 
