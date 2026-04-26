@@ -16,10 +16,11 @@ import {
 import {
   ArrowLeft, Clock, Users, GraduationCap, UserCheck, UserX,
   Loader2, RotateCcw, Radio, Square, Timer, CheckCircle2,
-  AlertTriangle, Undo2, Volume2, VolumeX, Link2, Copy,
+  AlertTriangle, Undo2, Volume2, VolumeX, Link2, Copy, UserMinus, UsersRound,
 } from "lucide-react";
 import {
   checkInParticipant, endMeeting, undoCheckIn, resetLiveSession,
+  markParticipantDone, bulkCheckIn,
 } from "@/app/actions/b2b-live";
 
 type LiveData = NonNullable<
@@ -225,6 +226,24 @@ export function B2BLiveDashboard({ data }: { data: LiveData }) {
     const result = await resetLiveSession(data.event.id);
     if (result.error) toast.error(result.error);
     else toast.success("Live session reset!");
+    setLoading("");
+    router.refresh();
+  }, [data.event.id, router]);
+
+  const handleMarkDone = useCallback(async (id: string) => {
+    setLoading(`done-${id}`);
+    const result = await markParticipantDone(id);
+    if (result.error) toast.error(result.error);
+    else toast.success("Marked as done");
+    setLoading("");
+    router.refresh();
+  }, [router]);
+
+  const handleBulkCheckIn = useCallback(async () => {
+    setLoading("bulk");
+    const result = await bulkCheckIn(data.event.id);
+    if (result.error) toast.error(result.error);
+    else toast.success(result.message);
     setLoading("");
     router.refresh();
   }, [data.event.id, router]);
@@ -446,15 +465,28 @@ export function B2BLiveDashboard({ data }: { data: LiveData }) {
                         </div>
                       </div>
                     </div>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-7 w-7 text-gray-500 hover:text-red-400"
-                      onClick={() => handleUndo(p.id)}
-                      disabled={loading === `undo-${p.id}`}
-                    >
-                      <Undo2 className="h-3.5 w-3.5" />
-                    </Button>
+                    <div className="flex items-center gap-0.5">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-7 w-7 text-gray-500 hover:text-amber-400"
+                        onClick={() => handleMarkDone(p.id)}
+                        disabled={loading === `done-${p.id}`}
+                        title="Mark as done (left early)"
+                      >
+                        <UserMinus className="h-3.5 w-3.5" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-7 w-7 text-gray-500 hover:text-red-400"
+                        onClick={() => handleUndo(p.id)}
+                        disabled={loading === `undo-${p.id}`}
+                        title="Undo check-in"
+                      >
+                        <Undo2 className="h-3.5 w-3.5" />
+                      </Button>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -463,9 +495,23 @@ export function B2BLiveDashboard({ data }: { data: LiveData }) {
 
           {/* CHECK-IN PANEL */}
           <div>
-            <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-wider flex items-center gap-2 mb-3">
-              <UserCheck className="h-4 w-4 text-blue-400" />Check In ({data.notArrived.length} remaining)
-            </h2>
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-wider flex items-center gap-2">
+                <UserCheck className="h-4 w-4 text-blue-400" />Check In ({data.notArrived.length} remaining)
+              </h2>
+              {data.notArrived.length > 1 && (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="border-blue-500/50 text-blue-400 hover:bg-blue-500/20 gap-1.5 text-xs h-7"
+                  onClick={handleBulkCheckIn}
+                  disabled={loading === "bulk"}
+                >
+                  {loading === "bulk" ? <Loader2 className="h-3 w-3 animate-spin" /> : <UsersRound className="h-3 w-3" />}
+                  Check In All
+                </Button>
+              )}
+            </div>
             {data.notArrived.length === 0 ? (
               <div className="bg-gray-900 border border-gray-800 rounded-xl p-6 text-center">
                 <p className="text-sm text-gray-500">Everyone has arrived! 🎉</p>

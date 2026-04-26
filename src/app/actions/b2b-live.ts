@@ -421,3 +421,103 @@ export async function resetLiveSession(eventId: string) {
     return { error: "Failed to reset live session" };
   }
 }
+
+// ============================================
+// MARK PARTICIPANT AS DONE (left early / skip)
+// ============================================
+
+export async function markParticipantDone(participantId: string) {
+  await requireB2BAdmin();
+
+  try {
+    const participant = await prisma.b2BParticipant.findUnique({
+      where: { id: participantId },
+    });
+    if (!participant) return { error: "Participant not found" };
+
+    // If they're in a meeting, end it first
+    if (participant.liveStatus === "IN_MEETING") {
+      const activeMeeting = await prisma.b2BMeeting.findFirst({
+        where: {
+          b2bEventId: participant.b2bEventId,
+          participantBId: participant.id,
+          status: "IN_PROGRESS",
+        },
+      });
+      if (activeMeeting) {
+        await prisma.b2BMeeting.update({
+          where: { id: activeMeeting.id },
+          data: { status: "COMPLETED", actualEnd: new Date() },
+        });
+      }
+    }
+
+    await prisma.b2BParticipant.update({
+      where: { id: participantId },
+      data: { liveStatus: "DONE", queuePosition: null },
+    });
+
+    // Try to assign next person to freed university
+    await batchAutoAssign(participant.b2bEventId);
+
+    revalidatePath(`/admin/b2b/${participant.b2bEventId}/live`);
+    return { success: true };
+  } catch (error) {
+    console.error("Mark done failed:", error);
+    return { error: "Failed to mark as done" };
+  }
+}
+
+// ============================================
+// BULK CHECK-IN (check in all remaining)
+// ============================================
+
+export async function bulkCheckIn(eventId: string) {
+  await requireB2BAdmin();
+
+  try {
+    const notArrived = await prisma.b2BParticipant.findMany({
+      where: { b2bEventId: eventId, side: "B", liveStatus: "NOT_ARRIVED" },
+    });
+
+    if (notArrived.length === 0) return { error: "No participants to check in" };
+
+    const now = new Date();
+    let queuePos = 0;
+
+    // Get current max queue position
+    const maxQueue = await prisma.b2BParticipant.findFirst({
+      where: { b2bEventId: eventId, liveStatus: "WAITING" },
+      orderBy: { queuePosition: "desc" },
+      select: { queuePosition: true },
+    });
+    queuePos = maxQueue?.queuePosition || 0;
+
+    // Check in all at once
+    for (const p of notArrived) {
+      queuePos++;
+      await prisma.b2BParticipant.update({
+        where: { id: p.id },
+        data: {
+          liveStatus: "WAITING",
+          arrivedAt: now,
+          queuePosition: queuePos,
+        },
+      });
+    }
+
+    // Auto-assign as many as possible
+    const assigned = await batchAutoAssign(eventId);
+
+    revalidatePath(`/admin/b2b/${eventId}/live`);
+    return {
+      success: true,
+      checkedIn: notArrived.length,
+      assigned,
+      message: `${notArrived.length} checked in, ${assigned} assigned to universities.`,
+    };
+  } catch (error) {
+    console.error("Bulk check-in failed:", error);
+    return { error: "Bulk check-in failed" };
+  }
+}
