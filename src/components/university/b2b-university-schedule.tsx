@@ -18,7 +18,7 @@ import {
 } from "@/components/ui/dialog";
 import {
   Calendar, Clock, MapPin, ArrowLeft, Building2,
-  FileText, CheckCircle2, Send, Loader2,
+  FileText, CheckCircle2, Send, Loader2, Radio,
 } from "lucide-react";
 import Link from "next/link";
 import { updateMeetingNotes, markDocumentsSent } from "@/app/actions/b2b";
@@ -57,18 +57,28 @@ export function B2BUniversityScheduleClient({
   return (
     <div className="max-w-4xl mx-auto space-y-6 p-6">
       {/* Header */}
-      <div className="flex items-center gap-4">
-        <Link href="../b2b">
-          <Button variant="outline" size="icon"><ArrowLeft className="h-4 w-4" /></Button>
-        </Link>
-        <div>
-          <h1 className="text-2xl font-bold">{event.name}</h1>
-          <div className="flex items-center gap-3 mt-1 text-sm text-muted-foreground">
-            <span className="flex items-center gap-1"><Calendar className="h-3.5 w-3.5" />{format(new Date(event.date), "MMM d, yyyy")}</span>
-            <span className="flex items-center gap-1"><Clock className="h-3.5 w-3.5" />{event.startTime} — {event.endTime}</span>
-            {event.location && <span className="flex items-center gap-1"><MapPin className="h-3.5 w-3.5" />{event.location}</span>}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-4">
+          <Link href="../b2b">
+            <Button variant="outline" size="icon"><ArrowLeft className="h-4 w-4" /></Button>
+          </Link>
+          <div>
+            <h1 className="text-2xl font-bold">{event.name}</h1>
+            <div className="flex items-center gap-3 mt-1 text-sm text-muted-foreground">
+              <span className="flex items-center gap-1"><Calendar className="h-3.5 w-3.5" />{format(new Date(event.date), "MMM d, yyyy")}</span>
+              <span className="flex items-center gap-1"><Clock className="h-3.5 w-3.5" />{event.startTime} — {event.endTime}</span>
+              {event.location && <span className="flex items-center gap-1"><MapPin className="h-3.5 w-3.5" />{event.location}</span>}
+            </div>
           </div>
         </div>
+        {participant.scheduleToken && (
+          <Link href={`/b2b/university/${participant.scheduleToken}`} target="_blank">
+            <Button className="bg-red-600 hover:bg-red-700 gap-2">
+              <Radio className="h-4 w-4 animate-pulse" />
+              Go Live
+            </Button>
+          </Link>
+        )}
       </div>
 
       {/* Meeting Count */}
