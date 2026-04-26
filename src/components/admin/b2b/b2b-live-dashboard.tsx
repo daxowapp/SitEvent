@@ -539,7 +539,14 @@ export function B2BLiveDashboard({ data }: { data: LiveData }) {
                   >
                     <div>
                       <p className="text-sm font-medium text-white">{p.name}</p>
-                      {p.organization && <p className="text-xs text-gray-400">{p.organization} {p.country && `· ${p.country}`}</p>}
+                      <div className="flex items-center gap-1.5">
+                        {p.organization && <p className="text-xs text-gray-400">{p.organization} {p.country && `· ${p.country}`}</p>}
+                        {p.contactEmail ? (
+                          <span className="text-[10px] text-emerald-500">✓ {p.contactEmail}</span>
+                        ) : (
+                          <span className="text-[10px] text-red-400">⚠ no email</span>
+                        )}
+                      </div>
                     </div>
                     <div className="flex items-center gap-1">
                       <button
@@ -578,6 +585,13 @@ export function B2BLiveDashboard({ data }: { data: LiveData }) {
               <input
                 name="name"
                 placeholder="Name *"
+                required
+                className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              />
+              <input
+                name="contactEmail"
+                type="email"
+                placeholder="Email *"
                 required
                 className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
               />

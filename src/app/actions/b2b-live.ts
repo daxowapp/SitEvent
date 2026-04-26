@@ -541,11 +541,13 @@ export async function walkInCheckIn(eventId: string, formData: FormData) {
 
   try {
     const name = (formData.get("name") as string)?.trim();
+    const contactEmail = (formData.get("contactEmail") as string)?.trim();
     const organization = (formData.get("organization") as string)?.trim() || null;
     const contactPerson = (formData.get("contactPerson") as string)?.trim() || null;
     const contactPhone = (formData.get("contactPhone") as string)?.trim() || null;
 
     if (!name) return { error: "Name is required" };
+    if (!contactEmail) return { error: "Email is required" };
 
     // Get current max queue position
     const maxQueue = await prisma.b2BParticipant.findFirst({
@@ -560,6 +562,7 @@ export async function walkInCheckIn(eventId: string, formData: FormData) {
         b2bEventId: eventId,
         side: "B",
         name,
+        contactEmail,
         organization,
         contactPerson,
         contactPhone,
