@@ -102,7 +102,7 @@ export const b2bEventSchema = z.object({
         .string()
         .min(3, "Slug must be at least 3 characters")
         .regex(/^[a-z0-9-]+$/, "Slug can only contain lowercase letters, numbers, and hyphens"),
-    date: z.string().datetime(),
+    date: z.string().regex(/^\d{4}-\d{2}-\d{2}/, "Must be a valid date"),
     startTime: z.string().regex(/^\d{2}:\d{2}$/, "Must be in HH:mm format"),
     endTime: z.string().regex(/^\d{2}:\d{2}$/, "Must be in HH:mm format"),
     slotDuration: z.number().int().min(5).max(120).default(20),
