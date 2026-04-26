@@ -71,6 +71,7 @@ enum GiftTier {
 
 enum B2BMeetingStatus {
   SCHEDULED
+  IN_PROGRESS
   COMPLETED
   CANCELLED
   NO_SHOW
@@ -607,6 +608,11 @@ model B2BParticipant {
   notes           String?   @db.Text
   arrivalTime     String?                     // "12:00" — HH:mm, null = available from start
 
+  // Live queue fields
+  liveStatus      String    @default("NOT_ARRIVED") // NOT_ARRIVED, WAITING, IN_MEETING, DONE
+  arrivedAt       DateTime?                          // Actual check-in timestamp
+  queuePosition   Int?                               // Position in waiting queue
+
   // Public schedule access token (Side B only)
   scheduleToken   String?   @unique @default(cuid())
 
@@ -636,6 +642,10 @@ model B2BMeeting {
 
   status          B2BMeetingStatus @default(SCHEDULED)
 
+  // Actual timing (for live mode)
+  actualStart     DateTime?
+  actualEnd       DateTime?
+
   // Meeting notes (Side A can add)
   notesA          String?   @db.Text           // University notes
   notesB          String?   @db.Text           // Side B notes (future)
@@ -648,7 +658,6 @@ model B2BMeeting {
   updatedAt       DateTime  @updatedAt
 
   @@unique([b2bEventId, participantAId, participantBId])  // No duplicate meetings
-  @@unique([b2bEventId, participantAId, timeSlot])        // No double-booking Side A
-  @@unique([b2bEventId, participantBId, timeSlot])        // No double-booking Side B
   @@index([b2bEventId])
+  @@index([b2bEventId, status])
 }

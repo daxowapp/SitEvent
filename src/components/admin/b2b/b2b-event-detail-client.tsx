@@ -34,7 +34,7 @@ import {
 import {
   ArrowLeft, Calendar, Clock, MapPin, Users, Plus, Trash2, Upload,
   Wand2, Download, Loader2, GraduationCap, Building2, FileSpreadsheet,
-  CheckCircle2, XCircle, AlertTriangle, Pencil,
+  CheckCircle2, XCircle, AlertTriangle, Pencil, Radio,
 } from "lucide-react";
 import {
   addUniversityToB2B, addParticipantB, removeParticipant,
@@ -200,6 +200,11 @@ export function B2BEventDetailClient({ event }: { event: EventData }) {
           </div>
         </div>
         <div className="flex items-center gap-2">
+          <Link href={`/admin/b2b/${event.id}/live`}>
+            <Button size="sm" className="gap-2 bg-red-600 hover:bg-red-700 text-white">
+              <Radio className="h-4 w-4" />Go Live
+            </Button>
+          </Link>
           {event.isScheduleGenerated && (
             <a href={`/api/admin/b2b/${event.id}/export?format=csv`} download>
               <Button variant="outline" size="sm" className="gap-2"><Download className="h-4 w-4" />Export CSV</Button>
