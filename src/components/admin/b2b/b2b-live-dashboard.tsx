@@ -429,7 +429,7 @@ export function B2BLiveDashboard({ data }: { data: LiveData }) {
             className="border-emerald-500/50 text-emerald-400 hover:bg-emerald-500/20 gap-1.5"
             onClick={async () => {
               setLoading("endbreak");
-              const result = await endMainBreak(data.event.id);
+              const result = await endMainBreak(data.event.id) as any;
               if (result.error) toast.error(result.error);
               else toast.success(result.message);
               setLoading("");
