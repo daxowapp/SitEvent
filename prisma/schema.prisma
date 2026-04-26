@@ -605,6 +605,7 @@ model B2BParticipant {
   organization    String?                     // Type: "Agent", "School", "Company"
   country         String?
   notes           String?   @db.Text
+  arrivalTime     String?                     // "12:00" — HH:mm, null = available from start
 
   // Public schedule access token (Side B only)
   scheduleToken   String?   @unique @default(cuid())

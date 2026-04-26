@@ -140,13 +140,14 @@ export function B2BEventDetailClient({ event }: { event: EventData }) {
       const obj: any = {};
       headers.forEach((h, i) => { obj[h] = values[i] || ""; });
       return {
-        name: obj.name || obj.company || obj.organization || "",
-        contactPerson: obj.contact_person || obj.contactperson || obj.person || "",
+        name: obj.name || obj.company || obj.organization || obj.institution_name || obj["institution name"] || "",
+        contactPerson: obj.contact_person || obj.contactperson || obj.person || obj.attendance_name || obj["attendance name"] || "",
         contactEmail: obj.email || obj.contact_email || "",
         contactPhone: obj.phone || obj.contact_phone || "",
         organization: obj.type || obj.organization_type || obj.org_type || "",
         country: obj.country || "",
         notes: obj.notes || "",
+        arrivalTime: obj.arrival_time || obj.arrivaltime || obj.arrival || obj.attendance_time || obj["attendance time"] || "",
       };
     }).filter(p => p.name);
 
@@ -282,6 +283,7 @@ export function B2BEventDetailClient({ event }: { event: EventData }) {
                       <p className="font-medium text-sm">{p.name}</p>
                       <p className="text-xs text-muted-foreground">
                         {[p.organization, p.contactPerson, p.country].filter(Boolean).join(" · ")}
+                        {p.arrivalTime && <span className="ml-2 inline-flex items-center gap-0.5 bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 px-1.5 py-0.5 rounded text-[10px] font-medium"><Clock className="h-2.5 w-2.5" />{p.arrivalTime}</span>}
                       </p>
                     </div>
                     <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:text-destructive" onClick={() => handleRemove(p.id)} disabled={loading === `remove-${p.id}`}>
@@ -482,7 +484,10 @@ export function B2BEventDetailClient({ event }: { event: EventData }) {
               <div className="space-y-2"><Label htmlFor="pb-email">Email</Label><Input id="pb-email" name="contactEmail" type="email" /></div>
               <div className="space-y-2"><Label htmlFor="pb-phone">Phone</Label><Input id="pb-phone" name="contactPhone" /></div>
             </div>
-            <div className="space-y-2"><Label htmlFor="pb-country">Country</Label><Input id="pb-country" name="country" /></div>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-2"><Label htmlFor="pb-country">Country</Label><Input id="pb-country" name="country" /></div>
+              <div className="space-y-2"><Label htmlFor="pb-arrival">Arrival Time</Label><Input id="pb-arrival" name="arrivalTime" type="time" placeholder="e.g. 12:00" /></div>
+            </div>
             <Button type="submit" className="w-full" disabled={loading === "addB"}>
               {loading === "addB" ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}Add Participant
             </Button>

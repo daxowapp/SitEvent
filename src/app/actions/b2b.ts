@@ -282,6 +282,7 @@ export async function addParticipantB(eventId: string, formData: FormData) {
     country: (formData.get("country") as string) || "",
     notes: (formData.get("notes") as string) || "",
   };
+  const arrivalTime = (formData.get("arrivalTime") as string) || null;
 
   const parsed = b2bParticipantSchema.safeParse(raw);
   if (!parsed.success) {
@@ -300,6 +301,7 @@ export async function addParticipantB(eventId: string, formData: FormData) {
         organization: parsed.data.organization || null,
         country: parsed.data.country || null,
         notes: parsed.data.notes || null,
+        arrivalTime,
       },
     });
 
@@ -321,6 +323,7 @@ export async function importParticipantsB(
     organization?: string;
     country?: string;
     notes?: string;
+    arrivalTime?: string;
   }>
 ) {
   await requireB2BAdmin();
@@ -337,6 +340,7 @@ export async function importParticipantsB(
         organization: p.organization || null,
         country: p.country || null,
         notes: p.notes || null,
+        arrivalTime: p.arrivalTime || null,
       })),
       skipDuplicates: true,
     });
@@ -461,11 +465,18 @@ export async function generateB2BSchedule(eventId: string) {
       });
     }
 
+    // Build arrival times map for Side B
+    const arrivalTimes = new Map<string, string | null>();
+    for (const p of sideB) {
+      arrivalTimes.set(p.id, p.arrivalTime || null);
+    }
+
     // Generate schedule
     const result = generateSchedule(
       sideA.map((p) => p.id),
       sideB.map((p) => p.id),
-      timeSlots
+      timeSlots,
+      arrivalTimes
     );
 
     if (!result.success) {

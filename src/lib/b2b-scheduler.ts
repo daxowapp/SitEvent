@@ -147,22 +147,22 @@ export function validateCapacity(
 }
 
 /**
- * Generate the meeting schedule using a deterministic round-robin algorithm.
+ * Generate the meeting schedule with arrival time support.
  * 
- * Formula: In time slot `s`, Side A participant `a` meets Side B participant
- * at index `(s + a) % sideBCount`. This guarantees:
- * - Each A meets each B exactly once
- * - No participant appears in two meetings in the same time slot
- * - Complete coverage with exactly max(sideA, sideB) slots
+ * When Side B participants have arrival times, the scheduler only assigns
+ * them to time slots that start at or after their arrival. Most constrained
+ * participants (fewest available slots) are scheduled first.
  */
 export function generateSchedule(
   sideAIds: string[],
   sideBIds: string[],
-  timeSlots: TimeSlot[]
+  timeSlots: TimeSlot[],
+  arrivalTimes?: Map<string, string | null> // participantId → "HH:mm" or null
 ): ScheduleResult {
   const validation = validateCapacity(sideAIds.length, sideBIds.length, timeSlots.length);
 
-  if (!validation.isValid) {
+  // Skip strict validation when arrival times are set (slots needed may differ)
+  if (!validation.isValid && !arrivalTimes) {
     return {
       success: false,
       meetings: [],
@@ -175,47 +175,80 @@ export function generateSchedule(
   const N = sideAIds.length;
   const M = sideBIds.length;
 
-  // Determine which side is larger for the round-robin rotation
-  if (N <= M) {
-    // More Side B than Side A (typical: few universities, many agents)
-    // Each slot: N meetings (one per university)
-    // Total slots needed: M (each Side B gets matched with all universities)
-    for (let s = 0; s < M; s++) {
-      if (s >= timeSlots.length) break; // safety
-      const slot = timeSlots[s];
+  // Calculate available slot indices for each Side B participant
+  const bAvailableSlots = new Map<string, number[]>();
+  for (const bId of sideBIds) {
+    const arrival = arrivalTimes?.get(bId);
+    if (arrival) {
+      const arrivalMinutes = parseTime(arrival);
+      const totalArrivalMinutes = arrivalMinutes.hours * 60 + arrivalMinutes.minutes;
+      const available = timeSlots
+        .filter((slot) => {
+          const slotMinutes = slot.start.getUTCHours() * 60 + slot.start.getUTCMinutes();
+          return slotMinutes >= totalArrivalMinutes;
+        })
+        .map((s) => s.index);
+      bAvailableSlots.set(bId, available);
+    } else {
+      bAvailableSlots.set(bId, timeSlots.map((s) => s.index));
+    }
+  }
 
-      for (let a = 0; a < N; a++) {
-        const bIndex = (s + a) % M;
+  // Track busy participants per slot
+  const slotBusyA = new Map<number, Set<string>>();
+  const slotBusyB = new Map<number, Set<string>>();
+  for (let i = 0; i < timeSlots.length; i++) {
+    slotBusyA.set(i, new Set());
+    slotBusyB.set(i, new Set());
+  }
 
+  // Build all needed pairs, sorted by most constrained B first
+  const pairsNeeded: Array<{ aId: string; bId: string; availableCount: number }> = [];
+  for (const bId of sideBIds) {
+    const availCount = bAvailableSlots.get(bId)!.length;
+    for (const aId of sideAIds) {
+      pairsNeeded.push({ aId, bId, availableCount: availCount });
+    }
+  }
+  // Most constrained first (fewest available slots), then by A index for stability
+  pairsNeeded.sort((a, b) => a.availableCount - b.availableCount);
+
+  // Greedy assignment: for each pair, find earliest available slot
+  let unscheduled = 0;
+  for (const pair of pairsNeeded) {
+    const availableSlots = bAvailableSlots.get(pair.bId)!;
+    let assigned = false;
+
+    for (const slotIdx of availableSlots) {
+      const busyA = slotBusyA.get(slotIdx)!;
+      const busyB = slotBusyB.get(slotIdx)!;
+
+      if (!busyA.has(pair.aId) && !busyB.has(pair.bId)) {
+        const slot = timeSlots[slotIdx];
         meetings.push({
-          participantAId: sideAIds[a],
-          participantBId: sideBIds[bIndex],
+          participantAId: pair.aId,
+          participantBId: pair.bId,
           timeSlot: slot.start,
           endTime: slot.end,
-          tableNumber: a + 1,
+          tableNumber: busyA.size + 1,
         });
+        busyA.add(pair.aId);
+        busyB.add(pair.bId);
+        assigned = true;
+        break;
       }
     }
-  } else {
-    // More Side A than Side B (rare: many universities, few agents)
-    // Each slot: M meetings (one per Side B)
-    // Total slots needed: N
-    for (let s = 0; s < N; s++) {
-      if (s >= timeSlots.length) break;
-      const slot = timeSlots[s];
 
-      for (let b = 0; b < M; b++) {
-        const aIndex = (s + b) % N;
+    if (!assigned) unscheduled++;
+  }
 
-        meetings.push({
-          participantAId: sideAIds[aIndex],
-          participantBId: sideBIds[b],
-          timeSlot: slot.start,
-          endTime: slot.end,
-          tableNumber: b + 1,
-        });
-      }
-    }
+  if (unscheduled > 0) {
+    return {
+      success: false,
+      meetings: [],
+      validation,
+      error: `Could not schedule ${unscheduled} meetings. Some participants arrive too late to meet everyone. Try extending the event end time or reducing slot duration.`,
+    };
   }
 
   // Sort meetings by time slot, then by table number
