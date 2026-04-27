@@ -3,6 +3,8 @@ import { redirect, notFound } from "next/navigation";
 import { getLiveDashboard } from "@/app/actions/b2b-live";
 import { B2BLiveDashboard } from "@/components/admin/b2b/b2b-live-dashboard";
 
+export const dynamic = "force-dynamic";
+
 export default async function B2BLivePage({
   params,
 }: {

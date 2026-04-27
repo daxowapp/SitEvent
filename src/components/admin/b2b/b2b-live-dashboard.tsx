@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
-import { useRouter } from "next/navigation";
+
 import { format } from "date-fns";
 import { toast } from "sonner";
 import Link from "next/link";
@@ -25,7 +25,7 @@ import {
   checkInParticipant, endMeeting, undoCheckIn, resetLiveSession,
   markParticipantDone, bulkCheckIn, walkInCheckIn, tickAutoAssign,
   forceAssignAll, updateBreakBuffer, startMainBreak, endMainBreak,
-  checkoutParticipant,
+  checkoutParticipant, getLiveDashboard,
 } from "@/app/actions/b2b-live";
 
 type LiveData = NonNullable<
@@ -222,8 +222,8 @@ function BreakCountdown({ breakEndsAt }: { breakEndsAt: string }) {
 // MAIN DASHBOARD
 // ============================================
 
-export function B2BLiveDashboard({ data }: { data: LiveData }) {
-  const router = useRouter();
+export function B2BLiveDashboard({ data: initialData }: { data: LiveData }) {
+  const [data, setData] = useState(initialData);
   const [loading, setLoading] = useState("");
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [emailPrompt, setEmailPrompt] = useState<{ id: string; name: string } | null>(null);
@@ -231,11 +231,17 @@ export function B2BLiveDashboard({ data }: { data: LiveData }) {
   const [qrModal, setQrModal] = useState<{ name: string; url: string } | null>(null);
   const [breakDuration, setBreakDuration] = useState(30);
 
+  // Direct data refresh — no router.refresh() dependency
+  const refreshData = useCallback(async () => {
+    const fresh = await getLiveDashboard(data.event.id);
+    if (fresh) setData(fresh);
+  }, [data.event.id]);
+
   // Auto-refresh every 3 seconds for real-time updates
   useEffect(() => {
-    const interval = setInterval(() => router.refresh(), 3000);
+    const interval = setInterval(refreshData, 3000);
     return () => clearInterval(interval);
-  }, [router]);
+  }, [refreshData]);
 
   // Periodic auto-assign tick every 10s — catches break buffer expiry
   useEffect(() => {
@@ -243,12 +249,12 @@ export function B2BLiveDashboard({ data }: { data: LiveData }) {
       if (data.stats.idleNow > 0 && data.stats.waiting > 0) {
         const result = await tickAutoAssign(data.event.id);
         if (result.assigned > 0) {
-          router.refresh();
+          refreshData();
         }
       }
     }, 10000);
     return () => clearInterval(interval);
-  }, [data.event.id, data.stats.idleNow, data.stats.waiting, router]);
+  }, [data.event.id, data.stats.idleNow, data.stats.waiting, refreshData]);
 
   const handleCheckIn = useCallback(async (id: string, existingEmail?: string | null) => {
     // If no email, show prompt first
@@ -266,8 +272,8 @@ export function B2BLiveDashboard({ data }: { data: LiveData }) {
       if (soundEnabled) playNotificationSound();
     }
     setLoading("");
-    router.refresh();
-  }, [router, soundEnabled, data.notArrived]);
+    refreshData();
+  }, [soundEnabled, data.notArrived, refreshData]);
 
   const handleEmailCheckIn = useCallback(async () => {
     if (!emailPrompt || !promptEmail.trim()) return;
@@ -281,8 +287,8 @@ export function B2BLiveDashboard({ data }: { data: LiveData }) {
     }
     setLoading("");
     setPromptEmail("");
-    router.refresh();
-  }, [emailPrompt, promptEmail, router, soundEnabled]);
+    refreshData();
+  }, [emailPrompt, promptEmail, soundEnabled, refreshData]);
 
   const handleEndMeeting = useCallback(async (id: string) => {
     if (loading.startsWith("end-")) return; // Prevent double-trigger
@@ -291,8 +297,8 @@ export function B2BLiveDashboard({ data }: { data: LiveData }) {
     if (result.error) toast.error(result.error);
     else toast.success(result.message);
     setLoading("");
-    router.refresh();
-  }, [router, loading]);
+    refreshData();
+  }, [loading, refreshData]);
 
   const handleUndo = useCallback(async (id: string) => {
     setLoading(`undo-${id}`);
@@ -300,8 +306,8 @@ export function B2BLiveDashboard({ data }: { data: LiveData }) {
     if (result.error) toast.error(result.error);
     else toast.success("Check-in undone");
     setLoading("");
-    router.refresh();
-  }, [router]);
+    refreshData();
+  }, [refreshData]);
 
   const handleCheckout = useCallback(async (id: string) => {
     setLoading(`checkout-${id}`);
@@ -309,8 +315,8 @@ export function B2BLiveDashboard({ data }: { data: LiveData }) {
     if (result.error) toast.error(result.error);
     else toast.success(result.message);
     setLoading("");
-    router.refresh();
-  }, [router]);
+    refreshData();
+  }, [refreshData]);
 
   const handleReset = useCallback(async () => {
     setLoading("reset");
@@ -318,8 +324,8 @@ export function B2BLiveDashboard({ data }: { data: LiveData }) {
     if (result.error) toast.error(result.error);
     else toast.success("Live session reset!");
     setLoading("");
-    router.refresh();
-  }, [data.event.id, router]);
+    refreshData();
+  }, [data.event.id, refreshData]);
 
   const handleMarkDone = useCallback(async (id: string) => {
     setLoading(`done-${id}`);
@@ -327,8 +333,8 @@ export function B2BLiveDashboard({ data }: { data: LiveData }) {
     if (result.error) toast.error(result.error);
     else toast.success("Marked as done");
     setLoading("");
-    router.refresh();
-  }, [router]);
+    refreshData();
+  }, [refreshData]);
 
   const handleBulkCheckIn = useCallback(async () => {
     setLoading("bulk");
@@ -336,8 +342,8 @@ export function B2BLiveDashboard({ data }: { data: LiveData }) {
     if (result.error) toast.error(result.error);
     else toast.success(result.message);
     setLoading("");
-    router.refresh();
-  }, [data.event.id, router]);
+    refreshData();
+  }, [data.event.id, refreshData]);
 
   const handleWalkIn = useCallback(async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -350,8 +356,8 @@ export function B2BLiveDashboard({ data }: { data: LiveData }) {
       (e.target as HTMLFormElement).reset();
     }
     setLoading("");
-    router.refresh();
-  }, [data.event.id, router]);
+    refreshData();
+  }, [data.event.id, refreshData]);
 
   const { stats } = data;
 
@@ -446,7 +452,7 @@ export function B2BLiveDashboard({ data }: { data: LiveData }) {
               if (result.error) toast.error(result.error);
               else toast.success(result.message);
               setLoading("");
-              router.refresh();
+              refreshData();
             }}
             disabled={loading === "endbreak"}
           >
@@ -479,7 +485,7 @@ export function B2BLiveDashboard({ data }: { data: LiveData }) {
                 if (result.error) toast.error(result.error);
                 else toast.success(result.message);
                 setLoading("");
-                router.refresh();
+                refreshData();
               }}
               disabled={loading === "startbreak"}
             >
@@ -502,7 +508,7 @@ export function B2BLiveDashboard({ data }: { data: LiveData }) {
               const newVal = Math.max(0, (data.event.breakBetweenMeetings ?? 5) - 1);
               const result = await updateBreakBuffer(data.event.id, newVal);
               if (result.error) toast.error(result.error);
-              else { toast.success(result.message); router.refresh(); }
+              else { toast.success(result.message); refreshData(); }
             }}
             disabled={loading === "break" || (data.event.breakBetweenMeetings ?? 5) <= 0}
           >
@@ -517,7 +523,7 @@ export function B2BLiveDashboard({ data }: { data: LiveData }) {
               const newVal = Math.min(30, (data.event.breakBetweenMeetings ?? 5) + 1);
               const result = await updateBreakBuffer(data.event.id, newVal);
               if (result.error) toast.error(result.error);
-              else { toast.success(result.message); router.refresh(); }
+              else { toast.success(result.message); refreshData(); }
             }}
             disabled={loading === "break" || (data.event.breakBetweenMeetings ?? 5) >= 30}
           >
@@ -537,7 +543,7 @@ export function B2BLiveDashboard({ data }: { data: LiveData }) {
               if (result.error) toast.error(result.error);
               else toast.success(result.message);
               setLoading("");
-              router.refresh();
+              refreshData();
             }}
             disabled={loading === "force"}
           >
