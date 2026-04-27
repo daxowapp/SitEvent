@@ -54,8 +54,8 @@ export function RegistrationForm({ eventId, locale, eventLocation, onSuccess }: 
     const form = useForm<KioskFormValues>({
         resolver: zodResolver(kioskSchema),
         defaultValues: {
-            country: eventLocation?.country || "Egypt", // Defaulting to Egypt for this kiosk
-            city: eventLocation?.city || "Cairo",
+            country: eventLocation?.country || "Malaysia", // Defaulting to Malaysia for this kiosk
+            city: eventLocation?.city || "Kuala Lumpur",
             consent: true,
             fullName: "",
             email: "",
@@ -88,7 +88,7 @@ export function RegistrationForm({ eventId, locale, eventLocation, onSuccess }: 
     async function onSubmit(values: KioskFormValues) {
         setLoading(true);
         // Format phone with prefix if needed, for now sending as is but assuming user enters 01xxxx
-        const formattedPhone = values.phone.startsWith("+") ? values.phone : `+20${values.phone.replace(/^0+/, "")}`;
+        const formattedPhone = values.phone.startsWith("+") ? values.phone : `+60${values.phone.replace(/^0+/, "")}`;
 
         try {
             const response = await fetch("/api/register", {
