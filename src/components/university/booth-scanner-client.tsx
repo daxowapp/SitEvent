@@ -120,23 +120,10 @@ export function BoothScannerClient() {
         });
       }
 
+      // Store stream and show video element FIRST
       streamRef.current = stream;
-
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-        // Required for iOS Safari
-        videoRef.current.setAttribute("playsinline", "true");
-        videoRef.current.setAttribute("webkit-playsinline", "true");
-        try {
-          await videoRef.current.play();
-        } catch {
-          // Some browsers need a slight delay
-          await new Promise((r) => setTimeout(r, 300));
-          await videoRef.current.play();
-        }
-        setCameraReady(true);
-        setScanning(true);
-      }
+      setScanning(true);
+      // The effect below will connect the stream to the video element
     } catch (err: any) {
       const msg = err?.name === "NotAllowedError"
         ? "Camera access denied. Please allow camera in your browser settings."
@@ -146,6 +133,31 @@ export function BoothScannerClient() {
       setError(msg);
     }
   }, []);
+
+  // Connect stream to video element once it's mounted
+  useEffect(() => {
+    if (!scanning || !streamRef.current) return;
+
+    const connectStream = async () => {
+      // Wait for video element to mount after scanning=true render
+      await new Promise((r) => setTimeout(r, 100));
+
+      if (videoRef.current && streamRef.current) {
+        videoRef.current.srcObject = streamRef.current;
+        videoRef.current.setAttribute("playsinline", "true");
+        videoRef.current.setAttribute("webkit-playsinline", "true");
+        try {
+          await videoRef.current.play();
+        } catch {
+          await new Promise((r) => setTimeout(r, 300));
+          await videoRef.current?.play();
+        }
+        setCameraReady(true);
+      }
+    };
+
+    connectStream();
+  }, [scanning]);
 
   // QR scanning loop using jsQR
   useEffect(() => {
