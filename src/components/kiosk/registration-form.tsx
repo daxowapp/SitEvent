@@ -220,12 +220,12 @@ export function RegistrationForm({ eventId, locale, eventLocation, onSuccess }: 
                                                 <FormControl>
                                                     <div className="flex direction-ltr" dir="ltr">
                                                         <span className="flex items-center justify-center bg-gray-100 border border-r-0 border-gray-200 rounded-l-md px-4 text-xl text-gray-600 font-mono">
-                                                            +20
+                                                            +60
                                                         </span>
                                                         <Input 
                                                             type="tel" 
                                                             dir="ltr"
-                                                            placeholder="10xxxxxxxxx" 
+                                                            placeholder="1xxxxxxxxx" 
                                                             className="h-20 text-xl bg-gray-50 border-gray-200 text-gray-900 rounded-l-none focus:border-red-500 focus:ring-red-200 font-mono tracking-widest" 
                                                             {...field} 
                                                         />
