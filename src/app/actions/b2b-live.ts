@@ -119,6 +119,9 @@ export async function getLiveDashboard(eventId: string) {
   // Done
   const done = sideB.filter((p) => p.liveStatus === "DONE");
 
+  // Checked out
+  const checkedOut = sideB.filter((p) => p.liveStatus === "CHECKED_OUT");
+
   // Completed meetings for history
   const completedMeetings = event.meetings
     .filter((m) => m.status === "COMPLETED")
@@ -139,6 +142,7 @@ export async function getLiveDashboard(eventId: string) {
     notArrived,
     inMeeting,
     done,
+    checkedOut,
     completedMeetings,
     isMainBreak,
     stats: {
@@ -663,12 +667,11 @@ export async function checkoutParticipant(participantId: string) {
             data: { status: "COMPLETED", actualEnd: new Date() },
           })
         : Promise.resolve(),
-      // Reset to NOT_ARRIVED
+      // Mark as CHECKED_OUT
       prisma.b2BParticipant.update({
         where: { id: participantId },
         data: {
-          liveStatus: "NOT_ARRIVED",
-          arrivedAt: null,
+          liveStatus: "CHECKED_OUT",
           queuePosition: null,
         },
       }),
@@ -681,6 +684,46 @@ export async function checkoutParticipant(participantId: string) {
   } catch (error) {
     console.error("Checkout failed:", error);
     return { error: "Failed to checkout participant" };
+  }
+}
+
+// ============================================
+// RE-CHECK-IN (from CHECKED_OUT back to WAITING)
+// ============================================
+
+export async function reCheckInParticipant(participantId: string) {
+  const [, participant] = await Promise.all([
+    requireB2BAdmin(),
+    prisma.b2BParticipant.findUnique({ where: { id: participantId } }),
+  ]);
+
+  if (!participant) return { error: "Participant not found" };
+  if (participant.liveStatus !== "CHECKED_OUT") {
+    return { error: "Participant is not checked out" };
+  }
+
+  try {
+    const maxQueue = await prisma.b2BParticipant.findFirst({
+      where: { b2bEventId: participant.b2bEventId, liveStatus: "WAITING" },
+      orderBy: { queuePosition: "desc" },
+      select: { queuePosition: true },
+    });
+
+    await prisma.b2BParticipant.update({
+      where: { id: participantId },
+      data: {
+        liveStatus: "WAITING",
+        arrivedAt: new Date(),
+        queuePosition: (maxQueue?.queuePosition || 0) + 1,
+      },
+    });
+
+    batchAutoAssign(participant.b2bEventId).catch(console.error);
+
+    return { success: true, message: `${participant.name} re-checked in` };
+  } catch (error) {
+    console.error("Re-check-in failed:", error);
+    return { error: "Failed to re-check in" };
   }
 }
 

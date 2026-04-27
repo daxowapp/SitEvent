@@ -19,13 +19,13 @@ import {
 import {
   ArrowLeft, Clock, Users, GraduationCap, UserCheck, UserX,
   Loader2, RotateCcw, Radio, Square, Timer, CheckCircle2,
-  AlertTriangle, Undo2, Volume2, VolumeX, Link2, Copy, UserMinus, UsersRound, UserPlus, QrCode, Mail, Coffee, Zap, Minus, Plus, UtensilsCrossed, Play, LogOut,
+  AlertTriangle, Undo2, Volume2, VolumeX, Link2, Copy, UserMinus, UsersRound, UserPlus, QrCode, Mail, Coffee, Zap, Minus, Plus, UtensilsCrossed, Play, LogOut, LogIn,
 } from "lucide-react";
 import {
   checkInParticipant, endMeeting, undoCheckIn, resetLiveSession,
   markParticipantDone, bulkCheckIn, walkInCheckIn, tickAutoAssign,
   forceAssignAll, updateBreakBuffer, startMainBreak, endMainBreak,
-  checkoutParticipant, getLiveDashboard,
+  checkoutParticipant, getLiveDashboard, reCheckInParticipant,
 } from "@/app/actions/b2b-live";
 
 type LiveData = NonNullable<
@@ -317,6 +317,18 @@ export function B2BLiveDashboard({ data: initialData }: { data: LiveData }) {
     else toast.success(result.message);
     refreshData();
   }, [refreshData]);
+
+  const handleReCheckIn = useCallback(async (id: string) => {
+    setLoading(`recheckin-${id}`);
+    const result = await reCheckInParticipant(id) as any;
+    setLoading("");
+    if (result.error) toast.error(result.error);
+    else {
+      toast.success(result.message);
+      if (soundEnabled) playNotificationSound();
+    }
+    refreshData();
+  }, [refreshData, soundEnabled]);
 
   const handleReset = useCallback(async () => {
     setLoading("reset");
@@ -933,6 +945,41 @@ export function B2BLiveDashboard({ data: initialData }: { data: LiveData }) {
                   >
                     <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" />
                     <p className="text-sm text-gray-300">{p.name}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* CHECKED OUT PARTICIPANTS */}
+          {data.checkedOut.length > 0 && (
+            <div>
+              <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-wider flex items-center gap-2 mb-3">
+                <LogOut className="h-4 w-4 text-red-400" />Checked Out ({data.checkedOut.length})
+              </h2>
+              <div className="space-y-1.5 max-h-[200px] overflow-y-auto">
+                {data.checkedOut.map((p) => (
+                  <div
+                    key={p.id}
+                    className="flex items-center justify-between bg-red-950/20 border border-red-900/30 rounded-lg px-3 py-2"
+                  >
+                    <div className="flex items-center gap-3">
+                      <LogOut className="h-3.5 w-3.5 text-red-400" />
+                      <div>
+                        <p className="text-sm text-gray-300">{p.name}</p>
+                        {p.contactEmail && <p className="text-[10px] text-gray-500">{p.contactEmail}</p>}
+                      </div>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-7 w-7 text-gray-500 hover:text-emerald-400"
+                      onClick={() => handleReCheckIn(p.id)}
+                      disabled={loading === `recheckin-${p.id}`}
+                      title="Re-check in"
+                    >
+                      {loading === `recheckin-${p.id}` ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <LogIn className="h-3.5 w-3.5" />}
+                    </Button>
                   </div>
                 ))}
               </div>
