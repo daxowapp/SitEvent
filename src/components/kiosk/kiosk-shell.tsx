@@ -21,8 +21,22 @@ export function KioskShell({ event, locale }: KioskShellProps) {
     const t = useTranslations("kiosk");
     const [state, setState] = useState<KioskState>("idle");
     const [successToken, setSuccessToken] = useState<string | null>(null);
+    const [qrDataUrl, setQrDataUrl] = useState<string | null>(null);
     const [isDuplicate, setIsDuplicate] = useState(false); 
     const [lastInteraction, setLastInteraction] = useState<number>(() => Date.now());
+
+    // Fetch QR Code from internal API
+    useEffect(() => {
+        if (state === "success" && successToken) {
+            setQrDataUrl(null);
+            fetch(`/api/qr/${successToken}`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data.qrDataUrl) setQrDataUrl(data.qrDataUrl);
+                })
+                .catch(console.error);
+        }
+    }, [state, successToken]);
     const interactionTimeout = useRef<NodeJS.Timeout | null>(null);
 
     // Auto-reset on inactivity
@@ -40,6 +54,7 @@ export function KioskShell({ event, locale }: KioskShellProps) {
                 setState("idle");
                 setTimeout(() => {
                     setSuccessToken(null);
+                    setQrDataUrl(null);
                     setIsDuplicate(false);
                 }, 500);
             }
@@ -160,12 +175,17 @@ export function KioskShell({ event, locale }: KioskShellProps) {
                     {state === "success" && (
                         <div className="text-center space-y-8 animate-in fade-in zoom-in duration-500 flex flex-col items-center">
                            <div className="p-6 bg-white rounded-3xl shadow-xl border border-gray-100">
-                                {/* eslint-disable-next-line @next/next/no-img-element */}
-                                <img 
-                                    src={`https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(successToken || "")}`} 
-                                    alt="Your Entry QR" 
-                                    className="w-64 h-64 md:w-80 md:h-80"
-                                />
+                                {qrDataUrl ? (
+                                    <img 
+                                        src={qrDataUrl} 
+                                        alt="Your Entry QR" 
+                                        className="w-64 h-64 md:w-80 md:h-80 object-contain"
+                                    />
+                                ) : (
+                                    <div className="w-64 h-64 md:w-80 md:h-80 flex items-center justify-center bg-gray-50 rounded-2xl">
+                                        <div className="w-12 h-12 border-4 border-red-500 border-t-transparent rounded-full animate-spin"></div>
+                                    </div>
+                                )}
                            </div>
                            
                            <div>

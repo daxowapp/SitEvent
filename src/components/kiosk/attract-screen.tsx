@@ -47,7 +47,7 @@ export function AttractScreen({ eventName, onStart }: AttractScreenProps) {
                     transition={{ duration: 0.8, ease: "easeOut" }}
                     className="mb-8"
                 >
-                    <div className="relative w-64 h-24 md:w-80 md:h-32">
+                    <div className="relative w-96 h-40 md:w-[600px] md:h-[240px]">
                         <Image 
                             src="/logo-red.svg" 
                             alt="Sit Connect Logo" 
@@ -67,7 +67,7 @@ export function AttractScreen({ eventName, onStart }: AttractScreenProps) {
                     <div className="inline-block px-4 py-1.5 rounded-full bg-red-100 text-red-600 font-semibold tracking-wide text-sm uppercase mb-4">
                         {t("welcomeTo")}
                     </div>
-                    <h1 className="text-6xl md:text-8xl font-black text-gray-900 tracking-tighter leading-tight">
+                    <h1 className="text-4xl md:text-6xl font-black text-gray-900 tracking-tighter leading-tight">
                         {eventName}
                     </h1>
                     <p className="text-xl md:text-2xl text-gray-500 font-medium tracking-widest uppercase">
