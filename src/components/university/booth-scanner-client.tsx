@@ -101,19 +101,49 @@ export function BoothScannerClient() {
     setNote("");
 
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: "environment" },
-      });
+      // Try back camera first, fall back to any camera
+      let stream: MediaStream;
+      try {
+        stream = await navigator.mediaDevices.getUserMedia({
+          video: {
+            facingMode: { ideal: "environment" },
+            width: { ideal: 1280 },
+            height: { ideal: 720 },
+          },
+          audio: false,
+        });
+      } catch {
+        // Fallback: any available camera
+        stream = await navigator.mediaDevices.getUserMedia({
+          video: true,
+          audio: false,
+        });
+      }
+
       streamRef.current = stream;
 
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
-        await videoRef.current.play();
+        // Required for iOS Safari
+        videoRef.current.setAttribute("playsinline", "true");
+        videoRef.current.setAttribute("webkit-playsinline", "true");
+        try {
+          await videoRef.current.play();
+        } catch {
+          // Some browsers need a slight delay
+          await new Promise((r) => setTimeout(r, 300));
+          await videoRef.current.play();
+        }
         setCameraReady(true);
         setScanning(true);
       }
-    } catch (err) {
-      setError("Camera access denied. Please allow camera access.");
+    } catch (err: any) {
+      const msg = err?.name === "NotAllowedError"
+        ? "Camera access denied. Please allow camera in your browser settings."
+        : err?.name === "NotFoundError"
+        ? "No camera found on this device."
+        : `Camera error: ${err?.message || "Unknown error"}. Try refreshing the page.`;
+      setError(msg);
     }
   }, []);
 
@@ -214,6 +244,7 @@ export function BoothScannerClient() {
                   ref={videoRef}
                   className="w-full aspect-[4/3] object-cover bg-black"
                   playsInline
+                  autoPlay
                   muted
                 />
                 <canvas ref={canvasRef} className="hidden" />
