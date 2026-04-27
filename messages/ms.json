@@ -1,13 +1,74 @@
 {
   "kiosk": {
+    "attract": {
+      "welcomeTo": "Selamat Datang ke",
+      "officialKiosk": "Kiosk Pendaftaran Rasmi",
+      "tapToStart": "Sentuh untuk Mula",
+      "footer": "Pendaftaran Selamat  •  Kod QR Segera"
+    },
+    "menu": {
+      "back": "Kembali",
+      "newRegistration": "Pendaftaran Baharu",
+      "newRegistrationDesc": "Saya belum ada tiket",
+      "lostTicket": "Tiket Hilang",
+      "lostTicketDesc": "Cetak lencana / Kod QR"
+    },
     "form": {
+      "title": "Pendaftaran Pantas",
+      "fullName": "Nama Penuh",
+      "fullNamePlaceholder": "Nama Penuh",
+      "email": "E-mel",
+      "emailPlaceholder": "contoh@email.com",
+      "phone": "Nombor Telefon",
+      "phonePlaceholder": "01xxxxxxxx",
+      "levelOfStudy": "Tahap Pengajian",
+      "selectLevel": "Pilih Tahap",
+      "interestedMajor": "Jurusan Diminati",
+      "majorPlaceholder": "cth., Kejuruteraan, Perubatan...",
+      "submit": "Daftar & Dapatkan Kod QR",
+      "submitting": "Mendaftar...",
+      "success": "Selamat datang! Pendaftaran berjaya",
+      "alreadyRegistered": "Anda sudah berdaftar. Mendapatkan tiket anda...",
+      "levels": {
+        "HIGH_SCHOOL": "Sekolah Menengah",
+        "BACHELOR": "Ijazah Sarjana Muda",
+        "MASTER": "Sarjana",
+        "PHD": "PhD"
+      },
       "validation": {
-        "attention": "Attention Required",
-        "defaultError": "Please check the form for errors.",
-        "fixIt": "Got it, I'll fix it",
-        "checkForm": "Please check the form",
-        "namePlaceholder": "Full Name (English preferred)"
+        "nameRequired": "Nama diperlukan",
+        "emailInvalid": "Alamat e-mel tidak sah",
+        "phoneRequired": "Nombor telefon diperlukan",
+        "levelRequired": "Tahap pengajian diperlukan",
+        "attention": "Perhatian Diperlukan",
+        "defaultError": "Sila semak borang untuk ralat.",
+        "fixIt": "Faham, saya akan betulkan",
+        "checkForm": "Sila semak borang",
+        "namePlaceholder": "Nama Penuh (Bahasa Inggeris diutamakan)"
+      },
+      "steps": {
+        "personal": "Maklumat Peribadi",
+        "contact": "Hubungi",
+        "education": "Pendidikan",
+        "next": "Seterusnya",
+        "back": "Kembali"
+      },
+      "majors": {
+        "MEDICINE": "Perubatan / Farmasi",
+        "ENGINEERING": "Kejuruteraan",
+        "BUSINESS": "Pentadbiran Perniagaan",
+        "LANGUAGES": "Bahasa / Terjemahan",
+        "CS": "Sains Komputer",
+        "OTHER": "Lain-lain"
       }
+    },
+    "success": {
+      "title": "Anda Sudah Sedia!",
+      "subtitle": "Imbas kod ini di pintu masuk. Kami juga telah menghantar salinan ke e-mel anda.",
+      "welcomeBack": "Selamat Kembali!",
+      "existingTicket": "Kami menemui pendaftaran anda sebelum ini. Ini tiket anda.",
+      "doneNext": "Selesai / Pelajar Seterusnya",
+      "resetting": "Skrin akan kembali dalam 10 saat..."
     }
   },
   "common": {

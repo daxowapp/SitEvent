@@ -196,32 +196,37 @@ async function autoAssign(eventId: string) {
   const breakBufferMs = (event.breakBetweenMeetings ?? 5) * 60 * 1000;
   const nowMs = Date.now();
 
-  // Get all Side A participants
-  const sideA = await prisma.b2BParticipant.findMany({
-    where: { b2bEventId: eventId, side: "A" },
-  });
+  // Fetch all data in PARALLEL — 4 queries at once instead of sequential
+  const [sideA, activeMeetings, allWaiting, completedMeetings] = await Promise.all([
+    prisma.b2BParticipant.findMany({
+      where: { b2bEventId: eventId, side: "A" },
+    }),
+    prisma.b2BMeeting.findMany({
+      where: { b2bEventId: eventId, status: "IN_PROGRESS" },
+      select: { participantAId: true },
+    }),
+    prisma.b2BParticipant.findMany({
+      where: { b2bEventId: eventId, side: "B", liveStatus: "WAITING" },
+      orderBy: { arrivedAt: "asc" },
+    }),
+    prisma.b2BMeeting.findMany({
+      where: { b2bEventId: eventId, status: "COMPLETED" },
+      select: { participantAId: true, participantBId: true, actualEnd: true },
+      orderBy: { actualEnd: "desc" },
+    }),
+  ]);
 
-  // Get active meetings (to know who's busy)
-  const activeMeetings = await prisma.b2BMeeting.findMany({
-    where: { b2bEventId: eventId, status: "IN_PROGRESS" },
-    select: { participantAId: true },
-  });
+  if (allWaiting.length === 0) return null;
+
   const busyUniIds = new Set(activeMeetings.map((m) => m.participantAId));
 
-  // Get last completed meeting for each university to enforce break buffer
-  const uniLastMeetings = await prisma.b2BMeeting.findMany({
-    where: {
-      b2bEventId: eventId,
-      status: "COMPLETED",
-      participantAId: { in: sideA.map((u) => u.id) },
-    },
-    select: { participantAId: true, actualEnd: true },
-    orderBy: { actualEnd: "desc" },
-  });
+  // Build uni last-end map from completed meetings
   const uniLastEndMap = new Map<string, Date>();
-  for (const m of uniLastMeetings) {
-    if (!uniLastEndMap.has(m.participantAId) && m.actualEnd) {
-      uniLastEndMap.set(m.participantAId, m.actualEnd);
+  const lastMeetingEndMap = new Map<string, Date>();
+  for (const m of completedMeetings) {
+    if (m.actualEnd) {
+      if (!uniLastEndMap.has(m.participantAId)) uniLastEndMap.set(m.participantAId, m.actualEnd);
+      if (!lastMeetingEndMap.has(m.participantBId)) lastMeetingEndMap.set(m.participantBId, m.actualEnd);
     }
   }
 
@@ -233,32 +238,6 @@ async function autoAssign(eventId: string) {
     return true;
   });
   if (idleUnis.length === 0) return null;
-
-  // Get ALL waiting participants
-  const allWaiting = await prisma.b2BParticipant.findMany({
-    where: { b2bEventId: eventId, side: "B", liveStatus: "WAITING" },
-    orderBy: { arrivedAt: "asc" },
-  });
-  if (allWaiting.length === 0) return null;
-
-  // Get last completed meeting time for each waiting participant
-  const waitingIds = allWaiting.map((w) => w.id);
-  const lastMeetings = await prisma.b2BMeeting.findMany({
-    where: {
-      b2bEventId: eventId,
-      participantBId: { in: waitingIds },
-      status: "COMPLETED",
-    },
-    select: { participantBId: true, actualEnd: true },
-    orderBy: { actualEnd: "desc" },
-  });
-
-  const lastMeetingEndMap = new Map<string, Date>();
-  for (const m of lastMeetings) {
-    if (!lastMeetingEndMap.has(m.participantBId) && m.actualEnd) {
-      lastMeetingEndMap.set(m.participantBId, m.actualEnd);
-    }
-  }
 
   // Sort: fresh arrivals first, then by longest wait since last meeting
   const sortedWaiting = [...allWaiting].sort((a, b) => {
@@ -279,13 +258,31 @@ async function autoAssign(eventId: string) {
     return true;
   });
 
+  // Pre-fetch ALL meetings for this event in ONE query (eliminates N+1)
+  const [allMeetings, uniMeetingCounts] = await Promise.all([
+    prisma.b2BMeeting.findMany({
+      where: { b2bEventId: eventId },
+      select: { participantAId: true, participantBId: true, status: true },
+    }),
+    prisma.b2BMeeting.groupBy({
+      by: ["participantAId"],
+      where: { b2bEventId: eventId, status: { in: ["COMPLETED", "IN_PROGRESS"] } },
+      _count: true,
+    }),
+  ]);
+
+  // Build lookup: participantBId -> Set of university IDs they've met
+  const metMap = new Map<string, Set<string>>();
+  for (const m of allMeetings) {
+    if (!metMap.has(m.participantBId)) metMap.set(m.participantBId, new Set());
+    metMap.get(m.participantBId)!.add(m.participantAId);
+  }
+
+  const countMap = new Map(uniMeetingCounts.map((c) => [c.participantAId, c._count]));
+
   // Try each ready participant in priority order
   for (const nextWaiting of readyWaiting) {
-    const alreadyMet = await prisma.b2BMeeting.findMany({
-      where: { b2bEventId: eventId, participantBId: nextWaiting.id },
-      select: { participantAId: true },
-    });
-    const metUniIds = new Set(alreadyMet.map((m) => m.participantAId));
+    const metUniIds = metMap.get(nextWaiting.id) || new Set();
 
     if (metUniIds.size >= sideA.length) {
       await prisma.b2BParticipant.update({
@@ -294,13 +291,6 @@ async function autoAssign(eventId: string) {
       });
       continue;
     }
-
-    const uniMeetingCounts = await prisma.b2BMeeting.groupBy({
-      by: ["participantAId"],
-      where: { b2bEventId: eventId, status: { in: ["COMPLETED", "IN_PROGRESS"] } },
-      _count: true,
-    });
-    const countMap = new Map(uniMeetingCounts.map((c) => [c.participantAId, c._count]));
 
     const candidates = idleUnis
       .filter((u) => !metUniIds.has(u.id))
@@ -498,6 +488,7 @@ export async function checkInParticipant(participantId: string, email?: string) 
   await requireB2BAdmin();
 
   try {
+    // Run participant lookup in one query
     const participant = await prisma.b2BParticipant.findUnique({
       where: { id: participantId },
     });
@@ -506,15 +497,22 @@ export async function checkInParticipant(participantId: string, email?: string) 
       return { error: "Participant already checked in" };
     }
 
-    // Get current max queue position
-    const maxQueue = await prisma.b2BParticipant.findFirst({
-      where: {
-        b2bEventId: participant.b2bEventId,
-        liveStatus: "WAITING",
-      },
-      orderBy: { queuePosition: "desc" },
-      select: { queuePosition: true },
-    });
+    // Run max queue + scheduled cleanup in PARALLEL (no dependency between them)
+    const [maxQueue] = await Promise.all([
+      prisma.b2BParticipant.findFirst({
+        where: { b2bEventId: participant.b2bEventId, liveStatus: "WAITING" },
+        orderBy: { queuePosition: "desc" },
+        select: { queuePosition: true },
+      }),
+      // Clean up old pre-scheduled meetings in parallel
+      prisma.b2BMeeting.deleteMany({
+        where: {
+          b2bEventId: participant.b2bEventId,
+          participantBId: participantId,
+          status: "SCHEDULED",
+        },
+      }),
+    ]);
 
     // Mark as WAITING + save email if provided
     await prisma.b2BParticipant.update({
@@ -527,24 +525,23 @@ export async function checkInParticipant(participantId: string, email?: string) 
       },
     });
 
-    // Clean up old pre-scheduled meetings for this participant
-    // (from the old scheduling system — they'd block the unique constraint)
-    await prisma.b2BMeeting.deleteMany({
-      where: {
-        b2bEventId: participant.b2bEventId,
-        participantBId: participantId,
-        status: "SCHEDULED",
-      },
-    });
+    // Respond FAST — defer auto-assign to background
+    // The tickAutoAssign heartbeat (every 10s) will pick it up,
+    // but we also fire it non-blocking for faster assignment
+    const eventId = participant.b2bEventId;
+    revalidatePath(`/admin/b2b/${eventId}/live`);
 
-    // Try to auto-assign
-    const assigned = await batchAutoAssign(participant.b2bEventId);
+    // Fire auto-assign without awaiting — responds to user instantly
+    batchAutoAssign(eventId).then((assigned) => {
+      if (assigned > 0) {
+        revalidatePath(`/admin/b2b/${eventId}/live`);
+      }
+    }).catch(console.error);
 
-    revalidatePath(`/admin/b2b/${participant.b2bEventId}/live`);
     return {
       success: true,
-      assigned,
-      message: assigned > 0 ? "Checked in and assigned to a university!" : "Checked in — waiting for a free university.",
+      assigned: 0,
+      message: "Checked in — assigning...",
     };
   } catch (error) {
     console.error("Check-in failed:", error);

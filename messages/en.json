@@ -1,13 +1,74 @@
 {
   "kiosk": {
+    "attract": {
+      "welcomeTo": "Welcome to",
+      "officialKiosk": "Official Registration Kiosk",
+      "tapToStart": "Tap to Start",
+      "footer": "Secure Registration  •  Instant QR Code"
+    },
+    "menu": {
+      "back": "Back",
+      "newRegistration": "New Registration",
+      "newRegistrationDesc": "I don't have a ticket yet",
+      "lostTicket": "Lost My Ticket",
+      "lostTicketDesc": "Print badge / QR code"
+    },
     "form": {
+      "title": "Quick Registration",
+      "fullName": "Full Name",
+      "fullNamePlaceholder": "Full Name",
+      "email": "Email",
+      "emailPlaceholder": "example@email.com",
+      "phone": "Phone Number",
+      "phonePlaceholder": "05xxxxxxxx",
+      "levelOfStudy": "Level of Study",
+      "selectLevel": "Select Level",
+      "interestedMajor": "Interested Major",
+      "majorPlaceholder": "e.g., Engineering, Medicine...",
+      "submit": "Register & Get QR Code",
+      "submitting": "Registering...",
+      "success": "Welcome! Registration successful",
+      "alreadyRegistered": "You are already registered. Retrieving your ticket...",
+      "levels": {
+        "HIGH_SCHOOL": "High School",
+        "BACHELOR": "Bachelor's",
+        "MASTER": "Master's",
+        "PHD": "PhD"
+      },
       "validation": {
+        "nameRequired": "Name is required",
+        "emailInvalid": "Invalid email address",
+        "phoneRequired": "Phone number is required",
+        "levelRequired": "Level of study is required",
         "attention": "Attention Required",
         "defaultError": "Please check the form for errors.",
         "fixIt": "Got it, I'll fix it",
         "checkForm": "Please check the form",
         "namePlaceholder": "Full Name (English preferred)"
+      },
+      "steps": {
+        "personal": "Personal Info",
+        "contact": "Contact",
+        "education": "Education",
+        "next": "Next",
+        "back": "Back"
+      },
+      "majors": {
+        "MEDICINE": "Medicine / Pharmacy",
+        "ENGINEERING": "Engineering",
+        "BUSINESS": "Business Administration",
+        "LANGUAGES": "Languages / Translation",
+        "CS": "Computer Science",
+        "OTHER": "Other"
       }
+    },
+    "success": {
+      "title": "You're All Set!",
+      "subtitle": "Scan this code at the gate. We've also sent a copy to your email.",
+      "welcomeBack": "Welcome Back!",
+      "existingTicket": "We found your previous registration. Here's your ticket.",
+      "doneNext": "Done / Next Student",
+      "resetting": "Screen will reset in 10 seconds..."
     }
   },
   "common": {
