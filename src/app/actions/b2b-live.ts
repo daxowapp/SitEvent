@@ -644,6 +644,60 @@ export async function undoCheckIn(participantId: string) {
 }
 
 // ============================================
+// CHECKOUT PARTICIPANT (works for ANY status)
+// ============================================
+
+export async function checkoutParticipant(participantId: string) {
+  await requireB2BAdmin();
+
+  try {
+    const participant = await prisma.b2BParticipant.findUnique({
+      where: { id: participantId },
+    });
+    if (!participant) return { error: "Participant not found" };
+    if (participant.liveStatus === "NOT_ARRIVED") {
+      return { error: "Participant is not checked in" };
+    }
+
+    // If they're in a meeting, end it first
+    if (participant.liveStatus === "IN_MEETING") {
+      const activeMeeting = await prisma.b2BMeeting.findFirst({
+        where: {
+          b2bEventId: participant.b2bEventId,
+          participantBId: participant.id,
+          status: "IN_PROGRESS",
+        },
+      });
+      if (activeMeeting) {
+        await prisma.b2BMeeting.update({
+          where: { id: activeMeeting.id },
+          data: { status: "COMPLETED", actualEnd: new Date() },
+        });
+      }
+    }
+
+    // Reset to NOT_ARRIVED
+    await prisma.b2BParticipant.update({
+      where: { id: participantId },
+      data: {
+        liveStatus: "NOT_ARRIVED",
+        arrivedAt: null,
+        queuePosition: null,
+      },
+    });
+
+    // Auto-assign freed university in background
+    batchAutoAssign(participant.b2bEventId).catch(console.error);
+
+    revalidatePath(`/admin/b2b/${participant.b2bEventId}/live`);
+    return { success: true, message: `${participant.name} checked out` };
+  } catch (error) {
+    console.error("Checkout failed:", error);
+    return { error: "Failed to checkout participant" };
+  }
+}
+
+// ============================================
 // RESET LIVE SESSION
 // ============================================
 

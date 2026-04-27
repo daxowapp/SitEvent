@@ -19,12 +19,13 @@ import {
 import {
   ArrowLeft, Clock, Users, GraduationCap, UserCheck, UserX,
   Loader2, RotateCcw, Radio, Square, Timer, CheckCircle2,
-  AlertTriangle, Undo2, Volume2, VolumeX, Link2, Copy, UserMinus, UsersRound, UserPlus, QrCode, Mail, Coffee, Zap, Minus, Plus, UtensilsCrossed, Play,
+  AlertTriangle, Undo2, Volume2, VolumeX, Link2, Copy, UserMinus, UsersRound, UserPlus, QrCode, Mail, Coffee, Zap, Minus, Plus, UtensilsCrossed, Play, LogOut,
 } from "lucide-react";
 import {
   checkInParticipant, endMeeting, undoCheckIn, resetLiveSession,
   markParticipantDone, bulkCheckIn, walkInCheckIn, tickAutoAssign,
   forceAssignAll, updateBreakBuffer, startMainBreak, endMainBreak,
+  checkoutParticipant,
 } from "@/app/actions/b2b-live";
 
 type LiveData = NonNullable<
@@ -298,6 +299,15 @@ export function B2BLiveDashboard({ data }: { data: LiveData }) {
     const result = await undoCheckIn(id);
     if (result.error) toast.error(result.error);
     else toast.success("Check-in undone");
+    setLoading("");
+    router.refresh();
+  }, [router]);
+
+  const handleCheckout = useCallback(async (id: string) => {
+    setLoading(`checkout-${id}`);
+    const result = await checkoutParticipant(id) as any;
+    if (result.error) toast.error(result.error);
+    else toast.success(result.message);
     setLoading("");
     router.refresh();
   }, [router]);
@@ -776,6 +786,14 @@ export function B2BLiveDashboard({ data }: { data: LiveData }) {
                           title="Copy link"
                         >
                           <Link2 className="h-3 w-3" />
+                        </button>
+                        <button
+                          className="text-gray-500 hover:text-red-400 transition-colors p-1"
+                          onClick={() => handleCheckout(p.id)}
+                          disabled={loading === `checkout-${p.id}`}
+                          title="Checkout (remove from queue)"
+                        >
+                          {loading === `checkout-${p.id}` ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <LogOut className="h-3.5 w-3.5" />}
                         </button>
                       </div>
                     </div>
