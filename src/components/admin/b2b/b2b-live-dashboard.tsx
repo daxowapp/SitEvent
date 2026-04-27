@@ -266,13 +266,13 @@ export function B2BLiveDashboard({ data: initialData }: { data: LiveData }) {
     }
     setLoading(`checkin-${id}`);
     const result = await checkInParticipant(id);
+    setLoading("");
     if (result.error) toast.error(result.error);
     else {
       toast.success(result.message);
       if (soundEnabled) playNotificationSound();
     }
-    setLoading("");
-    refreshData();
+    refreshData(); // non-blocking
   }, [soundEnabled, data.notArrived, refreshData]);
 
   const handleEmailCheckIn = useCallback(async () => {
@@ -280,68 +280,68 @@ export function B2BLiveDashboard({ data: initialData }: { data: LiveData }) {
     setLoading(`checkin-${emailPrompt.id}`);
     setEmailPrompt(null);
     const result = await checkInParticipant(emailPrompt.id, promptEmail.trim());
+    setLoading("");
+    setPromptEmail("");
     if (result.error) toast.error(result.error);
     else {
       toast.success(result.message);
       if (soundEnabled) playNotificationSound();
     }
-    setLoading("");
-    setPromptEmail("");
     refreshData();
   }, [emailPrompt, promptEmail, soundEnabled, refreshData]);
 
   const handleEndMeeting = useCallback(async (id: string) => {
-    if (loading.startsWith("end-")) return; // Prevent double-trigger
+    if (loading.startsWith("end-")) return;
     setLoading(`end-${id}`);
     const result = await endMeeting(id);
+    setLoading("");
     if (result.error) toast.error(result.error);
     else toast.success(result.message);
-    setLoading("");
     refreshData();
   }, [loading, refreshData]);
 
   const handleUndo = useCallback(async (id: string) => {
     setLoading(`undo-${id}`);
     const result = await undoCheckIn(id);
+    setLoading("");
     if (result.error) toast.error(result.error);
     else toast.success("Check-in undone");
-    setLoading("");
     refreshData();
   }, [refreshData]);
 
   const handleCheckout = useCallback(async (id: string) => {
     setLoading(`checkout-${id}`);
     const result = await checkoutParticipant(id) as any;
+    setLoading("");
     if (result.error) toast.error(result.error);
     else toast.success(result.message);
-    setLoading("");
     refreshData();
   }, [refreshData]);
 
   const handleReset = useCallback(async () => {
     setLoading("reset");
     const result = await resetLiveSession(data.event.id);
+    setLoading("");
     if (result.error) toast.error(result.error);
     else toast.success("Live session reset!");
-    setLoading("");
     refreshData();
   }, [data.event.id, refreshData]);
 
   const handleMarkDone = useCallback(async (id: string) => {
     setLoading(`done-${id}`);
     const result = await markParticipantDone(id);
+    setLoading("");
     if (result.error) toast.error(result.error);
     else toast.success("Marked as done");
-    setLoading("");
     refreshData();
   }, [refreshData]);
 
   const handleBulkCheckIn = useCallback(async () => {
     setLoading("bulk");
     const result = await bulkCheckIn(data.event.id);
+    setLoading("");
     if (result.error) toast.error(result.error);
     else toast.success(result.message);
-    setLoading("");
     refreshData();
   }, [data.event.id, refreshData]);
 
@@ -350,12 +350,12 @@ export function B2BLiveDashboard({ data: initialData }: { data: LiveData }) {
     setLoading("walkin");
     const formData = new FormData(e.currentTarget);
     const result = await walkInCheckIn(data.event.id, formData);
+    setLoading("");
     if (result.error) toast.error(result.error);
     else {
       toast.success(result.message);
       (e.target as HTMLFormElement).reset();
     }
-    setLoading("");
     refreshData();
   }, [data.event.id, refreshData]);
 

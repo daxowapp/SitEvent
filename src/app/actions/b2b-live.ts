@@ -485,26 +485,25 @@ export async function endMainBreak(eventId: string) {
 // ============================================
 
 export async function checkInParticipant(participantId: string, email?: string) {
-  await requireB2BAdmin();
+  // Run auth + participant lookup in PARALLEL
+  const [, participant] = await Promise.all([
+    requireB2BAdmin(),
+    prisma.b2BParticipant.findUnique({ where: { id: participantId } }),
+  ]);
+
+  if (!participant) return { error: "Participant not found" };
+  if (participant.liveStatus !== "NOT_ARRIVED") {
+    return { error: "Participant already checked in" };
+  }
 
   try {
-    // Run participant lookup in one query
-    const participant = await prisma.b2BParticipant.findUnique({
-      where: { id: participantId },
-    });
-    if (!participant) return { error: "Participant not found" };
-    if (participant.liveStatus !== "NOT_ARRIVED") {
-      return { error: "Participant already checked in" };
-    }
-
-    // Run max queue + scheduled cleanup in PARALLEL (no dependency between them)
+    // Run max queue + scheduled cleanup in PARALLEL
     const [maxQueue] = await Promise.all([
       prisma.b2BParticipant.findFirst({
         where: { b2bEventId: participant.b2bEventId, liveStatus: "WAITING" },
         orderBy: { queuePosition: "desc" },
         select: { queuePosition: true },
       }),
-      // Clean up old pre-scheduled meetings in parallel
       prisma.b2BMeeting.deleteMany({
         where: {
           b2bEventId: participant.b2bEventId,
@@ -525,18 +524,9 @@ export async function checkInParticipant(participantId: string, email?: string) 
       },
     });
 
-    // Respond FAST — defer auto-assign to background
-    // The tickAutoAssign heartbeat (every 10s) will pick it up,
-    // but we also fire it non-blocking for faster assignment
+    // Fire auto-assign in background — responds to user instantly
     const eventId = participant.b2bEventId;
-    revalidatePath(`/admin/b2b/${eventId}/live`);
-
-    // Fire auto-assign without awaiting — responds to user instantly
-    batchAutoAssign(eventId).then((assigned) => {
-      if (assigned > 0) {
-        revalidatePath(`/admin/b2b/${eventId}/live`);
-      }
-    }).catch(console.error);
+    batchAutoAssign(eventId).catch(console.error);
 
     return {
       success: true,
@@ -648,48 +638,45 @@ export async function undoCheckIn(participantId: string) {
 // ============================================
 
 export async function checkoutParticipant(participantId: string) {
-  await requireB2BAdmin();
+  // Run auth + participant lookup in PARALLEL
+  const [, participant] = await Promise.all([
+    requireB2BAdmin(),
+    prisma.b2BParticipant.findUnique({ where: { id: participantId } }),
+  ]);
+
+  if (!participant) return { error: "Participant not found" };
+  if (participant.liveStatus === "NOT_ARRIVED") {
+    return { error: "Participant is not checked in" };
+  }
 
   try {
-    const participant = await prisma.b2BParticipant.findUnique({
-      where: { id: participantId },
-    });
-    if (!participant) return { error: "Participant not found" };
-    if (participant.liveStatus === "NOT_ARRIVED") {
-      return { error: "Participant is not checked in" };
-    }
-
-    // If they're in a meeting, end it first
-    if (participant.liveStatus === "IN_MEETING") {
-      const activeMeeting = await prisma.b2BMeeting.findFirst({
-        where: {
-          b2bEventId: participant.b2bEventId,
-          participantBId: participant.id,
-          status: "IN_PROGRESS",
+    // End any active meeting + reset status in PARALLEL
+    await Promise.all([
+      // End active meeting if IN_MEETING
+      participant.liveStatus === "IN_MEETING"
+        ? prisma.b2BMeeting.updateMany({
+            where: {
+              b2bEventId: participant.b2bEventId,
+              participantBId: participant.id,
+              status: "IN_PROGRESS",
+            },
+            data: { status: "COMPLETED", actualEnd: new Date() },
+          })
+        : Promise.resolve(),
+      // Reset to NOT_ARRIVED
+      prisma.b2BParticipant.update({
+        where: { id: participantId },
+        data: {
+          liveStatus: "NOT_ARRIVED",
+          arrivedAt: null,
+          queuePosition: null,
         },
-      });
-      if (activeMeeting) {
-        await prisma.b2BMeeting.update({
-          where: { id: activeMeeting.id },
-          data: { status: "COMPLETED", actualEnd: new Date() },
-        });
-      }
-    }
-
-    // Reset to NOT_ARRIVED
-    await prisma.b2BParticipant.update({
-      where: { id: participantId },
-      data: {
-        liveStatus: "NOT_ARRIVED",
-        arrivedAt: null,
-        queuePosition: null,
-      },
-    });
+      }),
+    ]);
 
     // Auto-assign freed university in background
     batchAutoAssign(participant.b2bEventId).catch(console.error);
 
-    revalidatePath(`/admin/b2b/${participant.b2bEventId}/live`);
     return { success: true, message: `${participant.name} checked out` };
   } catch (error) {
     console.error("Checkout failed:", error);
