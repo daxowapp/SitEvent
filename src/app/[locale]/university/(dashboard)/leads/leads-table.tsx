@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Card } from "@/components/ui/card";
-import { Download, Search, Sparkles, BookOpen, Mail, Phone, Filter } from "lucide-react";
+import { Search, Sparkles, BookOpen, Mail, Phone, Filter } from "lucide-react";
 import { format } from "date-fns";
 import {
     Select,
@@ -86,38 +86,6 @@ export function GlobalLeadsTable({ data }: GlobalLeadsTableProps) {
         return 'text-gray-600 bg-gray-50 border-gray-100';
     };
 
-    const downloadCSV = () => {
-        const csvContent = [
-            [t('table.sourceEvent'), t('table.status'), t('table.student'), 'Gender', t('table.contact'), 'Phone', 'Country', 'City', 'Major (Std)', t('table.interest'), 'Category', 'Level', 'Points Awarded', 'Notes'],
-            ...filteredData.map(item => [
-                `"${item.event.title}"`,
-                format(new Date(item.createdAt), "yyyy-MM-dd"),
-                item.status,
-                `"${item.registrant.fullName}"`,
-                item.registrant.gender || '',
-                item.registrant.email,
-                item.registrant.phone,
-                item.registrant.country,
-                item.registrant.city,
-                `"${item.registrant.standardizedMajor || ''}"`,
-                `"${item.registrant.interestedMajor || ''}"`,
-                `"${item.registrant.majorCategory || ''}"`,
-                item.registrant.levelOfStudy || '',
-                item.pointsAwarded || 0,
-                `"${item.note || ''}"`
-            ])
-        ].map(e => e.join(",")).join("\n");
-
-        const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-        const link = document.createElement("a");
-        const url = URL.createObjectURL(blob);
-        link.setAttribute("href", url);
-        link.setAttribute("download", `university-leads-${format(new Date(), "yyyy-MM-dd")}.csv`);
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-    };
-
     return (
         <div className="space-y-6">
             {/* Toolbar */}
@@ -158,10 +126,6 @@ export function GlobalLeadsTable({ data }: GlobalLeadsTableProps) {
                         </SelectContent>
                     </Select>
                 </div>
-
-                <Button variant="outline" onClick={downloadCSV} className="bg-white hover:bg-gray-50 text-gray-700 border-gray-200">
-                    <Download className="mr-2 h-4 w-4" /> {t('exportCsv')}
-                </Button>
             </div>
 
             {/* Premium Table Card */}

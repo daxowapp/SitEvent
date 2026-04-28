@@ -98,11 +98,12 @@ export function UniversityFilesClient({ universityId }: Props) {
     setUploading(true);
     try {
       // Upload to Supabase Storage
-      const fileName = `${Date.now()}-${selectedFile.name}`;
+      const safeName = selectedFile.name.replace(/[^a-zA-Z0-9.-]/g, '_');
+      const fileName = `${Date.now()}-${safeName}`;
       const filePath = `university-files/${universityId}/${fileName}`;
 
       const { data: uploadData, error: uploadError } = await supabase.storage
-        .from("files")
+        .from("events-media")
         .upload(filePath, selectedFile, {
           cacheControl: "3600",
           upsert: false,
@@ -116,7 +117,7 @@ export function UniversityFilesClient({ universityId }: Props) {
 
       // Get public URL
       const { data: urlData } = supabase.storage
-        .from("files")
+        .from("events-media")
         .getPublicUrl(filePath);
 
       // Create file record
