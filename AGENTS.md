@@ -345,8 +345,8 @@ SitEvent/
 | `EVENT_MANAGER` | Event management, registrations, analytics |
 | `EVENT_STAFF` | Scanner access, limited admin |
 | `USHER` | Scanner access only (PIN login) |
-| `UNIVERSITY (ADMIN)` | University dashboard, participate in events, view global booth leads, manage team roster. |
-| `UNIVERSITY (MEMBER)`| University scanner rep. Can only view leads that they personally scanned. |
+| `UNIVERSITY (ADMIN)` | University dashboard, participate in events, view global booth leads, manage team roster, view all event registrants. |
+| `UNIVERSITY (MEMBER)`| University scanner rep. Can view events and event details (including all registrants), but on the Leads page they only view leads that they personally scanned. |
 
 ### Authorization Helpers (`src/lib/role-check.ts`)
 - `requireRole(allowedRoles)` — Check specific roles

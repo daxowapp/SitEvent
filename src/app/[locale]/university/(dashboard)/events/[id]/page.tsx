@@ -46,10 +46,7 @@ export default async function UniversityEventPage({ params }: { params: Promise<
         redirect("/university/login");
     }
 
-    // RBAC: Only ADMINs can access this page
-    if (session.user.role !== "ADMIN") {
-        redirect("/university/dashboard");
-    }
+
 
     const event = await prisma.event.findUnique({
         where: { id },
@@ -77,37 +74,24 @@ export default async function UniversityEventPage({ params }: { params: Promise<
     const isAccepted = status === "ACCEPTED" || status === "INVITED";
     const isPending = status === "REQUESTED";
 
-    // Fetch Registrants (only if accepted)
-    // Strict Access Control: 
-    // - ADMINs see all students who visited this university's booth at this event
-    // - MEMBERs only see students they personally scanned at this event
     let registrations: any[] = [];
     if (isAccepted) {
-        const whereClause: any = {
-            eventId: id,
-            universityId: session.user.universityId
-        };
-
-        if (session.user.role !== "ADMIN") {
-            whereClause.scannedById = session.user.id;
-        }
-
-        const boothVisits = await prisma.boothVisit.findMany({
-            where: whereClause,
+        // Allow the university to see all students registered for this event
+        const eventRegistrations = await prisma.registration.findMany({
+            where: {
+                eventId: id,
+                status: "REGISTERED"
+            },
             include: {
-                registration: {
-                    include: {
-                        registrant: true
-                    }
-                }
+                registrant: true
             },
             orderBy: { createdAt: 'desc' }
         });
 
-        // Map it back to the expected array shape (Array of mapped objects mimicking Registration)
-        registrations = boothVisits.map(visit => ({
-            id: visit.id,
-            registrant: visit.registration.registrant
+        // Map it back to the expected array shape
+        registrations = eventRegistrations.map(reg => ({
+            id: reg.id,
+            registrant: reg.registrant
         }));
     }
 

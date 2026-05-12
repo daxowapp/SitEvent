@@ -2,6 +2,8 @@
 
 All notable changes to this project will be documented in this file.
 
+2026-05-12 - University Dashboard Data Visibility - Removed the restrictive ADMIN role check on the Events and Event Details pages within the university dashboard, allowing all university staff (MEMBERs) to view event data. Updated the Event Details page to display the complete list of all registered students for the event, replacing the previous functionality that only showed students physically scanned at the university's booth.
+
 2026-04-27 - B2B Live Queue System - Replaced pre-scheduled B2B meetings with a real-time live queue system. Admin checks in participants as they arrive; the system auto-assigns them to idle universities prioritized by fewest completed meetings. Meetings auto-end when the countdown timer (slot duration) expires with a Web Audio API notification chime. Features: auto-assignment algorithm, countdown timers with progress bars, waiting queue with arrival time tracking, bulk check-in, mark-as-done (early departure), undo check-in, session reset, sound toggle. New page: `/admin/b2b/[id]/live`. New actions file: `b2b-live.ts`.
 
 2026-04-27 - University Live Dashboard - Public token-based page (`/b2b/university/[token]`) for each university to see their current meeting partner, countdown timer, auto-end with chime, end-meeting-early button, and completed meetings history. No login required. Auto-refreshes every 5 seconds.

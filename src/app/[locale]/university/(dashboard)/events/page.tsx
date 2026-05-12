@@ -30,10 +30,7 @@ export default async function UniversityEventsPage() {
         redirect("/university/login");
     }
 
-    // RBAC: Only ADMINs can access this page
-    if (session.user.role !== "ADMIN") {
-        redirect("/university/dashboard");
-    }
+
 
     // Get all events where this university is participating (ACCEPTED or INVITED)
     const participations = await prisma.eventParticipating.findMany({
