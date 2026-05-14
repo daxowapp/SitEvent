@@ -75,7 +75,6 @@ async function getPastEvents(): Promise<DisplayEvent[]> {
                 endDateTime: { lt: new Date() },
             },
             orderBy: { startDateTime: "desc" },
-            take: 3,
             include: {
                 _count: {
                     select: { universities: true }

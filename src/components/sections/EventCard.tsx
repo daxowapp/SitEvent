@@ -101,8 +101,11 @@ const EventCard = ({
                         </Link>
                     </Button>
                 ) : (
-                    <Button variant="secondary" className="w-full">
-                        {t('viewSummary')}
+                    <Button variant="secondary" className="w-full group/btn" asChild>
+                        <Link href={`/events/${slug}/summary`}>
+                            {t('viewSummary')}
+                            <ChevronRight className="w-4 h-4 transition-transform group-hover/btn:translate-x-1 ml-2" />
+                        </Link>
                     </Button>
                 )}
             </div>

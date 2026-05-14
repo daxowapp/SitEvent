@@ -2,6 +2,8 @@
 
 All notable changes to this project will be documented in this file.
 
+2026-05-14 - Event Summary Page - Implemented a new public-facing Event Summary page (`/events/[slug]/summary`) for past events. The page includes key impact statistics (Registrations, Universities, Sessions), interactive demographic charts (Top Countries, Study Levels) built with Recharts, a photo gallery, event recap description, and the list of participating universities. Updated the `EventCard` component to link to this new summary page for past events. Removing limit from home page past events.
+
 2026-05-12 - University Dashboard Data Visibility - Removed the restrictive ADMIN role check on the Events and Event Details pages within the university dashboard, allowing all university staff (MEMBERs) to view event data. Updated the Event Details page to display the complete list of all registered students for the event, replacing the previous functionality that only showed students physically scanned at the university's booth.
 
 2026-04-27 - B2B Live Queue System - Replaced pre-scheduled B2B meetings with a real-time live queue system. Admin checks in participants as they arrive; the system auto-assigns them to idle universities prioritized by fewest completed meetings. Meetings auto-end when the countdown timer (slot duration) expires with a Web Audio API notification chime. Features: auto-assignment algorithm, countdown timers with progress bars, waiting queue with arrival time tracking, bulk check-in, mark-as-done (early departure), undo check-in, session reset, sound toggle. New page: `/admin/b2b/[id]/live`. New actions file: `b2b-live.ts`.
