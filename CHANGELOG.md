@@ -2,6 +2,8 @@
 
 All notable changes to this project will be documented in this file.
 
+2026-05-15 - Event Summaries AI & Translations - Added an OpenAI-powered script to automatically generate and translate event summaries based on attendee statistics. Fixed missing translation keys for topCountries and studyLevels across all supported locales.
+
 2026-05-14 - Event Summary Page - Implemented a new public-facing Event Summary page (`/events/[slug]/summary`) for past events. The page includes key impact statistics (Registrations, Universities, Sessions), interactive demographic charts (Top Countries, Study Levels) built with Recharts, a photo gallery, event recap description, and the list of participating universities. Updated the `EventCard` component to link to this new summary page for past events. Removing limit from home page past events.
 
 2026-05-12 - University Dashboard Data Visibility - Removed the restrictive ADMIN role check on the Events and Event Details pages within the university dashboard, allowing all university staff (MEMBERs) to view event data. Updated the Event Details page to display the complete list of all registered students for the event, replacing the previous functionality that only showed students physically scanned at the university's booth.
