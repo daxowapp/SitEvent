@@ -141,6 +141,8 @@
         "registrationOpen": "Registration Open",
         "aboutEvent": "About This Event",
         "registrationClosed": "Registration Closed",
+        "topCountries": "Основные страны-участницы",
+        "studyLevels": "Интерес по уровню обучения",
         "eventEnded": "Past Event",
         "spotsRemaining": "{count} spots remaining",
         "unlimited": "Unlimited spots"

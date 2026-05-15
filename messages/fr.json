@@ -141,6 +141,8 @@
         "registrationOpen": "Registration Open",
         "aboutEvent": "About This Event",
         "registrationClosed": "Registration Closed",
+        "topCountries": "Principaux Pays Participants",
+        "studyLevels": "Intérêt par Niveau d'Étude",
         "eventEnded": "Past Event",
         "spotsRemaining": "{count} spots remaining",
         "unlimited": "Unlimited spots"

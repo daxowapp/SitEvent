@@ -141,6 +141,8 @@
         "registrationOpen": "Registration Open",
         "aboutEvent": "About This Event",
         "registrationClosed": "Registration Closed",
+        "topCountries": "主要参会国家",
+        "studyLevels": "各学习阶段的兴趣",
         "eventEnded": "Past Event",
         "spotsRemaining": "{count} spots remaining",
         "unlimited": "Unlimited spots"
