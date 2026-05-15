@@ -18,7 +18,7 @@ export function EventSummaryCharts({ countryData, studyLevelData }: EventSummary
             {/* Top Countries Chart */}
             <div className="bg-card rounded-3xl p-8 border border-border/50 shadow-xl card-elevated">
                 <h3 className="font-display text-2xl font-bold text-card-foreground mb-6">
-                    {t('topCountries') || "Top Attendee Countries"}
+                    {t.has('topCountries') ? t('topCountries') : "Top Attendee Countries"}
                 </h3>
                 {countryData.length > 0 ? (
                     <div className="h-72">
@@ -61,7 +61,7 @@ export function EventSummaryCharts({ countryData, studyLevelData }: EventSummary
             {/* Top Study Levels Chart */}
             <div className="bg-card rounded-3xl p-8 border border-border/50 shadow-xl card-elevated">
                 <h3 className="font-display text-2xl font-bold text-card-foreground mb-6">
-                    {t('studyLevels') || "Interest by Study Level"}
+                    {t.has('studyLevels') ? t('studyLevels') : "Interest by Study Level"}
                 </h3>
                 {studyLevelData.length > 0 ? (
                     <div className="h-72">
