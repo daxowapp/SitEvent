@@ -6,7 +6,11 @@ import { format } from "date-fns";
 export async function GET(request: NextRequest) {
     try {
         const session = await auth();
-        if (!session?.user) {
+        if (
+            !session?.user ||
+            (session.user as any).type !== "ADMIN" ||
+            !["SUPER_ADMIN", "EVENT_MANAGER"].includes((session.user as any).role)
+        ) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
 
@@ -67,12 +71,15 @@ export async function GET(request: NextRequest) {
             reg.registrant.utmCampaign || "",
         ]);
 
-        // Escape CSV values
+        // Escape CSV values and neutralize formula injection: a cell beginning
+        // with =,+,-,@,\t,\r can be executed as a formula by Excel/Sheets, and
+        // these fields come from the public registration form.
         const escapeCSV = (value: string) => {
-            if (value.includes(",") || value.includes('"') || value.includes("\n")) {
-                return `"${value.replace(/"/g, '""')}"`;
+            const safe = /^[=+\-@\t\r]/.test(value) ? `'${value}` : value;
+            if (safe.includes(",") || safe.includes('"') || safe.includes("\n")) {
+                return `"${safe.replace(/"/g, '""')}"`;
             }
-            return value;
+            return safe;
         };
 
         const csv = [
