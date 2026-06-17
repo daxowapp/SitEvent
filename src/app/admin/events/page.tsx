@@ -28,7 +28,7 @@ async function getEvents() {
         orderBy: { startDateTime: "desc" },
         include: {
             _count: {
-                select: { registrations: true, universities: true, boothVisits: true }
+                select: { registrations: true, universities: true }
             }
         }
     });
@@ -109,16 +109,16 @@ function EventTable({ events, emptyMessage }: { events: any[], emptyMessage: str
                                     variant="ghost"
                                     size="sm"
                                     asChild
-                                    title="Download all leads (scanned students) for this event as CSV"
+                                    title="Download all registrations (leads) for this event as CSV"
                                 >
                                     <a
-                                        href={`/api/admin/events/${event.id}/leads`}
+                                        href={`/api/admin/export?eventId=${event.id}`}
                                         download
                                         className="gap-1.5"
                                     >
                                         <Download className="h-3.5 w-3.5" />
                                         Leads
-                                        {event._count?.boothVisits ? ` (${event._count.boothVisits})` : ""}
+                                        {event._count?.registrations ? ` (${event._count.registrations})` : ""}
                                     </a>
                                 </Button>
                                 <Button variant="ghost" size="sm" asChild>

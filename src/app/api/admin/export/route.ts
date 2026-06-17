@@ -43,6 +43,9 @@ export async function GET(request: NextRequest) {
             "Nationality",
             "Level of Study",
             "Interested Major",
+            "Standardized Major",
+            "Major Category",
+            "Gender",
             "Registered At",
             "Checked In",
             "Check-in Time",
@@ -62,6 +65,9 @@ export async function GET(request: NextRequest) {
             reg.registrant.nationality || "",
             reg.registrant.levelOfStudy || "",
             reg.registrant.interestedMajor || "",
+            reg.registrant.standardizedMajor || "",
+            reg.registrant.majorCategory || "",
+            reg.registrant.gender || "",
             format(new Date(reg.createdAt), "yyyy-MM-dd HH:mm:ss"),
             reg.checkIn ? "Yes" : "No",
             reg.checkIn ? format(new Date(reg.checkIn.checkedInAt), "yyyy-MM-dd HH:mm:ss") : "",
@@ -82,18 +88,28 @@ export async function GET(request: NextRequest) {
             return safe;
         };
 
-        const csv = [
-            headers.join(","),
-            ...rows.map((row) => row.map(escapeCSV).join(",")),
-        ].join("\n");
+        // Prepend a UTF-8 BOM so Excel renders Arabic / accented names correctly.
+        const csv =
+            "\uFEFF" +
+            [
+                headers.join(","),
+                ...rows.map((row) => row.map(escapeCSV).join(",")),
+            ].join("\n");
 
+        // Use the event slug for a readable filename when exporting one event.
+        const event = eventId
+            ? await prisma.event.findUnique({
+                  where: { id: eventId },
+                  select: { slug: true },
+              })
+            : null;
         const filename = eventId
-            ? `registrations-${eventId}-${format(new Date(), "yyyy-MM-dd")}.csv`
+            ? `registrations-${event?.slug || eventId}-${format(new Date(), "yyyy-MM-dd")}.csv`
             : `all-registrations-${format(new Date(), "yyyy-MM-dd")}.csv`;
 
         return new NextResponse(csv, {
             headers: {
-                "Content-Type": "text/csv",
+                "Content-Type": "text/csv; charset=utf-8",
                 "Content-Disposition": `attachment; filename="${filename}"`,
             },
         });
