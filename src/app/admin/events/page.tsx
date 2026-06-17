@@ -12,6 +12,7 @@ import {
     TableRow,
 } from "@/components/ui/table";
 import { format } from "date-fns";
+import { Download } from "lucide-react";
 import { DuplicateEventButton } from "@/components/admin/DuplicateEventButton";
 import { CopyKioskLinkButton } from "@/components/admin/copy-kiosk-link-button";
 import { CopyScannerLinkButton } from "@/components/admin/copy-scanner-link-button";
@@ -27,7 +28,7 @@ async function getEvents() {
         orderBy: { startDateTime: "desc" },
         include: {
             _count: {
-                select: { registrations: true, universities: true }
+                select: { registrations: true, universities: true, boothVisits: true }
             }
         }
     });
@@ -103,6 +104,22 @@ function EventTable({ events, emptyMessage }: { events: any[], emptyMessage: str
                                 </Button>
                                 <Button variant="ghost" size="sm" asChild>
                                     <Link href={`/admin/events/${event.id}/analytics`}>Analytics</Link>
+                                </Button>
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    asChild
+                                    title="Download all leads (scanned students) for this event as CSV"
+                                >
+                                    <a
+                                        href={`/api/admin/events/${event.id}/leads`}
+                                        download
+                                        className="gap-1.5"
+                                    >
+                                        <Download className="h-3.5 w-3.5" />
+                                        Leads
+                                        {event._count?.boothVisits ? ` (${event._count.boothVisits})` : ""}
+                                    </a>
                                 </Button>
                                 <Button variant="ghost" size="sm" asChild>
                                     <Link href={`/admin/events/${event.id}/messaging`}>Message</Link>
