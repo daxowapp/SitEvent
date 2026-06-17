@@ -2,6 +2,7 @@
 
 import { prisma } from "@/lib/db";
 import { revalidatePath } from "next/cache";
+import { requireActionManager } from "@/lib/role-check";
 
 // Types
 export interface UniversityInput {
@@ -32,6 +33,7 @@ export async function getUniversities(activeOnly = false) {
 
 // Get single university with event assignments
 export async function getUniversity(id: string) {
+    await requireActionManager();
     return prisma.university.findUnique({
         where: { id },
         include: {
@@ -59,6 +61,7 @@ export async function getUniversity(id: string) {
 
 // Create university
 export async function createUniversity(data: UniversityInput) {
+    await requireActionManager();
     const university = await prisma.university.create({
         data: {
             name: data.name,
@@ -80,6 +83,7 @@ export async function createUniversity(data: UniversityInput) {
 
 // Update university
 export async function updateUniversity(id: string, data: Partial<UniversityInput>) {
+    await requireActionManager();
     const university = await prisma.university.update({
         where: { id },
         data: {
@@ -103,6 +107,7 @@ export async function updateUniversity(id: string, data: Partial<UniversityInput
 
 // Delete university
 export async function deleteUniversity(id: string) {
+    await requireActionManager();
     await prisma.university.delete({
         where: { id }
     });
@@ -116,6 +121,7 @@ export async function assignUniversityToEvent(
     eventId: string,
     data?: { boothNumber?: string; notes?: string }
 ) {
+    await requireActionManager();
     const participation = await prisma.eventParticipating.create({
         data: {
             universityId,
@@ -134,6 +140,7 @@ export async function assignUniversityToEvent(
 
 // Remove university from event
 export async function removeUniversityFromEvent(universityId: string, eventId: string) {
+    await requireActionManager();
     await prisma.eventParticipating.delete({
         where: {
             eventId_universityId: {
@@ -150,6 +157,7 @@ export async function removeUniversityFromEvent(universityId: string, eventId: s
 
 // Remove ALL universities from event
 export async function removeAllUniversitiesFromEvent(eventId: string) {
+    await requireActionManager();
     await prisma.eventParticipating.deleteMany({
         where: { eventId }
     });
@@ -183,6 +191,7 @@ export async function getAvailableEventsForUniversity(universityId: string) {
 
 // AI Generation Actions
 export async function generateUniversityData(name: string) {
+    await requireActionManager();
     const { generateUniversityContent } = await import("@/lib/services/openai");
     try {
         return await generateUniversityContent(name);
@@ -194,6 +203,7 @@ export async function generateUniversityData(name: string) {
 
 // University User Management
 export async function getAllUniversityUsers(universityId: string) {
+    await requireActionManager();
     return prisma.universityUser.findMany({
         where: { universityId },
         select: { id: true, email: true, name: true, role: true },
@@ -202,6 +212,7 @@ export async function getAllUniversityUsers(universityId: string) {
 }
 
 export async function createOrUpdateUniversityUser(universityId: string, email: string, role: string, password?: string, userId?: string) {
+    await requireActionManager();
     const { hash } = await import("bcryptjs");
 
     const data: any = {
@@ -248,6 +259,7 @@ export async function createOrUpdateUniversityUser(universityId: string, email: 
 }
 
 export async function deleteUniversityUser(userId: string, universityId: string) {
+    await requireActionManager();
     await prisma.universityUser.delete({
         where: { id: userId }
     });

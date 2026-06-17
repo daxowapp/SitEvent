@@ -2,6 +2,7 @@
 
 import { prisma } from "@/lib/db";
 import { revalidatePath } from "next/cache";
+import { requireActionSuperAdmin } from "@/lib/role-check";
 
 // Types
 export interface CountryInput {
@@ -37,6 +38,7 @@ export async function getCountry(id: string) {
 
 // Create country
 export async function createCountry(data: CountryInput) {
+    await requireActionSuperAdmin();
     const country = await prisma.country.create({
         data: {
             name: data.name,
@@ -52,6 +54,7 @@ export async function createCountry(data: CountryInput) {
 
 // Update country
 export async function updateCountry(id: string, data: Partial<CountryInput>) {
+    await requireActionSuperAdmin();
     const country = await prisma.country.update({
         where: { id },
         data: {
@@ -68,6 +71,7 @@ export async function updateCountry(id: string, data: Partial<CountryInput>) {
 
 // Delete country
 export async function deleteCountry(id: string) {
+    await requireActionSuperAdmin();
     await prisma.country.delete({
         where: { id }
     });

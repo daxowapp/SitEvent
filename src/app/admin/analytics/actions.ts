@@ -2,6 +2,7 @@
 
 import { prisma } from "@/lib/db";
 import { format, subDays, startOfDay, endOfDay, eachDayOfInterval, startOfMonth, endOfMonth, subMonths, startOfYear, endOfYear, subYears } from "date-fns";
+import { requireActionManager } from "@/lib/role-check";
 
 export type DateRange = '7d' | '30d' | '90d' | '1y' | 'all';
 
@@ -71,6 +72,7 @@ async function getPercentageChange(current: number, previous: number) {
 }
 
 export async function getAnalyticsData(range: DateRange): Promise<AnalyticsData> {
+    await requireActionManager();
     const { start, end, previousStart, previousEnd } = getDateRange(range);
     
     // Helper to construct date filter. If range is 'all', we don't filter by date for totals.

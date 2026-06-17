@@ -2,6 +2,7 @@
 
 import { prisma } from "@/lib/db";
 import { format, subDays, startOfDay, endOfDay, eachDayOfInterval } from "date-fns";
+import { requireActionManager } from "@/lib/role-check";
 
 export interface RegistrationTrend {
     date: string;
@@ -14,6 +15,7 @@ export interface EventStatusDistribution {
 }
 
 export async function getDashboardData() {
+    await requireActionManager();
     const now = new Date();
     const thirtyDaysAgo = subDays(now, 30);
 

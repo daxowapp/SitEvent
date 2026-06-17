@@ -2,6 +2,7 @@
 
 import { prisma } from "@/lib/db";
 import { revalidatePath } from "next/cache";
+import { requireActionSuperAdmin } from "@/lib/role-check";
 
 export async function updateTemplate(
     id: string,
@@ -11,6 +12,7 @@ export async function updateTemplate(
     }
 ) {
     try {
+        await requireActionSuperAdmin();
         await prisma.messageTemplate.update({
             where: { id },
             data,

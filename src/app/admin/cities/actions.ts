@@ -2,6 +2,7 @@
 
 import { prisma } from "@/lib/db";
 import { revalidatePath } from "next/cache";
+import { requireActionSuperAdmin } from "@/lib/role-check";
 
 // Types for city content
 export interface Attraction {
@@ -72,6 +73,7 @@ export async function getCity(id: string) {
 
 // Create city
 export async function createCity(data: CityInput) {
+    await requireActionSuperAdmin();
     const city = await prisma.city.create({
         data: {
             name: data.name,
@@ -92,6 +94,7 @@ export async function createCity(data: CityInput) {
 
 // Update city
 export async function updateCity(id: string, data: Partial<CityInput>) {
+    await requireActionSuperAdmin();
     const city = await prisma.city.update({
         where: { id },
         data: {
@@ -114,6 +117,7 @@ export async function updateCity(id: string, data: Partial<CityInput>) {
 
 // Delete city
 export async function deleteCity(id: string) {
+    await requireActionSuperAdmin();
     await prisma.city.delete({
         where: { id }
     });

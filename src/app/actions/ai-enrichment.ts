@@ -3,10 +3,13 @@
 import { prisma } from "@/lib/db";
 import { enrichRegistrantData } from "@/lib/ai";
 import { revalidatePath } from "next/cache";
+import { requireActionUser } from "@/lib/role-check";
 
 export async function enrichLeadAction(registrantId: string) {
     console.log("SERVER ACTION: enrichLeadAction called with ID:", registrantId);
     try {
+        await requireActionUser();
+
         const registrant = await prisma.registrant.findUnique({
             where: { id: registrantId }
         });
@@ -59,6 +62,8 @@ export async function enrichBulkLeadsAction(registrantIds: string[]) {
     };
 
     try {
+        await requireActionUser();
+
         // Fetch all registrants
         const registrants = await prisma.registrant.findMany({
             where: { id: { in: registrantIds } }
