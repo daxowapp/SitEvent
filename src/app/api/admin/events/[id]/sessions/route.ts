@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { z } from "zod";
 import { sessionSchema } from "@/lib/validations/session";
+import { requireApiManager } from "@/lib/role-check";
 
 const routeContextSchema = z.object({
   params: z.promise(z.object({
@@ -14,6 +15,9 @@ export async function GET(
   context: z.infer<typeof routeContextSchema>
 ) {
   try {
+    const denied = await requireApiManager();
+    if (denied) return denied;
+
     // await for params
     const { id } = await context.params;
 
@@ -37,6 +41,9 @@ export async function POST(
   context: z.infer<typeof routeContextSchema>
 ) {
   try {
+    const denied = await requireApiManager();
+    if (denied) return denied;
+
     const { id } = await context.params;
     const body = await req.json();
     const { title, description, startTime, endTime, location, speaker } = sessionSchema.parse(body);

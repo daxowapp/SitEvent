@@ -4,6 +4,7 @@ import { prisma } from "@/lib/db";
 import { revalidatePath } from "next/cache";
 import { AdminRole } from "@prisma/client";
 import bcrypt from "bcryptjs";
+import { requireActionSuperAdmin } from "@/lib/role-check";
 
 export async function createAdminUser(data: {
     name: string;
@@ -13,6 +14,8 @@ export async function createAdminUser(data: {
     accessCode?: string;
 }) {
     try {
+        await requireActionSuperAdmin();
+
         const passwordHash = data.password ? await bcrypt.hash(data.password, 10) : null;
         
         // Clean access code: trim and convert empty to null
@@ -54,6 +57,8 @@ export async function updateAdminUser(
     }
 ) {
     try {
+        await requireActionSuperAdmin();
+
         const updateData: any = { ...data };
         delete updateData.password;
 
@@ -86,6 +91,8 @@ export async function updateAdminUser(
 
 export async function deleteAdminUser(id: string) {
     try {
+        await requireActionSuperAdmin();
+
         // Instead of hard delete, maybe just deactivate for safety?
         // But the plan says "Delete/Toggle Status". Let's do hard delete for now if requested,
         // but toggle status is safer. Let's stick to update isActive for "Delete" action in UI usually.

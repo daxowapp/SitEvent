@@ -73,13 +73,24 @@ export async function GET(
         m.participantB.contactPerson || "",
         m.participantB.contactEmail || "",
         m.status,
-        (m.notesA || "").replace(/"/g, '""'),
+        m.notesA || "",
       ]);
 
-      const csv =
-        headers.join(",") +
-        "\n" +
-        rows.map((r) => r.map((c) => `"${c}"`).join(",")).join("\n");
+      // Escape CSV values and neutralize formula injection (cells beginning with
+      // =,+,-,@,\t,\r can be executed as formulas by Excel/Sheets). Also doubles
+      // embedded quotes for every field, not just the notes column.
+      const escapeCSV = (value: string) => {
+        const safe = /^[=+\-@\t\r]/.test(value) ? `'${value}` : value;
+        if (safe.includes(",") || safe.includes('"') || safe.includes("\n")) {
+          return `"${safe.replace(/"/g, '""')}"`;
+        }
+        return safe;
+      };
+
+      const csv = [
+        headers.join(","),
+        ...rows.map((r) => r.map(escapeCSV).join(",")),
+      ].join("\n");
 
       return new NextResponse(csv, {
         headers: {

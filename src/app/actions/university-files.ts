@@ -6,6 +6,7 @@
  */
 
 import { prisma } from "@/lib/db";
+import { requireActionUniversityOrAdmin } from "@/lib/role-check";
 
 interface CreateFileParams {
   universityId: string;
@@ -22,6 +23,8 @@ interface CreateFileParams {
  */
 export async function createUniversityFile(params: CreateFileParams) {
   try {
+    await requireActionUniversityOrAdmin(params.universityId);
+
     const file = await prisma.universityFile.create({
       data: {
         universityId: params.universityId,
@@ -36,6 +39,7 @@ export async function createUniversityFile(params: CreateFileParams) {
 
     return { success: true, file };
   } catch (error) {
+    if (error instanceof Error && error.message === "Unauthorized") throw error;
     console.error("Failed to create university file:", error);
     return { success: false, error: "Failed to save file record." };
   }
@@ -45,6 +49,7 @@ export async function createUniversityFile(params: CreateFileParams) {
  * Get all files for a university
  */
 export async function getUniversityFiles(universityId: string) {
+  await requireActionUniversityOrAdmin(universityId);
   const files = await prisma.universityFile.findMany({
     where: { universityId, isActive: true },
     orderBy: { createdAt: "desc" },
@@ -58,6 +63,8 @@ export async function getUniversityFiles(universityId: string) {
  */
 export async function deleteUniversityFile(fileId: string, universityId: string) {
   try {
+    await requireActionUniversityOrAdmin(universityId);
+
     await prisma.universityFile.update({
       where: { id: fileId, universityId },
       data: { isActive: false },
@@ -65,6 +72,7 @@ export async function deleteUniversityFile(fileId: string, universityId: string)
 
     return { success: true };
   } catch (error) {
+    if (error instanceof Error && error.message === "Unauthorized") throw error;
     console.error("Failed to delete university file:", error);
     return { success: false, error: "Failed to delete file." };
   }
@@ -79,6 +87,8 @@ export async function updateUniversityFile(
   data: { label?: string; description?: string }
 ) {
   try {
+    await requireActionUniversityOrAdmin(universityId);
+
     const file = await prisma.universityFile.update({
       where: { id: fileId, universityId },
       data,
@@ -86,6 +96,7 @@ export async function updateUniversityFile(
 
     return { success: true, file };
   } catch (error) {
+    if (error instanceof Error && error.message === "Unauthorized") throw error;
     console.error("Failed to update university file:", error);
     return { success: false, error: "Failed to update file." };
   }

@@ -6,7 +6,11 @@ import { format } from "date-fns";
 export async function GET(request: NextRequest) {
     try {
         const session = await auth();
-        if (!session?.user) {
+        if (
+            !session?.user ||
+            (session.user as any).type !== "ADMIN" ||
+            !["SUPER_ADMIN", "EVENT_MANAGER"].includes((session.user as any).role)
+        ) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
 
@@ -39,6 +43,9 @@ export async function GET(request: NextRequest) {
             "Nationality",
             "Level of Study",
             "Interested Major",
+            "Standardized Major",
+            "Major Category",
+            "Gender",
             "Registered At",
             "Checked In",
             "Check-in Time",
@@ -58,6 +65,9 @@ export async function GET(request: NextRequest) {
             reg.registrant.nationality || "",
             reg.registrant.levelOfStudy || "",
             reg.registrant.interestedMajor || "",
+            reg.registrant.standardizedMajor || "",
+            reg.registrant.majorCategory || "",
+            reg.registrant.gender || "",
             format(new Date(reg.createdAt), "yyyy-MM-dd HH:mm:ss"),
             reg.checkIn ? "Yes" : "No",
             reg.checkIn ? format(new Date(reg.checkIn.checkedInAt), "yyyy-MM-dd HH:mm:ss") : "",
@@ -67,26 +77,39 @@ export async function GET(request: NextRequest) {
             reg.registrant.utmCampaign || "",
         ]);
 
-        // Escape CSV values
+        // Escape CSV values and neutralize formula injection: a cell beginning
+        // with =,+,-,@,\t,\r can be executed as a formula by Excel/Sheets, and
+        // these fields come from the public registration form.
         const escapeCSV = (value: string) => {
-            if (value.includes(",") || value.includes('"') || value.includes("\n")) {
-                return `"${value.replace(/"/g, '""')}"`;
+            const safe = /^[=+\-@\t\r]/.test(value) ? `'${value}` : value;
+            if (safe.includes(",") || safe.includes('"') || safe.includes("\n")) {
+                return `"${safe.replace(/"/g, '""')}"`;
             }
-            return value;
+            return safe;
         };
 
-        const csv = [
-            headers.join(","),
-            ...rows.map((row) => row.map(escapeCSV).join(",")),
-        ].join("\n");
+        // Prepend a UTF-8 BOM so Excel renders Arabic / accented names correctly.
+        const csv =
+            "\uFEFF" +
+            [
+                headers.join(","),
+                ...rows.map((row) => row.map(escapeCSV).join(",")),
+            ].join("\n");
 
+        // Use the event slug for a readable filename when exporting one event.
+        const event = eventId
+            ? await prisma.event.findUnique({
+                  where: { id: eventId },
+                  select: { slug: true },
+              })
+            : null;
         const filename = eventId
-            ? `registrations-${eventId}-${format(new Date(), "yyyy-MM-dd")}.csv`
+            ? `registrations-${event?.slug || eventId}-${format(new Date(), "yyyy-MM-dd")}.csv`
             : `all-registrations-${format(new Date(), "yyyy-MM-dd")}.csv`;
 
         return new NextResponse(csv, {
             headers: {
-                "Content-Type": "text/csv",
+                "Content-Type": "text/csv; charset=utf-8",
                 "Content-Disposition": `attachment; filename="${filename}"`,
             },
         });

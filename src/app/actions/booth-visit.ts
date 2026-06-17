@@ -8,6 +8,7 @@
 import { prisma } from "@/lib/db";
 import { getRedPointsSummary } from "@/lib/red-points";
 import { sendConfirmationEmail, sendBrochuresEmail } from "@/lib/email";
+import { requireActionUniversityOrAdmin, requireActionAdmin } from "@/lib/role-check";
 
 interface BoothScanResult {
   success: boolean;
@@ -41,6 +42,9 @@ export async function processBoothScan(
   note?: string
 ): Promise<BoothScanResult> {
   try {
+    // Only the scanning university (or an admin) may record a booth visit.
+    await requireActionUniversityOrAdmin(universityId);
+
     // Find registration by QR token
     const registration = await prisma.registration.findUnique({
       where: { qrToken },
@@ -259,6 +263,7 @@ export async function processBoothScan(
       },
     };
   } catch (error) {
+    if (error instanceof Error && error.message === "Unauthorized") throw error;
     console.error("Booth scan error:", error);
     return {
       success: false,
@@ -274,6 +279,7 @@ export async function getUniversityLeads(
   universityId: string,
   eventId: string
 ) {
+  await requireActionUniversityOrAdmin(universityId);
   const visits = await prisma.boothVisit.findMany({
     where: { universityId, eventId },
     include: {
@@ -320,6 +326,8 @@ export async function redeemGift(
   totalPoints?: number;
 }> {
   try {
+    await requireActionAdmin();
+
     // Check if already redeemed
     const existing = await prisma.giftRedemption.findFirst({
       where: { eventId, registrationId },
@@ -359,6 +367,7 @@ export async function redeemGift(
       totalPoints: summary.totalPoints,
     };
   } catch (error) {
+    if (error instanceof Error && error.message === "Unauthorized") throw error;
     console.error("Gift redemption error:", error);
     return { success: false, error: "Failed to process redemption." };
   }

@@ -4,6 +4,7 @@ import { sendConfirmationEmail, sendReminderEmail } from "@/lib/email";
 import { formatInTimeZone } from "date-fns-tz";
 import { differenceInDays, differenceInHours } from "date-fns";
 import { getTranslations } from "next-intl/server";
+import { requireApiManager } from "@/lib/role-check";
 
 /**
  * POST /api/admin/events/[id]/send-single
@@ -21,6 +22,9 @@ export async function POST(
     { params }: { params: Promise<{ id: string }> }
 ) {
     try {
+        const denied = await requireApiManager();
+        if (denied) return denied;
+
         const { id: eventId } = await params;
         const body = await request.json();
         const { email, type, customMessage, locale = "en" } = body;
