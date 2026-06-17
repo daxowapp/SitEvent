@@ -4,6 +4,7 @@ import { sendConfirmationEmail } from "@/lib/email";
 import { formatInTimeZone } from "date-fns-tz";
 import { enUS, tr, ar } from "date-fns/locale";
 import { getTranslations } from "next-intl/server";
+import { requireApiManager } from "@/lib/role-check";
 
 /**
  * POST /api/admin/events/[id]/resend-emails
@@ -20,6 +21,9 @@ export async function POST(
     { params }: { params: Promise<{ id: string }> }
 ) {
     try {
+        const denied = await requireApiManager();
+        if (denied) return denied;
+
         const { id: eventId } = await params;
 
         // Optional body params

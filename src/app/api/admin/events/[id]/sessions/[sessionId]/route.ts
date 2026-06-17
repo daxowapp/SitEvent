@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { z } from "zod";
 import { sessionSchema } from "@/lib/validations/session";
+import { requireApiManager } from "@/lib/role-check";
 
 const routeContextSchema = z.object({
   params: z.promise(z.object({
@@ -15,6 +16,9 @@ export async function PATCH(
   context: z.infer<typeof routeContextSchema>
 ) {
   try {
+    const denied = await requireApiManager();
+    if (denied) return denied;
+
     const { sessionId } = await context.params;
     const body = await req.json();
     const { title, description, startTime, endTime, location, speaker } = sessionSchema.parse(body);
@@ -47,6 +51,9 @@ export async function DELETE(
   context: z.infer<typeof routeContextSchema>
 ) {
   try {
+    const denied = await requireApiManager();
+    if (denied) return denied;
+
     const { sessionId } = await context.params;
 
     await prisma.eventSession.delete({

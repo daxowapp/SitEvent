@@ -3,6 +3,7 @@ import { prisma } from "@/lib/db";
 import { sendReminderEmail } from "@/lib/email";
 import { formatInTimeZone } from "date-fns-tz";
 import { differenceInDays, differenceInHours } from "date-fns";
+import { requireApiManager } from "@/lib/role-check";
 
 /**
  * POST /api/admin/events/[id]/send-reminder
@@ -19,6 +20,9 @@ export async function POST(
     { params }: { params: Promise<{ id: string }> }
 ) {
     try {
+        const denied = await requireApiManager();
+        if (denied) return denied;
+
         const { id: eventId } = await params;
 
         // Parse optional body

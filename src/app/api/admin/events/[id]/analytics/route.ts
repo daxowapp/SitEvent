@@ -1,12 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { startOfDay, subDays, format, eachDayOfInterval } from "date-fns";
+import { requireApiManager } from "@/lib/role-check";
 
 export async function GET(
     request: NextRequest,
     context: { params: Promise<{ id: string }> }
 ) {
     try {
+        const denied = await requireApiManager();
+        if (denied) return denied;
+
         const { id } = await context.params;
 
         // 1. Get Event Details
