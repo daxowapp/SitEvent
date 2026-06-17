@@ -39,6 +39,7 @@ export async function createUniversityFile(params: CreateFileParams) {
 
     return { success: true, file };
   } catch (error) {
+    if (error instanceof Error && error.message === "Unauthorized") throw error;
     console.error("Failed to create university file:", error);
     return { success: false, error: "Failed to save file record." };
   }
@@ -71,6 +72,7 @@ export async function deleteUniversityFile(fileId: string, universityId: string)
 
     return { success: true };
   } catch (error) {
+    if (error instanceof Error && error.message === "Unauthorized") throw error;
     console.error("Failed to delete university file:", error);
     return { success: false, error: "Failed to delete file." };
   }
@@ -94,6 +96,7 @@ export async function updateUniversityFile(
 
     return { success: true, file };
   } catch (error) {
+    if (error instanceof Error && error.message === "Unauthorized") throw error;
     console.error("Failed to update university file:", error);
     return { success: false, error: "Failed to update file." };
   }

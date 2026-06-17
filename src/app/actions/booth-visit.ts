@@ -263,6 +263,7 @@ export async function processBoothScan(
       },
     };
   } catch (error) {
+    if (error instanceof Error && error.message === "Unauthorized") throw error;
     console.error("Booth scan error:", error);
     return {
       success: false,
@@ -366,6 +367,7 @@ export async function redeemGift(
       totalPoints: summary.totalPoints,
     };
   } catch (error) {
+    if (error instanceof Error && error.message === "Unauthorized") throw error;
     console.error("Gift redemption error:", error);
     return { success: false, error: "Failed to process redemption." };
   }
